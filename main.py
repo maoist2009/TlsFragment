@@ -11,7 +11,7 @@ import random
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
 
-num_fragment = 87  # total number of chunks that ClientHello devided into (chunks with random size)
+num_fragment = 5  # total number of chunks that ClientHello devided into (chunks with random size)
 fragment_sleep = 0.005  # sleep between each fragment to make GFW-cache full so it forget previous chunks. LOL.
 
 log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache statistics
@@ -295,10 +295,9 @@ class ThreadedServer(object):
 
 
 def send_other_data_in_fragment(data , sock):
-    # print("send: ", data)
+    print("sending: ", data)
     L_data = len(data)
-    if L_data<num_fragment: 
-        num_fragment=L_data
+
     indices = random.sample(range(1,L_data-1), num_fragment-1)
     indices.sort()
     # print('indices=',indices)
@@ -308,7 +307,8 @@ def send_other_data_in_fragment(data , sock):
         fragment_data = data[i_pre:i]
         i_pre=i
         print('send ',len(fragment_data),' bytes')                        
-        
+        print(fragment_data)
+
         # sock.send(fragment_data)
         sock.sendall(fragment_data)
         
@@ -316,6 +316,7 @@ def send_other_data_in_fragment(data , sock):
     
     fragment_data = data[i_pre:L_data]
     sock.sendall(fragment_data)
+    print("--------------------end------------------")
 
 def send_data_in_fragment(sni, settings, data , sock):
     # print(data)
@@ -326,7 +327,7 @@ def send_data_in_fragment(sni, settings, data , sock):
     L_snifrag=settings.get("frag");
     T_sleep=settings.get("sleep");
     L_data=len(data)
-
+    
     send_other_data_in_fragment(data[0:stt+L_snifrag],sock)
     time.sleep(T_sleep)
 
