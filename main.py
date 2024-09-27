@@ -11,8 +11,8 @@ import random
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
 
-num_fragment = 5  # total number of chunks that ClientHello devided into (chunks with random size)
-fragment_sleep = 0.005  # sleep between each fragment to make GFW-cache full so it forget previous chunks. LOL.
+num_fragment = 1  # total number of chunks that ClientHello devided into (chunks with random size)
+fragment_sleep = 0.05  # sleep between each fragment to make GFW-cache full so it forget previous chunks. LOL.
 
 log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache statistics
 
@@ -38,18 +38,33 @@ DNS_url = 'https://cloudflare-dns.com/dns-query?dns='
 domain_settings={
     "www.pixiv.net": {
         "IP": "104.19.112.154",
-        "frag": 5,
-        "sleep": 0.05
+        "frag": 3,
+        "sleep": 0.2
     },
     "accounts.pixiv.net": {
-        "IP": "104.19.112.154",
-        "frag": 5,
-        "sleep": 0.05
+        "IP": "104.19.112.155",
+        "frag": 8,
+        "sleep": 0.2
     },
     "liaoyuan1949.site": {
-        "IP": "104.19.112.154",
+        "IP": "104.19.112.156",
         "frag": 5,
-        "sleep": 0.05
+        "sleep": 0.2
+    },
+    "bu2021.xyz": {
+        "IP": "104.19.112.159",
+        "frag": 5,
+        "sleep": 0.2
+    },
+    "pages.dev": {
+        "IP": "104.19.112.161",
+        "frag": 2,
+        "sleep": 0.2
+    },
+    "workers.dev": {
+        "IP": "104.19.112.160",
+        "frag": 2,
+        "sleep": 0.2
     },
     "null": 
     {
@@ -64,7 +79,7 @@ domain_settings={
 
 
 # ignore description below , its for old code , just leave it intact.
-my_socket_timeout = 60 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
+my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 
@@ -88,7 +103,7 @@ class ThreadedServer(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
-        self.sni = ""
+        self.sni = b""
         self.settings = {
             "IP": "127.0.0.1",
             "frag": 114514,
@@ -145,7 +160,7 @@ class ThreadedServer(object):
 
         
         print(server_name,'-->',server_port)
-        self.sni=server_name
+        self.sni=bytes(server_name,encoding="utf-8")
 
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -311,24 +326,29 @@ def send_other_data_in_fragment(data , sock):
     for i in indices:
         fragment_data = data[i_pre:i]
         i_pre=i
-        print('send ',len(fragment_data),' bytes'," of ",L_data," bytes. And 'll sleep for ",fragment_sleep, "seconds. ")                        
         # sock.send(fragment_data)
-        sock.sendall(bytes(fragment_data,encoding="utf-8"))
+        # print(fragment_data)
+        sock.sendall(fragment_data)
+        print('Other: send ',len(fragment_data),' bytes'," of ",L_data," bytes. And 'll sleep for ",fragment_sleep, "seconds. ")                        
         # print(fragment_data)
         time.sleep(fragment_sleep)
     fragment_data = data[i_pre:L_data]
-    sock.sendall(bytes(fragment_data,encoding="utf-8"))
+    sock.sendall(fragment_data)
     print("--------------------end------------------")
 
 def send_data_in_fragment(sni, settings, data , sock):
-    # print(data)
-    data=str(data)
+    # print(sni)
+    # send_other_data_in_fragment(data, sock)
+    # return
     stt=data.find(sni)
+    # print(stt)
 
     L_sni=len(sni)
     L_snifrag=settings.get("frag")
     T_sleep=settings.get("sleep")
     L_data=len(data)
+
+    # print(data[0:stt+L_snifrag])
 
     print("To send: ",L_data," Bytes. ")
     
@@ -337,15 +357,19 @@ def send_data_in_fragment(sni, settings, data , sock):
 
     nst=L_snifrag
 
-    print(nst)
+    # print(data[stt:stt+L_sni])
+
+    # print("------------------mid---------------------")
+
+    # print(nst)
 
     while nst<=L_sni:
         print("send: ",data[stt+nst:stt+nst+L_snifrag])
-        sock.sendall(bytes(data[stt+nst:stt+nst+L_snifrag],encoding="utf-8"))
+        sock.sendall(data[stt+nst:stt+nst+L_snifrag])
         nst=nst+L_snifrag
         time.sleep(T_sleep)
 
-    print(data[stt+nst:L_data])
+    # print(data[stt+nst:L_data])
     send_other_data_in_fragment(data[stt+nst:L_data],sock)
 
     print('----------finish------------')
