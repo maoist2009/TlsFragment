@@ -39,12 +39,17 @@ domain_settings={
     "www.pixiv.net": {
         "IP": "104.19.112.154",
         "frag": 5,
-        "sleep": 0.3
+        "sleep": 0.05
     },
     "accounts.pixiv.net": {
         "IP": "104.19.112.154",
-        "frag": 3,
-        "sleep": 0.3
+        "frag": 5,
+        "sleep": 0.05
+    },
+    "liaoyuan1949.site": {
+        "IP": "104.19.112.154",
+        "frag": 5,
+        "sleep": 0.05
     },
     "null": 
     {
@@ -59,7 +64,7 @@ domain_settings={
 
 
 # ignore description below , its for old code , just leave it intact.
-my_socket_timeout = 8 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
+my_socket_timeout = 60 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 
@@ -295,7 +300,7 @@ class ThreadedServer(object):
 
 
 def send_other_data_in_fragment(data , sock):
-    print("sending: ", data)
+    # print("sending: ", data)
     L_data = len(data)
 
     indices = random.sample(range(1,L_data-1), num_fragment-1)
@@ -306,16 +311,13 @@ def send_other_data_in_fragment(data , sock):
     for i in indices:
         fragment_data = data[i_pre:i]
         i_pre=i
-        print('send ',len(fragment_data),' bytes')                        
-        print(fragment_data)
-
+        print('send ',len(fragment_data),' bytes'," of ",L_data," bytes. And 'll sleep for ",fragment_sleep, "seconds. ")                        
         # sock.send(fragment_data)
-        sock.sendall(fragment_data)
-        
+        sock.sendall(bytes(fragment_data,encoding="utf-8"))
+        # print(fragment_data)
         time.sleep(fragment_sleep)
-    
     fragment_data = data[i_pre:L_data]
-    sock.sendall(fragment_data)
+    sock.sendall(bytes(fragment_data,encoding="utf-8"))
     print("--------------------end------------------")
 
 def send_data_in_fragment(sni, settings, data , sock):
@@ -324,9 +326,11 @@ def send_data_in_fragment(sni, settings, data , sock):
     stt=data.find(sni)
 
     L_sni=len(sni)
-    L_snifrag=settings.get("frag");
-    T_sleep=settings.get("sleep");
+    L_snifrag=settings.get("frag")
+    T_sleep=settings.get("sleep")
     L_data=len(data)
+
+    print("To send: ",L_data," Bytes. ")
     
     send_other_data_in_fragment(data[0:stt+L_snifrag],sock)
     time.sleep(T_sleep)
@@ -337,11 +341,12 @@ def send_data_in_fragment(sni, settings, data , sock):
 
     while nst<=L_sni:
         print("send: ",data[stt+nst:stt+nst+L_snifrag])
-        sock.sendall(data[stt+nst:stt+nst+L_snifrag])
+        sock.sendall(bytes(data[stt+nst:stt+nst+L_snifrag],encoding="utf-8"))
         nst=nst+L_snifrag
         time.sleep(T_sleep)
 
-    send_other_data_in_fragment(data[stt+nst:L_data])
+    print(data[stt+nst:L_data])
+    send_other_data_in_fragment(data[stt+nst:L_data],sock)
 
     print('----------finish------------')
 
