@@ -1,37 +1,58 @@
 {
-    "www.pixiv.net": {
-        "IP": "104.19.112.156",
-        "frag": 2,
-        "sleep": 0.2
-    },
-    "accounts.pixiv.net": {
-        "IP": "104.19.112.151",
-        "frag": 10,
-        "sleep": 0.2
-    },
-    "liaoyuan1949.site": {
-        "IP": "104.19.112.156",
-        "frag": 2,
-        "sleep": 0.2
-    },
-    "bu2021.xyz": {
-        "IP": "104.19.112.159",
-        "frag": 5,
-        "sleep": 0.2
-    },
-    "pages.dev": {
-        "IP": "104.19.112.161",
-        "frag": 2,
-        "sleep": 0.2
-    },
-    "workers.dev": {
-        "IP": "104.19.112.169",
-        "frag": 2,
-        "sleep": 0.2
-    },
-    "null": {
-        "IP": "127.0.0.1",
-        "frag": 114514,
-        "sleep": 0.001
+    "listen_PORT": 2500,
+    "num_fragment": 43,
+    "fragment_sleep": 0.1,
+    "my_socket_timeout": 180,
+    "domains": {
+		"freezhihu.org": {
+            "IP": "104.19.112.120",
+            "frag": 1,
+            "sleep": 0.2
+        },
+        "api.freezhihu.org": {
+            "IP": "104.19.112.120",
+            "frag": 1,
+            "sleep": 0.2
+        },
+        "comments-api.greatfire.org": {
+            "IP": "104.19.112.119",
+            "frag": 1,
+            "sleep": 0.2
+        },
+        "www.pixiv.net": {
+            "IP": "104.19.112.156",
+            "frag": 7,
+            "sleep": 0.2
+        },
+        "accounts.pixiv.net": {
+            "IP": "104.19.112.151",
+            "frag": 10,
+            "sleep": 0.2
+        },
+        "liaoyuan1949.site": {
+            "IP": "104.19.112.156",
+            "frag": 8,
+            "sleep": 0.2
+        },
+        "bu2021.xyz": {
+            "IP": "104.19.112.159",
+            "frag": 4,
+            "sleep": 0.2
+        },
+        "pages.dev": {
+            "IP": "104.19.112.161",
+            "frag": 2,
+            "sleep": 0.2
+        },
+        "workers.dev": {
+            "IP": "104.19.112.169",
+            "frag": 2,
+            "sleep": 0.2
+        },
+        "null": {
+            "IP": "127.0.0.1",
+            "frag": 114514,
+            "sleep": 0.001
+        }
     }
 }
