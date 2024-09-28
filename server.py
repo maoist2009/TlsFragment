@@ -46,11 +46,6 @@ domain_settings={
     }
 }
 
-with open("config.json",'r', encoding='UTF-8') as f:
-    domain_settings = json.load(f)
-
-
-
 
 
 # ignore description below , its for old code , just leave it intact.
@@ -58,6 +53,12 @@ my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unles
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 
+with open("config.json",'r', encoding='UTF-8') as f:
+    config = json.load(f)
+    domain_settings=config.get("domains")
+    num_fragment=config.get("num_fragment")
+    fragment_sleep=config.get("fragment_sleep")
+    my_socket_timeout=config.get("my_socket_timeout")
 
 DNS_cache = {}      # resolved domains
 IP_DL_traffic = {}  # download usage for each ip
@@ -310,8 +311,9 @@ def send_other_data_in_fragment(data , sock):
     fragment_data = data[i_pre:L_data]
     sock.sendall(fragment_data)
     print("--------------------end------------------")
-
+# http114=b""
 def send_data_in_fragment(sni, settings, data , sock):
+    # data=data+http114
     # print(sni)
     # send_other_data_in_fragment(data, sock)
     # return
@@ -330,9 +332,8 @@ def send_data_in_fragment(sni, settings, data , sock):
     print("To send: ",L_data," Bytes. ")
     
     send_other_data_in_fragment(data[0:stt+L_snifrag],sock)
-    time.sleep(T_sleep)
-
     nst=L_snifrag
+    time.sleep(T_sleep)
 
     # print(data[stt:stt+L_sni])
 
@@ -356,6 +357,8 @@ def send_data_in_fragment(sni, settings, data , sock):
 
 
 if (__name__ == "__main__"):
+    # while len(http114)<10000:
+        # http114=http114+b"\x00"
     # savedStdout = sys.stdout 
     # print_log = open("log.txt","w")
     # sys.stdout = print_log
