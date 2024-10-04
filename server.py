@@ -13,14 +13,14 @@ import sys
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
 
-num_fragment = 37
-fragment_sleep = 0.04  # sleep between each fragment to make GFW-cache full so it forget previous chunks. LOL.
 
 log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache statistics
 
 allow_insecure = True   # set true to allow certificate domain mismatch in DoH
-
-
+my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
+first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
+accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
+output_data=True
 
 DNS_url = 'https://cloudflare-dns.com/dns-query?dns='
 # DNS_url = 'https://8.8.4.4/dns-query?dns='      # blocked?
@@ -38,27 +38,27 @@ DNS_url = 'https://cloudflare-dns.com/dns-query?dns='
 
 
 domain_settings={
-    "null": 
-    {
+    "null": {
         "IP": "127.0.0.1",
-        "frag": 114514,
-        "sleep": 0.001
+        "TCP_frag": 114514,
+        "TCP_sleep": 0.001,
+        "TLS_frag": 114514
     }
 }
 
-
-
-# ignore description below , its for old code , just leave it intact.
-my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
-first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
-accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
+num_TCP_fragment = 37
+num_TLS_fragment = 37
 
 with open("config.json",'r', encoding='UTF-8') as f:
     config = json.load(f)
-    domain_settings=config.get("domains")
-    num_fragment=config.get("num_fragment")
-    fragment_sleep=config.get("fragment_sleep")
+    output_data=config.get("output_data")
+
     my_socket_timeout=config.get("my_socket_timeout")
+    listen_PORT=config.get("listen_PORT")
+    
+    domain_settings=config.get("domains")
+    num_TCP_fragment=config.get("num_TCP_fragment")
+    num_TLS_fragment=config.get("num_TLS_fragment")
 
 DNS_cache = {}      # resolved domains
 IP_DL_traffic = {}  # download usage for each ip
@@ -67,9 +67,6 @@ IP_UL_traffic = {}  # upload usage for each ip
 
 def query_settings(domain):
     return domain_settings.get(domain)
-
-
-
 
 
 class ThreadedServer(object):
@@ -286,15 +283,14 @@ class ThreadedServer(object):
         return (host,int(port)) 
 
 
-
-
-
-
-def send_other_data_in_fragment(data , sock):
+def split_other_data(data, num_fragment, split):
     # print("sending: ", data)
     L_data = len(data)
 
-    indices = random.sample(range(1,L_data-1), min(num_fragment,int(L_data/3))-1)
+    if num_fragment==0|L_data==1:
+        split(data)
+        return
+    indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     indices.sort()
     # print('indices=',indices)
 
@@ -304,63 +300,70 @@ def send_other_data_in_fragment(data , sock):
         i_pre=i
         # sock.send(fragment_data)
         # print(fragment_data)
-        sock.sendall(fragment_data)
-        print('Other: send ',len(fragment_data),' bytes'," of ",L_data," bytes. And 'll sleep for ",fragment_sleep, "seconds. ")                        
-        # print(fragment_data)
-        time.sleep(fragment_sleep)
+        split(new_frag=fragment_data)
+        
     fragment_data = data[i_pre:L_data]
-    sock.sendall(fragment_data)
-    print("--------------------end------------------")
+    split(fragment_data)
 # http114=b""
-def send_data_in_fragment(sni, settings, data , sock):
-    # data=data+http114
-    # print(sni)
-    # send_other_data_in_fragment(data, sock)
-    # return
+
+def split_data(data, sni, L_snifrag, num_fragment,split):
     stt=data.find(sni)
-    # print(stt)
-    print(data)
 
     L_sni=len(sni)
-    L_snifrag=settings.get("frag")
-    T_sleep=settings.get("sleep")
     L_data=len(data)
 
-    # print(data[0:stt+L_snifrag])   
- 
+    if L_snifrag==0:
+        split_other_data(data, num_fragment, split)
+        return sni
 
-    print("To send: ",L_data," Bytes. ")
+    split_other_data(data[0:stt+L_snifrag], num_fragment, split)
     
-    send_other_data_in_fragment(data[0:stt+L_snifrag],sock)
     nst=L_snifrag
-    time.sleep(T_sleep)
-
-    # print(data[stt:stt+L_sni])
-
-    # print("------------------mid---------------------")
-
-    # print(nst)
 
     while nst<=L_sni:
         fragment_data=data[stt+nst:stt+nst+L_snifrag]
-        print("send: ",fragment_data)
-        sock.sendall(fragment_data)
+        split(fragment_data)
         nst=nst+L_snifrag
+
+    split_other_data(data[stt+nst:L_data], num_fragment, split)
+
+    return data[stt:stt+L_sni]
+
+def send_data_in_fragment(sni, settings, data , sock):
+    print("To send: ",len(data)," Bytes. ")
+    if output_data:
+        print("sending:    ",data,"\n")
+    base_header = data[:3]
+    record=data[5:]
+    TLS_ans=b""
+    def TLS_add_frag(new_frag):
+        nonlocal TLS_ans,base_header
+        TLS_ans+=base_header + int.to_bytes(len(new_frag), byteorder='big', length=2)
+        TLS_ans+=new_frag
+        print("adding frag:",len(new_frag)," bytes. ")
+        if output_data:
+            print("adding frag: ",new_frag,"\n")
+    first_sni_frag=split_data(record, sni, settings.get("TLS_frag"), num_TLS_fragment,TLS_add_frag)
+    
+    print("TLS fraged: ",len(TLS_ans)," Bytes. ")
+    if output_data:
+        print("TLS fraged: ",TLS_ans,"\n")
+
+    T_sleep=settings.get("TCP_sleep")
+    def TCP_send_with_sleep(new_frag):
+        nonlocal sock,T_sleep
+        sock.sendall(new_frag)
+        print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
+        if output_data:
+            print("TCP send: ",new_frag,"\n")
         time.sleep(T_sleep)
+    split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), num_TCP_fragment,TCP_send_with_sleep)
+    
+    print("----------finish------------")
 
-    # print(data[stt+nst:L_data])
-    send_other_data_in_fragment(data[stt+nst:L_data],sock)
-
-    print('----------finish------------')
-
-
-
-
-if (__name__ == "__main__"):
-    # while len(http114)<10000:
-        # http114=http114+b"\x00"
-    # savedStdout = sys.stdout 
-    # print_log = open("log.txt","w")
-    # sys.stdout = print_log
+def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
     ThreadedServer('',listen_PORT).listen()
+
+if (__name__ == "__main__"):
+    start_server()
