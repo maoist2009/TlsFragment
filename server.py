@@ -9,6 +9,7 @@ import time
 import random
 import json
 import sys
+import ahocorasick
 
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
@@ -49,6 +50,9 @@ domain_settings={
 num_TCP_fragment = 37
 num_TLS_fragment = 37
 
+domain_settings=None
+domain_settings_tree=None
+
 with open("config.json",'r', encoding='UTF-8') as f:
     config = json.load(f)
     output_data=config.get("output_data")
@@ -56,17 +60,23 @@ with open("config.json",'r', encoding='UTF-8') as f:
     my_socket_timeout=config.get("my_socket_timeout")
     listen_PORT=config.get("listen_PORT")
     
-    domain_settings=config.get("domains")
     num_TCP_fragment=config.get("num_TCP_fragment")
     num_TLS_fragment=config.get("num_TLS_fragment")
+
+    domain_settings=config.get("domains")
+    # print(set(domain_settings.keys()))
+    domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
+
 
 DNS_cache = {}      # resolved domains
 IP_DL_traffic = {}  # download usage for each ip
 IP_UL_traffic = {}  # upload usage for each ip
-        
+    
 
 def query_settings(domain):
-    return domain_settings.get(domain)
+    res=domain_settings_tree.search(domain)
+    # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
+    return domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
 
 
 class ThreadedServer(object):
