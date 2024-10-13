@@ -1,33 +1,24 @@
 {
     "output_data": false,
     "listen_PORT": 2500,
-    "num_TCP_fragment": 0,
+    "num_TCP_fragment": 3,
     "num_TLS_fragment": 2,
+    "TCP_frag": 0,
+    "TCP_sleep": 0.01,
     "my_socket_timeout": 180,
+    "doh_server": "https://1.0.0.1/dns-query",
     "domains": {
+        "bridges.torproject.org": {
+            "IP": "116.202.120.184",
+            "TLS_frag": 8
+        },
 		"freezhihu.org": {
             "IP": "104.19.112.120",
-            "TCP_frag": 0,
-            "TCP_sleep": 0.01,
             "TLS_frag": 6
         },
-        "api.freezhihu.org": {
+        "greatfire.org": {
             "IP": "104.19.112.120",
-            "TCP_frag": 0,
-            "TCP_sleep": 0.01,
             "TLS_frag": 6
-        },
-        "comments-api.greatfire.org": {
-            "IP": "104.19.112.120",
-            "TCP_frag": 0,
-            "TCP_sleep": 0.01,
-            "TLS_frag": 6
-        },
-        "null": {
-            "IP": "127.0.0.1",
-            "TCP_frag": 0,
-            "TCP_sleep": 0.001,
-            "TLS_frag": 0
         }
     }
 }

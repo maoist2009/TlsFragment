@@ -1,2 +1,1 @@
-requests==2.32.3
 ahocorasick-python==0.0.9

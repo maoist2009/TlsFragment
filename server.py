@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import requests      #  --> pip install requests
 from pathlib import Path
-import os
-import base64
 import socket
+# import requests
+# from requests_doh import DNSOverHTTPSSession, add_dns_provider, remove_dns_provider
+# import dns.message
+# import dns.rdatatype
 import threading
 import time
 import random
@@ -23,19 +24,6 @@ first_time_sleep = 0.1 # speed control , avoid server crash if huge number of us
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 output_data=True
 
-DNS_url = 'https://cloudflare-dns.com/dns-query?dns='
-# DNS_url = 'https://8.8.4.4/dns-query?dns='      # blocked?
-# DNS_url = 'https://8.8.8.8/dns-query?dns='      # blocked?
-# DNS_url = 'https://1.1.1.1/dns-query?dns='      # blocked?
-# DNS_url = 'https://dns.google/dns-query?dns='              # blocked?
-# DNS_url = 'https://doh.opendns.com/dns-query?dns='           # blocked?
-# DNS_url = 'https://secure.avastdns.com/dns-query?dns='      # blocked?
-# DNS_url = 'https://doh.libredns.gr/dns-query?dns='          # blocked?
-# DNS_url = 'https://dns.electrotm.org/dns-query?dns='        # DNS server inside iran
-# DNS_url = 'https://dns.bitdefender.net/dns-query?dns='
-# DNS_url = 'https://cluster-1.gac.edu/dns-query?dns='
-
-
 
 
 domain_settings={
@@ -43,12 +31,18 @@ domain_settings={
         "IP": "127.0.0.1",
         "TCP_frag": 114514,
         "TCP_sleep": 0.001,
-        "TLS_frag": 114514
+        "TLS_frag": 114514,
+        "num_TCP_fragment": 37,
+        "num_TLS_fragment": 37,
     }
 }
 
 num_TCP_fragment = 37
 num_TLS_fragment = 37
+TCP_sleep = 0.001
+TCP_frag=0
+TLS_frag=0
+doh_server="https://127.0.0.1/dns-query"
 
 domain_settings=None
 domain_settings_tree=None
@@ -62,10 +56,17 @@ with open("config.json",'r', encoding='UTF-8') as f:
     
     num_TCP_fragment=config.get("num_TCP_fragment")
     num_TLS_fragment=config.get("num_TLS_fragment")
+    TCP_sleep=config.get("TCP_sleep")
+    TCP_frag=config.get("TCP_frag")
+    TLS_frag=config.get("TLS_frag")
+    doh_server=config.get("doh_server")
 
     domain_settings=config.get("domains")
     # print(set(domain_settings.keys()))
     domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
+
+# add_dns_provider("selected-dns", doh_server)
+# doh_session = DNSOverHTTPSSession("selected-dns")
 
 
 DNS_cache = {}      # resolved domains
@@ -76,7 +77,25 @@ IP_UL_traffic = {}  # upload usage for each ip
 def query_settings(domain):
     res=domain_settings_tree.search(domain)
     # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
-    return domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
+    try:
+        res=domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
+    except:
+        res={}
+
+    if res.get("IP")==None:
+        res["IP"]="127.0.0.1"
+    if res.get("TCP_frag")==None:
+        res["TCP_frag"]=TCP_frag
+    if res.get("TCP_sleep")==None:
+        res["TCP_sleep"]=TCP_sleep
+    if res.get("TLS_frag")==None:
+        res["TLS_frag"]=TLS_frag
+    if res.get("num_TCP_fragment")==None:
+        res["num_TCP_fragment"]=num_TCP_fragment
+    if res.get("num_TLS_fragment")==None:
+        res["num_TLS_fragment"]=num_TLS_fragment
+    print(domain,'-->',res)
+    return res  
 
 
 class ThreadedServer(object):
@@ -353,7 +372,7 @@ def send_data_in_fragment(sni, settings, data , sock):
         print("adding frag:",len(new_frag)," bytes. ")
         if output_data:
             print("adding frag: ",new_frag,"\n")
-    first_sni_frag=split_data(record, sni, settings.get("TLS_frag"), num_TLS_fragment,TLS_add_frag)
+    first_sni_frag=split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
     
     print("TLS fraged: ",len(TLS_ans)," Bytes. ")
     if output_data:
@@ -367,7 +386,7 @@ def send_data_in_fragment(sni, settings, data , sock):
         if output_data:
             print("TCP send: ",new_frag,"\n")
         time.sleep(T_sleep)
-    split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), num_TCP_fragment,TCP_send_with_sleep)
+    split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
     print("----------finish------------")
 
