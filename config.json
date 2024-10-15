@@ -6,8 +6,13 @@
     "TCP_frag": 0,
     "TCP_sleep": 0.01,
     "my_socket_timeout": 180,
-    "doh_server": "https://1.0.0.1/dns-query",
+    "doh_server": "https://chrome.cloudflare-dns.com/dns-query",
     "domains": {
+        "chrome.cloudflare-dns.com":
+        {
+            "IP": "104.19.112.120",
+            "TLS_frag": 6
+        },
         "bridges.torproject.org": {
             "IP": "116.202.120.184",
             "TLS_frag": 8
