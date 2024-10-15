@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import socket
-# import requests
-# from requests_doh import DNSOverHTTPSSession, add_dns_provider, remove_dns_provider
-# import dns.message
-# import dns.rdatatype
+import requests
 import threading
 import time
 import random
 import json
 import sys
 import ahocorasick
+import dns.message
+import base64
 
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
@@ -72,7 +71,55 @@ with open("config.json",'r', encoding='UTF-8') as f:
 DNS_cache = {}      # resolved domains
 IP_DL_traffic = {}  # download usage for each ip
 IP_UL_traffic = {}  # upload usage for each ip
+
+DNS_req = requests.session()              
+fragment_proxy = {
+    'https': 'http://127.0.0.1:'+str(listen_PORT)
+}
     
+
+
+def DNS_query(server_name):     
+    quary_params = {
+        # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
+        'type': 'A',
+        'ct': 'application/dns-message',
+        }
+    
+
+    print(f'online DNS Query',server_name)        
+    try:
+        query_message = dns.message.make_query(server_name,'A')
+        query_wire = query_message.to_wire()
+        query_base64 = base64.urlsafe_b64encode(query_wire).decode('utf-8')
+        query_base64 = query_base64.replace('=','')    # remove base64 padding to append in url            
+
+        query_url = doh_server + query_base64
+        ans = DNS_req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=fragment_proxy)
+        
+        # Parse the response as a DNS packet
+        if ans.status_code == 200 and ans.headers.get('content-type') == 'application/dns-message':
+            answer_msg = dns.message.from_wire(ans.content)
+
+            resolved_ip = None
+            for x in answer_msg.answer:
+                if (x.rdtype == dns.rdatatype.A):
+                    resolved_ip = x[0].address    # pick first ip in DNS answer
+                    DNS_cache[server_name] = resolved_ip                        
+                    print("################# DNS Cache is : ####################")
+                    print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
+                    print("#####################################################")
+                    break
+            
+            print(f'online DNS --> Resolved {server_name} to {resolved_ip}')                
+            return resolved_ip
+        else:
+            print(f'Error: {ans.status_code} {ans.reason}')
+            return "127.0.0.1"
+    except Exception as e:
+        print(repr(e))
+        return "127.0.0.1"
+
 
 def query_settings(domain):
     res=domain_settings_tree.search(domain)
@@ -83,7 +130,11 @@ def query_settings(domain):
         res={}
 
     if res.get("IP")==None:
-        res["IP"]="127.0.0.1"
+        if DNS_cache.get(domain)!=None:
+            res["IP"]=DNS_cache[domain]
+        else:
+            res["IP"]=DNS_query(domain)
+        # res["IP"]="127.0.0.1"
     if res.get("TCP_frag")==None:
         res["TCP_frag"]=TCP_frag
     if res.get("TCP_sleep")==None:
