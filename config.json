@@ -5,10 +5,22 @@
     "num_TLS_fragment": 2,
     "TCP_frag": 0,
     "TCP_sleep": 0.01,
+    "TLS_frag": 5,
     "my_socket_timeout": 180,
-    "doh_server": "https://chrome.cloudflare-dns.com/dns-query",
+    "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
+    "DNS_log_every": 5,
     "domains": {
-        "chrome.cloudflare-dns.com":
+        "one.one.one.one":
+        {
+            "IP": "104.19.112.120",
+            "TLS_frag": 4
+        },
+        "nav-edge.smartscreen.microsoft.com":
+        {
+            "IP": "0.0.0.0",
+            "TLS_frag": 4
+        },
+        "cloudflare-dns.com":
         {
             "IP": "104.19.112.120",
             "TLS_frag": 6
