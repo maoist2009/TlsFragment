@@ -8,7 +8,8 @@ import random
 import json
 import sys
 import ahocorasick
-import dns.message
+import dns.message   #  --> pip install dnspython
+import dns.rdatatype
 import base64
 
 
@@ -42,9 +43,15 @@ TCP_sleep = 0.001
 TCP_frag=0
 TLS_frag=0
 doh_server="https://127.0.0.1/dns-query"
+DNS_log_every=1
 
 domain_settings=None
 domain_settings_tree=None
+
+
+DNS_cache = {}      # resolved domains
+IP_DL_traffic = {}  # download usage for each ip
+IP_UL_traffic = {}  # upload usage for each ip
 
 with open("config.json",'r', encoding='UTF-8') as f:
     config = json.load(f)
@@ -59,98 +66,110 @@ with open("config.json",'r', encoding='UTF-8') as f:
     TCP_frag=config.get("TCP_frag")
     TLS_frag=config.get("TLS_frag")
     doh_server=config.get("doh_server")
-
     domain_settings=config.get("domains")
+    DNS_log_every=config.get("DNS_log_every")
+
     # print(set(domain_settings.keys()))
     domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
 
-# add_dns_provider("selected-dns", doh_server)
-# doh_session = DNSOverHTTPSSession("selected-dns")
+try:
+    with open("DNS_cache.json",'r+', encoding='UTF-8') as f:
+        DNS_cache=json.load(f)
+except Exception as e:
+    print("ERROR DNS query: ",repr(e))
 
+cnt_chg = 0
 
-DNS_cache = {}      # resolved domains
-IP_DL_traffic = {}  # download usage for each ip
-IP_UL_traffic = {}  # upload usage for each ip
-
-DNS_req = requests.session()              
-fragment_proxy = {
-    'https': 'http://127.0.0.1:'+str(listen_PORT)
-}
-    
-
-
-def DNS_query(server_name):     
-    quary_params = {
-        # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
-        'type': 'A',
-        'ct': 'application/dns-message',
+class GET_settings:
+    def __init__(self):
+        self.url = doh_server
+        self.req = requests.session()              
+        self.fragment_proxy = {
+        'https': 'http://127.0.0.1:'+str(listen_PORT)
         }
-    
-
-    print(f'online DNS Query',server_name)        
-    try:
-        query_message = dns.message.make_query(server_name,'A')
-        query_wire = query_message.to_wire()
-        query_base64 = base64.urlsafe_b64encode(query_wire).decode('utf-8')
-        query_base64 = query_base64.replace('=','')    # remove base64 padding to append in url            
-
-        query_url = doh_server + query_base64
-        ans = DNS_req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=fragment_proxy)
         
-        # Parse the response as a DNS packet
-        if ans.status_code == 200 and ans.headers.get('content-type') == 'application/dns-message':
-            answer_msg = dns.message.from_wire(ans.content)
 
-            resolved_ip = None
-            for x in answer_msg.answer:
-                if (x.rdtype == dns.rdatatype.A):
-                    resolved_ip = x[0].address    # pick first ip in DNS answer
-                    DNS_cache[server_name] = resolved_ip                        
-                    print("################# DNS Cache is : ####################")
-                    print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
-                    print("#####################################################")
-                    break
+
+    def query_DNS(self,server_name):     
+        quary_params = {
+            # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
+            'type': 'A',
+            'ct': 'application/dns-message',
+            }
+        
+
+        print(f'online DNS Query',server_name)        
+        try:
+            query_message = dns.message.make_query(server_name,'A')
+            query_wire = query_message.to_wire()
+            query_base64 = base64.urlsafe_b64encode(query_wire).decode('utf-8')
+            query_base64 = query_base64.replace('=','')    # remove base64 padding to append in url            
+
+            query_url = self.url + query_base64
+
+
+            ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.fragment_proxy)
             
-            print(f'online DNS --> Resolved {server_name} to {resolved_ip}')                
-            return resolved_ip
-        else:
-            print(f'Error: {ans.status_code} {ans.reason}')
+            # Parse the response as a DNS packet
+            if ans.status_code == 200 and ans.headers.get('content-type') == 'application/dns-message':
+                answer_msg = dns.message.from_wire(ans.content)
+
+                resolved_ip = None
+                for x in answer_msg.answer:
+                    if (x.rdtype == dns.rdatatype.A):
+                        resolved_ip = x[0].address    # pick first ip in DNS answer
+                        DNS_cache[server_name] = resolved_ip                        
+                        # print("################# DNS Cache is : ####################")
+                        # print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
+                        # print("#####################################################")
+                        break
+                
+                print(f'online DNS --> Resolved {server_name} to {resolved_ip}')                
+                return resolved_ip
+            else:
+                print(f'Error DNS query: {ans.status_code} {ans.reason}')
             return "127.0.0.1"
-    except Exception as e:
-        print(repr(e))
-        return "127.0.0.1"
+        except Exception as e:
+            print("ERROR DNS query: ",repr(e))
 
+    def query(self,domain):
+        res=domain_settings_tree.search(domain)
+        # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
+        try:
+            res=domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
+        except:
+            res={}
 
-def query_settings(domain):
-    res=domain_settings_tree.search(domain)
-    # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
-    try:
-        res=domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
-    except:
-        res={}
-
-    if res.get("IP")==None:
-        if DNS_cache.get(domain)!=None:
-            res["IP"]=DNS_cache[domain]
-        else:
-            res["IP"]=DNS_query(domain)
-        # res["IP"]="127.0.0.1"
-    if res.get("TCP_frag")==None:
-        res["TCP_frag"]=TCP_frag
-    if res.get("TCP_sleep")==None:
-        res["TCP_sleep"]=TCP_sleep
-    if res.get("TLS_frag")==None:
-        res["TLS_frag"]=TLS_frag
-    if res.get("num_TCP_fragment")==None:
-        res["num_TCP_fragment"]=num_TCP_fragment
-    if res.get("num_TLS_fragment")==None:
-        res["num_TLS_fragment"]=num_TLS_fragment
-    print(domain,'-->',res)
-    return res  
+        if res.get("IP")==None:
+            if DNS_cache.get(domain)!=None:
+                res["IP"]=DNS_cache[domain]
+            else:
+                res["IP"]=self.query_DNS(domain)
+                global cnt_chg
+                cnt_chg=cnt_chg+1
+                if cnt_chg>DNS_log_every:
+                    cnt_chg=0
+                    with open("DNS_cache.json",'w', encoding='UTF-8') as f:
+                        json.dump(DNS_cache,f)
+            # res["IP"]="127.0.0.1"
+        if res.get("TCP_frag")==None:
+            res["TCP_frag"]=TCP_frag
+        if res.get("TCP_sleep")==None:
+            res["TCP_sleep"]=TCP_sleep
+        if res.get("TLS_frag")==None:
+            res["TLS_frag"]=TLS_frag
+        if res.get("num_TCP_fragment")==None:
+            res["num_TCP_fragment"]=num_TCP_fragment
+        if res.get("num_TLS_fragment")==None:
+            res["num_TLS_fragment"]=num_TLS_fragment
+        print(domain,'-->',res)
+        return res
+    
 
 
 class ThreadedServer(object):
     def __init__(self, host, port):
+        self.DoH=GET_settings()
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -226,9 +245,9 @@ class ThreadedServer(object):
                 server_IP = server_name
             except socket.error:
                 # print('Not IP , its domain , try to resolve it')
-                self.settings=query_settings(server_name)
+                self.settings=self.DoH.query(server_name)
                 if self.settings==None:                    
-                    self.settings="127.0.0.1"
+                    self.settings={}
                 server_IP=self.settings.get("IP")
             
 
