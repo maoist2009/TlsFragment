@@ -10,35 +10,30 @@
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "DNS_log_every": 2147483647,
     "domains": {
-	 "pixiv": {
-	    "TLS_frag": 3
-	},
-"google.com":
-	{
-    "IP": "35.190.247.149",
-    "port": 1445
-	},
-"googleusercontent.com": {
-"IP": "35.190.247.149",
-    "port": 1445
-},
-	"play.google.com":
-	{
-    "IP": "13.230.98.94",
-    "port": 5128
-	},
-        "one.one.one.one":
-        {
+        "pixiv": {
+            "TLS_frag": 3
+        },
+        "google.com": {
+            "IP": "35.190.247.149",
+            "port": 1445
+        },
+        "googleusercontent.com": {
+            "IP": "35.190.247.149",
+            "port": 1445
+        },
+        "play.google.com": {
+            "IP": "13.230.98.94",
+            "port": 5128
+        },
+        "one.one.one.one": {
             "IP": "104.19.112.129",
             "TLS_frag": 4
         },
-        "nav-edge.smartscreen.microsoft.com":
-        {
+        "nav-edge.smartscreen.microsoft.com": {
             "IP": "0.0.0.0",
             "TLS_frag": 4
         },
-        "cloudflare-dns.com":
-        {
+        "cloudflare-dns.com": {
             "IP": "104.19.112.121",
             "TLS_frag": 6
         },
@@ -46,7 +41,7 @@
             "IP": "116.202.120.184",
             "TLS_frag": 8
         },
-		"freezhihu.org": {
+        "freezhihu.org": {
             "IP": "104.19.112.120",
             "TLS_frag": 6
         },
