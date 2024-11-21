@@ -231,7 +231,6 @@ class ThreadedServer(object):
             return None
 
         
-        print(server_name,'-->',server_port)
         self.sni=bytes(server_name,encoding="utf-8")
 
         try:
@@ -249,7 +248,10 @@ class ThreadedServer(object):
                 if self.settings==None:                    
                     self.settings={}
                 server_IP=self.settings.get("IP")
+                if(self.settings.get("port")):
+                    server_port=self.settings.get("port")
             
+            print(server_name,'-->',server_IP,":",server_port)
 
             try:
                 server_socket.connect((server_IP, server_port))
@@ -458,7 +460,7 @@ def send_data_in_fragment(sni, settings, data , sock):
         time.sleep(T_sleep)
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
-    print("----------finish------------")
+    print("----------finish:",sni,"------------")
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
