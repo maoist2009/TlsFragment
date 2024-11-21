@@ -8,11 +8,28 @@
     "TLS_frag": 5,
     "my_socket_timeout": 180,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
-    "DNS_log_every": 5,
+    "DNS_log_every": 2147483647,
     "domains": {
+	 "pixiv": {
+	    "TLS_frag": 3
+	},
+"google.com":
+	{
+    "IP": "35.190.247.149",
+    "port": 1445
+	},
+"googleusercontent.com": {
+"IP": "35.190.247.149",
+    "port": 1445
+},
+	"play.google.com":
+	{
+    "IP": "13.230.98.94",
+    "port": 5128
+	},
         "one.one.one.one":
         {
-            "IP": "104.19.112.120",
+            "IP": "104.19.112.129",
             "TLS_frag": 4
         },
         "nav-edge.smartscreen.microsoft.com":
@@ -22,7 +39,7 @@
         },
         "cloudflare-dns.com":
         {
-            "IP": "104.19.112.120",
+            "IP": "104.19.112.121",
             "TLS_frag": 6
         },
         "bridges.torproject.org": {
