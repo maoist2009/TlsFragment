@@ -231,13 +231,10 @@ class ThreadedServer(object):
             return None
 
         
+        print(server_name,'-->',server_port)
         self.sni=bytes(server_name,encoding="utf-8")
 
         try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_socket.settimeout(my_socket_timeout)
-            server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   #force localhost kernel to send TCP packet immediately (idea: @free_the_internet)
-
             try:
                 socket.inet_aton(server_name)
                 # print('legal IP')
@@ -248,11 +245,17 @@ class ThreadedServer(object):
                 if self.settings==None:                    
                     self.settings={}
                 server_IP=self.settings.get("IP")
-                if(self.settings.get("port")):
+                if self.settings.get("port"):
                     server_port=self.settings.get("port")
+                print("send to ",server_IP,":",server_port)
+                
+            if server_IP.find(":")==-1:
+                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            else:
+                server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            server_socket.settimeout(my_socket_timeout)
+            server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   #force localhost kernel to send TCP packet immediately (idea: @free_the_internet)
             
-            print(server_name,'-->',server_IP,":",server_port)
-
             try:
                 server_socket.connect((server_IP, server_port))
                 # Send HTTP 200 OK
@@ -460,7 +463,7 @@ def send_data_in_fragment(sni, settings, data , sock):
         time.sleep(T_sleep)
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
-    print("----------finish:",sni,"------------")
+    print("----------finish------------")
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
