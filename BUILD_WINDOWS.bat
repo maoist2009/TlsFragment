@@ -1,3 +1,3 @@
-pyinstaller -F server.py -n proxy.exe
+pyinstaller -F server.py -n proxy.exe --noconsole
 copy /Y config.json dist\config.json
 pause
