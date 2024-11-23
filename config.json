@@ -22,15 +22,56 @@
             "IPtype": "ipv6",
 			"IPcache": false
         },
+		"telegram.org": {
+            "IP": "2001:b28:f23f:f005::d"
+        },
         "googleusercontent.com": {
+            "IP": "4.193.121.119",
+            "port": 41620
+        },
+		"ggpht.com": {
+            "IP": "4.193.121.119",
+            "port": 41620
+        },
+		"gstatic.com": {
+            "IP": "13.230.98.94",
+            "port": 5128
+        },
+		"googleapis.com": {
+            "IP": "13.230.98.94",
+            "port": 5128
+        },
+		"youtube.com": {
             "IP": "35.190.247.149",
             "port": 1445
         },
-		"i.ytimg.com": {
-            "IP": "2800:380:5000:c::17",
-            "port": 443
+		"ytimg.com": {
+            "IP": "4.193.121.119",
+            "port": 41620
         },
-		
+		"xcannel.com": {
+            "IP": "198.98.60.34"
+        },
+        "cdn.xcannel.com": {
+            "IP": "129.80.246.62"
+        },
+		"video.twimg.com": {
+			"CDN": "Fastly: 2024/11/13: 151.101.40.158"
+		},
+		"twimg.com": {
+			"IP": "104.19.112.125",
+			"TLS_frag": 4
+		},
+		"x.com": {
+			"IP": "104.19.112.125",
+			"TCP_frag": 5,
+			"TCP_sleep": 0.02,
+			"TLS_frag": 2
+		},
+		"twitter.com": {
+			"IP": "104.19.112.125",
+			"TLS_frag": 4
+		},
         "one.one.one.one": {
             "IP": "104.19.112.129",
             "TLS_frag": 4
@@ -40,7 +81,7 @@
             "TLS_frag": 4
         },
         "cloudflare-dns.com": {
-            "IP": "104.19.112.121",
+            "IP": "104.19.112.120",
             "TLS_frag": 6
         },
         "bridges.torproject.org": {
