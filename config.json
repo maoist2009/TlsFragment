@@ -8,7 +8,8 @@
     "TLS_frag": 5,
     "my_socket_timeout": 180,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
-    "DNS_log_every": 2147483647,
+    "DNS_log_every": 5,
+	"IPtype": "ipv4",
     "domains": {
         "pixiv": {
             "TLS_frag": 3
@@ -17,14 +18,19 @@
             "IP": "35.190.247.149",
             "port": 1445
         },
+		"googlevideo.com": {
+            "IPtype": "ipv6",
+			"IPcache": false
+        },
         "googleusercontent.com": {
             "IP": "35.190.247.149",
             "port": 1445
         },
-        "play.google.com": {
-            "IP": "13.230.98.94",
-            "port": 5128
+		"i.ytimg.com": {
+            "IP": "2800:380:5000:c::17",
+            "port": 443
         },
+		
         "one.one.one.one": {
             "IP": "104.19.112.129",
             "TLS_frag": 4
