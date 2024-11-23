@@ -135,7 +135,7 @@ class GET_settings:
                         except:    
                             DNS_cache[server_name] = resolved_ip                        
                         # print("################# DNS Cache is : ####################")
-                        print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
+                        # print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
                         # print("#####################################################")
                         break
                 
@@ -148,7 +148,7 @@ class GET_settings:
             print("ERROR DNS query: ",repr(e))
 
     def query(self,domain):
-        print("Query:",domain)
+        # print("Query:",domain)
         res=domain_settings_tree.search(domain)
         # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
         try:
