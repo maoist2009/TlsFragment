@@ -165,6 +165,13 @@ class GET_settings:
                 res["IP"]=DNS_cache[domain]
             else:
                 res["IP"]=self.query_DNS(domain,res)
+                if res["IP"]==None:
+                    print("Faild to resolve domain, try again with other IP type")
+                    if res["IPtype"]=="ipv6":                        
+                        res["IPtype"]="ipv4"
+                    elif res["IPtype"]=="ipv4":
+                        res["IPtype"]="ipv6"
+                    res["IP"]=self.query_DNS(domain,res)
                 global cnt_chg
                 cnt_chg=cnt_chg+1
                 if cnt_chg>DNS_log_every:
