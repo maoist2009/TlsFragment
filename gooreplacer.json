@@ -1,0 +1,16 @@
+{
+  "createBy": "http://liujiacai.net/gooreplacer/",
+  "version": "3.13.0",
+  "createAt": "2024/11/24 16:30:42",
+  "redirect-rules": [
+    {
+      "src": "abs-0.twimg.com",
+      "kind": "wildcard",
+      "dst": "abs.twimg.com",
+      "enable": true
+    }
+  ],
+  "cancel-rules": [],
+  "request-headers": [],
+  "response-headers": []
+}
