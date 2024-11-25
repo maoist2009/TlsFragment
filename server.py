@@ -418,10 +418,11 @@ def split_other_data(data, num_fragment, split):
     # print("sending: ", data)
     L_data = len(data)
 
-    if num_fragment==0|L_data==1:
+    try:
+        indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
+    except:
         split(data)
         return
-    indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     indices.sort()
     # print('indices=',indices)
 

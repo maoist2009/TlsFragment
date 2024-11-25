@@ -22,6 +22,16 @@
             "IPtype": "ipv6",
 			"IPcache": false
         },
+     "facebook.com": {
+        "IP": "2a03:2880:f176:84:face:b00c:0:25de",
+	      "TLSfrag": 3,
+         "TCPfrag": 5
+    },
+     "fbcdn.net": {
+          "IP": "2a03:2880:f176:84:face:b00c:0:25de",
+          "TLSfrag": 3,
+         "TCPfrag": 5
+     },
 		"telegram.org": {
 			"IP": "2001:67c:4e8:f004::8"
         },
