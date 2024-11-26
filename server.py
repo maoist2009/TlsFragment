@@ -5,6 +5,7 @@ import requests
 import threading
 import time
 import random
+import copy
 import json
 import sys
 import ahocorasick
@@ -42,6 +43,7 @@ num_TLS_fragment = 37
 TCP_sleep = 0.001
 TCP_frag=0
 TLS_frag=0
+IPtype="ipv4"
 doh_server="https://127.0.0.1/dns-query"
 DNS_log_every=1
 
@@ -68,6 +70,7 @@ with open("config.json",'r', encoding='UTF-8') as f:
     doh_server=config.get("doh_server")
     domain_settings=config.get("domains")
     DNS_log_every=config.get("DNS_log_every")
+    IPtype=config.get("IPtype")
 
     # print(set(domain_settings.keys()))
     domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
@@ -90,17 +93,23 @@ class GET_settings:
         
 
 
-    def query_DNS(self,server_name):     
+    def query_DNS(self,server_name,settings):     
         quary_params = {
             # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
             'type': 'A',
             'ct': 'application/dns-message',
             }
-        
+        if settings["IPtype"]=="ipv6":
+            quary_params['type']="AAAA";
+        else:
+            quary_params['type']="A";
 
         print(f'online DNS Query',server_name)        
         try:
-            query_message = dns.message.make_query(server_name,'A')
+            if settings["IPtype"]=="ipv6":
+                query_message = dns.message.make_query(server_name,'AAAA')
+            else:
+                query_message = dns.message.make_query(server_name,'A')
             query_wire = query_message.to_wire()
             query_base64 = base64.urlsafe_b64encode(query_wire).decode('utf-8')
             query_base64 = query_base64.replace('=','')    # remove base64 padding to append in url            
@@ -116,9 +125,15 @@ class GET_settings:
 
                 resolved_ip = None
                 for x in answer_msg.answer:
-                    if (x.rdtype == dns.rdatatype.A):
+                    if ((settings["IPtype"] == "ipv6" and x.rdtype == dns.rdatatype.AAAA) or (settings["IPtype"] == "ipv4" and x.rdtype == dns.rdatatype.A)):
                         resolved_ip = x[0].address    # pick first ip in DNS answer
-                        DNS_cache[server_name] = resolved_ip                        
+                        try:
+                            if settings.get("IPcache")==False:
+                                pass
+                            else:
+                                DNS_cache[server_name] = resolved_ip                        
+                        except:    
+                            DNS_cache[server_name] = resolved_ip                        
                         # print("################# DNS Cache is : ####################")
                         # print(DNS_cache)         # print DNS cache , it usefull to track all resolved IPs , to be used later.
                         # print("#####################################################")
@@ -133,18 +148,30 @@ class GET_settings:
             print("ERROR DNS query: ",repr(e))
 
     def query(self,domain):
+        # print("Query:",domain)
         res=domain_settings_tree.search(domain)
         # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
         try:
-            res=domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0])
+            res=copy.deepcopy(domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0]))
         except:
             res={}
+        
+        
+        if res.get("IPtype")==None:
+            res["IPtype"]=IPtype
 
         if res.get("IP")==None:
             if DNS_cache.get(domain)!=None:
                 res["IP"]=DNS_cache[domain]
             else:
-                res["IP"]=self.query_DNS(domain)
+                res["IP"]=self.query_DNS(domain,res)
+                if res["IP"]==None:
+                    print("Faild to resolve domain, try again with other IP type")
+                    if res["IPtype"]=="ipv6":                        
+                        res["IPtype"]="ipv4"
+                    elif res["IPtype"]=="ipv4":
+                        res["IPtype"]="ipv6"
+                    res["IP"]=self.query_DNS(domain,res)
                 global cnt_chg
                 cnt_chg=cnt_chg+1
                 if cnt_chg>DNS_log_every:
@@ -391,11 +418,7 @@ def split_other_data(data, num_fragment, split):
     # print("sending: ", data)
     L_data = len(data)
 
-    if num_fragment==0:
-        split(data)
-        return
-
-    try: 
+    try:
         indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     except:
         split(data)
