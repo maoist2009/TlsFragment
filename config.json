@@ -9,7 +9,7 @@
     "my_socket_timeout": 180,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "DNS_log_every": 5,
-	"IPtype": "ipv4",
+    "IPtype": "ipv4",
     "domains": {
         "pixiv": {
             "TLS_frag": 3
@@ -18,90 +18,99 @@
             "IP": "35.190.247.149",
             "port": 1445
         },
-		"googlevideo.com": {
+        "googlevideo.com": {
             "IPtype": "ipv6",
-			"IPcache": false
+            "IPcache": false
         },
-     "facebook.com": {
-        "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-	      "TLSfrag": 3,
-         "TCPfrag": 5
-    },
-     "fbcdn.net": {
-          "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-          "TLSfrag": 3,
-         "TCPfrag": 5
-     },
-    "fbsbx.com": {
-          "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-          "TLSfrag": 3,
-         "TCPfrag": 5
-     },
-		"telegram.org": {
-			"IP": "2001:67c:4e8:f004::8"
+        "facebook.com": {
+            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
+            "TLSfrag": 3,
+            "TCPfrag": 5
         },
-		"telegram.me": {
-			"IP": "2001:67c:4e8:f004::8"
-            
+        "www.instagram.com": {
+            "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
         },
-		"t.me": {
-			"IP": "2001:67c:4e8:f004::8",
+        "static.cdninstagram.com": {
+            "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
+        },
+        "fbcdn.net": {
+            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
+            "TLSfrag": 3,
+            "TCPfrag": 5
+        },
+        "fbsbx.com": {
+            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
+            "TLSfrag": 3,
+            "TCPfrag": 5
+        },
+        "dropbox.com": 
+        {
+            "IP": "162.125.2.18"
+        },
+        "telegram.org": {
+            "IP": "2001:67c:4e8:f004::8"
+        },
+        "telegram.me": {
+            "IP": "2001:67c:4e8:f004::8"
+        },
+        "t.me": {
+            "IP": "2001:67c:4e8:f004::8",
             "TLS_frag": 1,
-			"num_TCP_fragment": 3,
-			"num_TLS_fragment": 5,
-			"TCP_frag": 2
+            "num_TCP_fragment": 3,
+            "num_TLS_fragment": 5,
+            "TCP_frag": 2
         },
         "googleusercontent.com": {
             "IP": "4.193.121.119",
             "port": 41620
         },
-		".translate.goog": {
+        ".translate.goog": {
             "IP": "4.193.121.119",
             "port": 41620
         },
-		"ggpht.com": {
+        "ggpht.com": {
             "IP": "4.193.121.119",
             "port": 41620
         },
-		"gstatic.com": {
+        "gstatic.com": {
             "IP": "13.230.98.94",
             "port": 5128
         },
-		"googleapis.com": {
+        "googleapis.com": {
             "IP": "13.230.98.94",
             "port": 5128
         },
-		"youtube.com": {
+        "youtube.com": {
             "IP": "35.190.247.149",
             "port": 1445
         },
-		"ytimg.com": {
+        "ytimg.com": {
             "IP": "4.193.121.119",
             "port": 41620
         },
-		"xcannel.com": {
+        "xcannel.com": {
             "IP": "198.98.60.34"
         },
         "cdn.xcannel.com": {
             "IP": "129.80.246.62"
         },
-		"video.twimg.com": {
-			"CDN": "Fastly: 2024/11/13: 151.101.40.158"
-		},
-		"twimg.com": {
-			"IP": "104.19.112.125",
-			"TLS_frag": 4
-		},
-		"x.com": {
-			"IP": "104.19.112.125",
-			"TCP_frag": 5,
-			"TCP_sleep": 0.02,
-			"TLS_frag": 2
-		},
-		"twitter.com": {
-			"IP": "104.19.112.125",
-			"TLS_frag": 4
-		},
+        "video.twimg.com": {
+            "CDN": "Fastly: 2024/11/13: 151.101.40.158"
+        },
+        "twimg.com": {
+            "IP": "104.19.112.125",
+            "TLS_frag": 4
+        },
+        "x.com": {
+            "IP": "104.19.112.125",
+            "TCP_frag": 5,
+            "TCP_sleep": 0.02,
+            "TLS_frag": 2
+        },
+        "twitter.com": {
+            "IP": "104.19.112.125",
+            "TLS_frag": 4
+        },
         "one.one.one.one": {
             "IP": "104.19.112.129",
             "TLS_frag": 4
