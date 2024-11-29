@@ -14,30 +14,15 @@
         "github.com": {
             "IP": "140.82.121.3"
         },
-        "wikinews": {
-            "IP": "103.102.166.224",
+        "wiki": {
+            "IP": "185.15.58.224",
             "TLS_frag": 2,
             "TCP_frag": 3,
             "num_TCP_fragment": 3,
             "num_TLS_fragment": 3,
             "TCP_sleep": 0.01
         },
-        "wikipedia": {
-            "IP": "103.102.166.224",
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 3,
-            "TCP_sleep": 0.01
-        },
-        "wikimedia": {
-            "IP": "103.102.166.240",
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 3,
-            "TCP_sleep": 0.01
-        },
+
         "pixiv": {
             "TLS_frag": 3
         },
@@ -79,7 +64,7 @@
         },
 
         "facebook.com": {
-            "IP": "2a03:2880:f115:83:face:b00c:0:25de",
+            "IP": "157.240.229.35",
             "TLSfrag": 3,
             "TCPfrag": 5
         },
@@ -95,7 +80,7 @@
             "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
         },
         "fbcdn.net": {
-            "IP": "2a03:2880:f083:6:face:b00c:0:2",
+            "IP": "157.240.229.35",
             "TLS_frag": 3,
             "TCP_frag": 5
         },
