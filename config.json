@@ -22,7 +22,9 @@
             "num_TLS_fragment": 3,
             "TCP_sleep": 0.01
         },
-
+		"upload.wikimedia.org": {
+			"IP": "185.15.58.240"
+		},
         "pixiv": {
             "TLS_frag": 3
         },
