@@ -11,6 +11,17 @@
     "DNS_log_every": 5,
     "IPtype": "ipv4",
     "domains": {
+        "github.com": {
+            "IP": "140.82.121.3"
+        },
+        "wikinews": {
+            "IP": "103.102.166.224",
+            "TLS_frag": 2,
+            "TCP_frag": 3,
+            "num_TCP_fragment": 3,
+            "num_TLS_fragment": 3,
+            "TCP_sleep": 0.01
+        },
         "wikipedia": {
             "IP": "103.102.166.224",
             "TLS_frag": 2,
@@ -37,44 +48,6 @@
         "googlevideo.com": {
             "IPtype": "ipv6",
             "IPcache": false
-        },
-        "facebook.com": {
-            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-            "TLSfrag": 3,
-            "TCPfrag": 5
-        },
-        "www.instagram.com": {
-            "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
-        },
-        "static.cdninstagram.com": {
-            "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
-        },
-        "fbcdn.net": {
-            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-            "TLSfrag": 3,
-            "TCPfrag": 5
-        },
-        "fbsbx.com": {
-            "IP": "2a03:2880:f176:84:face:b00c:0:25de",
-            "TLSfrag": 3,
-            "TCPfrag": 5
-        },
-        "dropbox.com": 
-        {
-            "IP": "162.125.2.18"
-        },
-        "telegram.org": {
-            "IP": "2001:67c:4e8:f004::8"
-        },
-        "telegram.me": {
-            "IP": "2001:67c:4e8:f004::8"
-        },
-        "t.me": {
-            "IP": "2001:67c:4e8:f004::8",
-            "TLS_frag": 1,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 5,
-            "TCP_frag": 2
         },
         "googleusercontent.com": {
             "IP": "4.193.121.119",
@@ -104,12 +77,60 @@
             "IP": "4.193.121.119",
             "port": 41620
         },
+
+        "facebook.com": {
+            "IP": "2a03:2880:f115:83:face:b00c:0:25de",
+            "TLSfrag": 3,
+            "TCPfrag": 5
+        },
+        "www.instagram.com": {
+            "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
+        },
+        "meta": {
+            "TLS_frag": 2,
+            "TCP_frag": 3,
+            "TCP_sleep": 0.01
+        },
+        "static.cdninstagram.com": {
+            "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
+        },
+        "fbcdn.net": {
+            "IP": "2a03:2880:f083:6:face:b00c:0:2",
+            "TLS_frag": 3,
+            "TCP_frag": 5
+        },
+        "fbsbx.com": {
+            "IP": "2a03:2880:f115:83:face:b00c:0:25de",
+            "TLS_frag": 3,
+            "TCP_frag": 5
+        },
+
+        "dropbox.com": 
+        {
+            "IP": "162.125.2.18"
+        },
+
+        "telegram.org": {
+            "IP": "2001:67c:4e8:f004::8"
+        },
+        "telegram.me": {
+            "IP": "2001:67c:4e8:f004::8"
+        },
+        "t.me": {
+            "IP": "2001:67c:4e8:f004::8",
+            "TLS_frag": 1,
+            "num_TCP_fragment": 3,
+            "num_TLS_fragment": 5,
+            "TCP_frag": 2
+        },
+
         "xcannel.com": {
             "IP": "198.98.60.34"
         },
         "cdn.xcannel.com": {
             "IP": "129.80.246.62"
         },
+
         "video.twimg.com": {
             "CDN": "Fastly: 2024/11/13: 151.101.40.158"
         },
@@ -123,10 +144,15 @@
             "TCP_sleep": 0.02,
             "TLS_frag": 2
         },
+        "platform.twitter.com": {
+            "IP": "146.75.120.157",
+            "TLS_frag": 4
+        },
         "twitter.com": {
             "IP": "104.19.112.125",
             "TLS_frag": 4
         },
+
         "one.one.one.one": {
             "IP": "104.19.112.129",
             "TLS_frag": 4
