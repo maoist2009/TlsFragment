@@ -14,6 +14,7 @@
         "github.com": {
             "IP": "140.82.121.3"
         },
+
         "wiki": {
             "IP": "185.15.58.224",
             "TLS_frag": 2,
@@ -109,6 +110,9 @@
             "num_TCP_fragment": 3,
             "num_TLS_fragment": 5,
             "TCP_frag": 2
+        },
+        "cdn-telegram.org": {
+            "IPtype": "ipv4"
         },
 
         "xcannel.com": {
