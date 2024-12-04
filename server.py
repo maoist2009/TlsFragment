@@ -15,7 +15,7 @@ import base64
 
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
-
+DOH_PORT = 2500
 
 log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache statistics
 
@@ -61,6 +61,7 @@ with open("config.json",'r', encoding='UTF-8') as f:
 
     my_socket_timeout=config.get("my_socket_timeout")
     listen_PORT=config.get("listen_PORT")
+    DOH_PORT=config.get("DOH_PORT")
     
     num_TCP_fragment=config.get("num_TCP_fragment")
     num_TLS_fragment=config.get("num_TLS_fragment")
@@ -87,8 +88,8 @@ class GET_settings:
     def __init__(self):
         self.url = doh_server
         self.req = requests.session()              
-        self.fragment_proxy = {
-        'https': 'http://127.0.0.1:'+str(listen_PORT)
+        self.knocker_proxy = {
+        'https': 'http://127.0.0.1:'+str(DOH_PORT)
         }
         
 
@@ -117,7 +118,7 @@ class GET_settings:
             query_url = self.url + query_base64
 
 
-            ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.fragment_proxy)
+            ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
             
             # Parse the response as a DNS packet
             if ans.status_code == 200 and ans.headers.get('content-type') == 'application/dns-message':
