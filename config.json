@@ -1,6 +1,7 @@
 {
     "output_data": false,
     "listen_PORT": 2500,
+    "DOH_PORT": 2500,
     "num_TCP_fragment": 3,
     "num_TLS_fragment": 2,
     "TCP_frag": 0,
