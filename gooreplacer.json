@@ -1,18 +1,24 @@
 {
   "createBy": "http://liujiacai.net/gooreplacer/",
   "version": "3.13.0",
-  "createAt": "2024/11/29 14:33:13",
+  "createAt": "2024/12/8 18:01:01",
   "redirect-rules": [
     {
-      "src": "abs-0.twimg.com",
+      "src": "raw.githubusercontent.com",
       "kind": "wildcard",
-      "dst": "abs.twimg.com",
+      "dst": "raw.kkgithub.com",
       "enable": true
     },
     {
       "src": "google.cn/m",
       "kind": "wildcard",
       "dst": "google.com.hk/m",
+      "enable": true
+    },
+    {
+      "src": "abs-0.twimg.com",
+      "kind": "wildcard",
+      "dst": "abs.twimg.com",
       "enable": true
     }
   ],
