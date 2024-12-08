@@ -154,7 +154,7 @@
             "TLS_frag": 4
         },
         "cloudflare-dns.com": {
-            "IP": "104.19.112.120",
+            "IP": "104.19.112.119",
             "TLS_frag": 6
         },
         "bridges.torproject.org": {
