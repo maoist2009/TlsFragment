@@ -423,7 +423,7 @@ def split_other_data(data, num_fragment, split):
         indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     except:
         split(data)
-        return
+        return 0
     indices.sort()
     # print('indices=',indices)
 
@@ -437,19 +437,32 @@ def split_other_data(data, num_fragment, split):
         
     fragment_data = data[i_pre:L_data]
     split(fragment_data)
+
+    return 1
 # http114=b""
 
 def split_data(data, sni, L_snifrag, num_fragment,split):
     stt=data.find(sni)
+    if output_data:
+        print(sni,stt)
+    else:
+        print("start of sni:",stt)
+
+    if stt==-1:
+        split_other_data(data, num_fragment, split)
+        return 0,0
 
     L_sni=len(sni)
     L_data=len(data)
 
     if L_snifrag==0:
         split_other_data(data, num_fragment, split)
-        return sni
+        return 0,0
 
-    split_other_data(data[0:stt+L_snifrag], num_fragment, split)
+    nstt=stt
+
+    if split_other_data(data[0:stt+L_snifrag], num_fragment, split):
+         nstt=nstt+num_fragment*5
     
     nst=L_snifrag
 
@@ -458,9 +471,12 @@ def split_data(data, sni, L_snifrag, num_fragment,split):
         split(fragment_data)
         nst=nst+L_snifrag
 
-    split_other_data(data[stt+nst:L_data], num_fragment, split)
+    fraged_sni=data[stt:stt+nst]
 
-    return data[stt:stt+L_sni]
+    if split_other_data(data[stt+nst:L_data], num_fragment, split):
+          nstt=nstt+num_fragment*5
+
+    return nstt,int(nstt+nst+nst*5/L_snifrag)
 
 def send_data_in_fragment(sni, settings, data , sock):
     print("To send: ",len(data)," Bytes. ")
@@ -476,8 +492,12 @@ def send_data_in_fragment(sni, settings, data , sock):
         print("adding frag:",len(new_frag)," bytes. ")
         if output_data:
             print("adding frag: ",new_frag,"\n")
-    first_sni_frag=split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
-    
+    stsni,edsni=split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
+    if edsni>0:
+        first_sni_frag=TLS_ans[stsni:edsni]
+    else: 
+        first_sni_frag=b''
+
     print("TLS fraged: ",len(TLS_ans)," Bytes. ")
     if output_data:
         print("TLS fraged: ",TLS_ans,"\n")
