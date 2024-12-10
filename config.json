@@ -13,7 +13,9 @@
     "IPtype": "ipv4",
     "domains": {
         "github.com": {
-            "IP": "140.82.121.3"
+            "IP": "140.82.121.3",
+            "TLS_frag": 3,
+            "TCP_frag": 5
         },
 
         "wiki": {
