@@ -126,7 +126,9 @@
         },
 
         "video.twimg.com": {
-            "CDN": "Fastly: 2024/11/13: 151.101.40.158"
+            "CDN": "Fastly: 2024/11/13: 151.101.40.158",
+            "TCP_frag": 8,
+            "IPcache": false
         },
         "twimg.com": {
             "IP": "104.19.112.125",
