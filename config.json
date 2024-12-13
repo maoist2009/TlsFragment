@@ -13,7 +13,9 @@
     "IPtype": "ipv4",
     "domains": {
         "github.com": {
-            "IP": "140.82.121.3"
+            "IP": "140.82.121.3",
+            "TLS_frag": 3,
+            "TCP_frag": 5
         },
 
         "wiki": {
@@ -124,7 +126,9 @@
         },
 
         "video.twimg.com": {
-            "CDN": "Fastly: 2024/11/13: 151.101.40.158"
+            "CDN": "Fastly: 2024/11/13: 151.101.40.158",
+            "TCP_frag": 8,
+            "IPcache": false
         },
         "twimg.com": {
             "IP": "104.19.112.125",
