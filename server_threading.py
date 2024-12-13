@@ -2,7 +2,7 @@
 from pathlib import Path
 import socket
 import requests
-import asyncio
+import threading
 import time
 import random
 import copy
@@ -195,7 +195,7 @@ class GET_settings:
     
 
 
-class AsyncServer(object):
+class ThreadedServer(object):
     def __init__(self, host, port):
         self.DoH=GET_settings()
         self.host = host
@@ -210,21 +210,23 @@ class AsyncServer(object):
             "sleep": 0.001
         }
 
-    async def listen(self):
+    def listen(self):
         self.sock.listen(128)  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
                         
         while True:
-            client_sock , client_addr = asyncio.get_running_loop().sock_accept(self.sock)                    
+            client_sock , client_addr = self.sock.accept()                    
             client_sock.settimeout(my_socket_timeout)
                         
             time.sleep(accept_time_sleep)   # avoid server crash on flooding request
-            asyncio.create_task(self.my_upstream(client_sock))
+            thread_up = threading.Thread(target = self.my_upstream , args =(client_sock,) )
+            thread_up.daemon = True   #avoid memory leak by telling os its belong to main program , its not a separate program , so gc collect it when thread finish
+            thread_up.start()
     
 
 
     def handle_client_request(self,client_socket):
         # Receive the CONNECT request from the client
-        data = asyncio.get_running_loop().sock_recv(client_socket,16384)
+        data = client_socket.recv(16384)
         
 
         if(data[:7]==b'CONNECT'):            
@@ -246,13 +248,13 @@ class AsyncServer(object):
             print('************************@@@@@@@@@@@@***************************')
             print('redirect',q_method,'http to HTTPS',q_url)          
             response_data = 'HTTP/1.1 302 Found\r\nLocation: '+q_url+'\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
-            asyncio.get_running_loop().sock_sendall(client_socket,response_data.encode())
+            client_socket.sendall(response_data.encode())
             client_socket.close()            
             return None
         else:
             print('Unknown Method',str(data[:10]))            
             response_data = b'HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-            asyncio.get_running_loop().sock_sendall(client_socket,response_data)
+            client_socket.sendall(response_data)
             client_socket.close()            
             return None
 
@@ -286,13 +288,13 @@ class AsyncServer(object):
                 server_socket.connect((server_IP, server_port))
                 # Send HTTP 200 OK
                 response_data = b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
-                asyncio.get_running_loop().sock_sendall(client_socket,response_data)
+                client_socket.sendall(response_data)
                 return server_socket
             except socket.error:
                 print("@@@ "+server_IP+":"+str(server_port)+ " ==> filtered @@@")
                 # Send HTTP ERR 502
                 response_data = b'HTTP/1.1 502 Bad Gateway (is IP filtered?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-                asyncio.get_running_loop().sock_sendall(client_socket,response_data)
+                client_socket.sendall(response_data)
                 client_socket.close()
                 server_socket.close()
                 return server_IP
@@ -302,7 +304,7 @@ class AsyncServer(object):
             print(repr(e))
             # Send HTTP ERR 502
             response_data = b'HTTP/1.1 502 Bad Gateway (Strange ERR?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-            asyncio.get_running_loop().sock_sendall(client_socket,response_data)
+            client_socket.sendall(response_data)
             client_socket.close()
             server_socket.close()
             return None
@@ -313,7 +315,7 @@ class AsyncServer(object):
 
 
 
-    async def my_upstream(self, client_sock):
+    def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
 
@@ -342,12 +344,14 @@ class AsyncServer(object):
                     first_flag = False
 
                     time.sleep(first_time_sleep)   # speed control + waiting for packet to fully recieve
-                    data = asyncio.get_running_loop().sock_recv(client_sock,16384)
+                    data = client_sock.recv(16384)
                     #print('len data -> ',str(len(data)))                
                     #print('user talk :')
 
                     if data:                                                                                            
-                        asyncio.create_task(self.my_downstream(backend_sock , client_sock))
+                        thread_down = threading.Thread(target = self.my_downstream , args = (backend_sock , client_sock) )
+                        thread_down.daemon = True
+                        thread_down.start()
                         # backend_sock.sendall(data)    
                         send_data_in_fragment(self.sni,self.settings,data,backend_sock)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
@@ -356,9 +360,9 @@ class AsyncServer(object):
                         raise Exception('cli syn close')
 
                 else:
-                    data = asyncio.get_running_loop().sock_recv(client_sock,16384)
+                    data = client_sock.recv(16384)
                     if data:
-                        asyncio.get_running_loop().sock_sendall(backend_sock,data)  
+                        backend_sock.sendall(data)  
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)                      
                     else:
                         raise Exception('cli pipe close')
@@ -373,7 +377,7 @@ class AsyncServer(object):
 
 
             
-    async def my_downstream(self, backend_sock , client_sock):
+    def my_downstream(self, backend_sock , client_sock):
         this_ip = backend_sock.getpeername()[0]        
 
         first_flag = True
@@ -381,17 +385,17 @@ class AsyncServer(object):
             try:
                 if( first_flag == True ):
                     first_flag = False            
-                    data = asyncio.get_running_loop().sock_recv(backend_sock,16384)
+                    data = backend_sock.recv(16384)
                     if data:
-                        asyncio.get_running_loop().sock_sendall(client_sock,data)
+                        client_sock.sendall(data)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
                     else:
                         raise Exception('backend pipe close at first')
                     
                 else:
-                    data = asyncio.get_running_loop().sock_recv(backend_sock,16384)
+                    data = backend_sock.recv(16384)
                     if data:
-                        asyncio.get_running_loop().sock_sendall(client_sock,data)
+                        client_sock.sendall(data)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
                     else:
                         raise Exception('backend pipe close')
@@ -419,7 +423,7 @@ def split_other_data(data, num_fragment, split):
         indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     except:
         split(data)
-        return
+        return 0
     indices.sort()
     # print('indices=',indices)
 
@@ -433,19 +437,32 @@ def split_other_data(data, num_fragment, split):
         
     fragment_data = data[i_pre:L_data]
     split(fragment_data)
+
+    return 1
 # http114=b""
 
 def split_data(data, sni, L_snifrag, num_fragment,split):
     stt=data.find(sni)
+    if output_data:
+        print(sni,stt)
+    else:
+        print("start of sni:",stt)
+
+    if stt==-1:
+        split_other_data(data, num_fragment, split)
+        return 0,0
 
     L_sni=len(sni)
     L_data=len(data)
 
     if L_snifrag==0:
         split_other_data(data, num_fragment, split)
-        return sni
+        return 0,0
 
-    split_other_data(data[0:stt+L_snifrag], num_fragment, split)
+    nstt=stt
+
+    if split_other_data(data[0:stt+L_snifrag], num_fragment, split):
+         nstt=nstt+num_fragment*5
     
     nst=L_snifrag
 
@@ -454,9 +471,12 @@ def split_data(data, sni, L_snifrag, num_fragment,split):
         split(fragment_data)
         nst=nst+L_snifrag
 
-    split_other_data(data[stt+nst:L_data], num_fragment, split)
+    fraged_sni=data[stt:stt+nst]
 
-    return data[stt:stt+L_sni]
+    if split_other_data(data[stt+nst:L_data], num_fragment, split):
+          nstt=nstt+num_fragment*5
+
+    return nstt,int(nstt+nst+nst*5/L_snifrag)
 
 def send_data_in_fragment(sni, settings, data , sock):
     print("To send: ",len(data)," Bytes. ")
@@ -472,8 +492,12 @@ def send_data_in_fragment(sni, settings, data , sock):
         print("adding frag:",len(new_frag)," bytes. ")
         if output_data:
             print("adding frag: ",new_frag,"\n")
-    first_sni_frag=split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
-    
+    stsni,edsni=split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
+    if edsni>0:
+        first_sni_frag=TLS_ans[stsni:edsni]
+    else: 
+        first_sni_frag=b''
+
     print("TLS fraged: ",len(TLS_ans)," Bytes. ")
     if output_data:
         print("TLS fraged: ",TLS_ans,"\n")
@@ -481,7 +505,7 @@ def send_data_in_fragment(sni, settings, data , sock):
     T_sleep=settings.get("TCP_sleep")
     def TCP_send_with_sleep(new_frag):
         nonlocal sock,T_sleep
-        asyncio.get_running_loop().sock_sendall(sock,new_frag)
+        sock.sendall(new_frag)
         print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
         if output_data:
             print("TCP send: ",new_frag,"\n")
@@ -492,7 +516,7 @@ def send_data_in_fragment(sni, settings, data , sock):
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
-    asyncio.run(AsyncServer('',listen_PORT).listen())
+    ThreadedServer('',listen_PORT).listen()
 
 if (__name__ == "__main__"):
     start_server()
