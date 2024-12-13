@@ -4,7 +4,6 @@ import socket
 import aiohttp
 import aiohttp_socks
 import asyncio
-import threading
 import time
 import random
 import copy
