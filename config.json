@@ -37,8 +37,7 @@
             "port": 1445
         },
         "googlevideo.com": {
-            "IPtype": "ipv6",
-            "IPcache": false
+            "IPtype": "ipv6"
         },
         "googleusercontent.com": {
             "IP": "4.193.121.119",
