@@ -224,13 +224,13 @@ class AsyncServer(object):
 
     async def listen(self):
         await self.DoH.init_session()
+        self.sock.setblocking(False)
         self.sock.listen(128)  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
                         
         while True:
             client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)                    
-            client_sock.settimeout(my_socket_timeout)
+            # client_sock.settimeout(my_socket_timeout)
                         
-            await asyncio.sleep(accept_time_sleep)   # avoid server crash on flooding request
             asyncio.create_task(self.my_upstream(client_sock))
     
 
@@ -354,8 +354,8 @@ class AsyncServer(object):
                 if( first_flag == True ):                        
                     first_flag = False
 
-                    await asyncio.sleep(first_time_sleep)   # speed control + waiting for packet to fully recieve
-                    data = await asyncio.get_running_loop().sock_recv(client_sock,16384)
+                    
+                    data = await asyncio.wait_for(asyncio.get_running_loop().sock_recv(client_sock,16384),my_socket_timeout)
                     #print('len data -> ',str(len(data)))                
                     #print('user talk :')
 
@@ -369,16 +369,16 @@ class AsyncServer(object):
                         raise Exception('cli syn close')
 
                 else:
-                    data = await asyncio.get_running_loop().sock_recv(client_sock,16384)
+                    data = await asyncio.wait_for(asyncio.get_running_loop().sock_recv(client_sock,16384),my_socket_timeout)   
                     if data:
-                        await asyncio.get_running_loop().sock_sendall(backend_sock,data)  
+                        await asyncio.wait_for(asyncio.get_running_loop().sock_sendall(backend_sock,data),my_socket_timeout)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)                      
                     else:
                         raise Exception('cli pipe close')
                     
             except Exception as e:
                 print('upstream : '+ repr(e) + 'from' , self.sni )
-                await asyncio.sleep(2) # wait two second for another thread to flush
+                
                 client_sock.close()
                 backend_sock.close()
                 return False
@@ -394,24 +394,24 @@ class AsyncServer(object):
             try:
                 if( first_flag == True ):
                     first_flag = False            
-                    data = await asyncio.get_running_loop().sock_recv(backend_sock,16384)
+                    data = await asyncio.wait_for(asyncio.get_running_loop().sock_recv(backend_sock,16384),my_socket_timeout)
                     if data:
-                        await asyncio.get_running_loop().sock_sendall(client_sock,data)
+                        await asyncio.wait_for(asyncio.get_running_loop().sock_sendall(client_sock,data),my_socket_timeout)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
                     else:
                         raise Exception('backend pipe close at first')
                     
                 else:
-                    data = await asyncio.get_running_loop().sock_recv(backend_sock,16384)
+                    data = await asyncio.wait_for(asyncio.get_running_loop().sock_recv(backend_sock,16384), my_socket_timeout)
                     if data:
-                        await asyncio.get_running_loop().sock_sendall(client_sock,data)
+                        await asyncio.wait_for(asyncio.get_running_loop().sock_sendall(client_sock,data),my_socket_timeout)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
                     else:
                         raise Exception('backend pipe close')
             
             except Exception as e:
                 print('downstream '+' : '+ repr(e) , self.sni) 
-                await asyncio.sleep(2) # wait two second for another thread to flush
+                
                 backend_sock.close()
                 client_sock.close()
                 return False
@@ -494,7 +494,7 @@ async def send_data_in_fragment(sni, settings, data , sock):
     T_sleep=settings.get("TCP_sleep")
     async def TCP_send_with_sleep(new_frag):
         nonlocal sock,T_sleep
-        await asyncio.get_running_loop().sock_sendall(sock,new_frag)
+        await asyncio.wait_for(asyncio.get_running_loop().sock_sendall(sock,new_frag),my_socket_timeout)
         print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
         if output_data:
             print("TCP send: ",new_frag,"\n")
