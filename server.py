@@ -294,9 +294,11 @@ class AsyncServer(object):
                 server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             
             server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   #force localhost kernel to send TCP packet immediately (idea: @free_the_internet)
+            server_socket.setblocking(False)
             
             try:
-                server_socket.connect((server_IP, server_port))
+                await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
+                # server_socket.connect((server_IP, server_port))
                 # Send HTTP 200 OK
                 response_data = b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
                 await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
@@ -329,7 +331,6 @@ class AsyncServer(object):
     async def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = await self.handle_client_request(client_sock)
-        backend_sock.setblocking(False)
 
         if(backend_sock==None):
             client_sock.close()
