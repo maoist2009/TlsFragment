@@ -229,7 +229,7 @@ class AsyncServer(object):
                         
         while True:
             client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)                    
-            # client_sock.settimeout(my_socket_timeout)
+            client_sock.setblocking(False)
                         
             asyncio.create_task(self.my_upstream(client_sock))
     
@@ -292,7 +292,7 @@ class AsyncServer(object):
                 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             else:
                 server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            server_socket.settimeout(my_socket_timeout)
+            
             server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   #force localhost kernel to send TCP packet immediately (idea: @free_the_internet)
             
             try:
@@ -329,6 +329,7 @@ class AsyncServer(object):
     async def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = await self.handle_client_request(client_sock)
+        backend_sock.setblocking(False)
 
         if(backend_sock==None):
             client_sock.close()
@@ -361,7 +362,8 @@ class AsyncServer(object):
 
                     if data:                                                                                            
                         asyncio.create_task(self.my_downstream(backend_sock , client_sock))
-                        # backend_sock.sendall(data)    
+                        
+                        
                         await send_data_in_fragment(self.sni,self.settings,data,backend_sock)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
 
@@ -440,7 +442,7 @@ async def split_other_data(data, num_fragment, split):
     for i in indices:
         fragment_data = data[i_pre:i]
         i_pre=i
-        # sock.send(fragment_data)
+        
         # print(fragment_data)
         await split(new_frag=fragment_data)
         
