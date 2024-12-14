@@ -7,7 +7,7 @@
     "TCP_frag": 0,
     "TCP_sleep": 0.01,
     "TLS_frag": 5,
-    "my_socket_timeout": 30,
+    "my_socket_timeout": 180,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "DNS_log_every": 5,
     "IPtype": "ipv4",
