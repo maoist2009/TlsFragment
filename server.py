@@ -154,10 +154,10 @@ class GET_settings:
                 return resolved_ip
             else:
                 print(f'Error DNS query: {ans.status} {ans.reason}')
-            return "127.0.0.1"
+                raise Exception("Error DNS query: "+str(ans.status))
         except Exception as e:
             print("ERROR DNS query: ",repr(e))
-            return "127.0.0.1"
+            raise e
 
 
     async def query(self,domain):
@@ -280,7 +280,10 @@ class AsyncServer(object):
                 server_IP = server_name
             except socket.error:
                 # print('Not IP , its domain , try to resolve it')
-                self.settings=await self.DoH.query(server_name)
+                try:
+                    self.settings=await self.DoH.query(server_name)
+                except Exception as e:
+                    raise e
                 if self.settings==None:                    
                     self.settings={}
                 server_IP=self.settings.get("IP")
