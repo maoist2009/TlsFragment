@@ -32,8 +32,9 @@
         "pixiv": {
             "TLS_frag": 3
         },
+		
         "google.com": {
-            "IP": "35.190.247.149",
+            "IP": "35.190.247.148",
             "port": 1445
         },
         "googlevideo.com": {
@@ -130,11 +131,11 @@
             "IPcache": false
         },
         "twimg.com": {
-            "IP": "104.19.112.125",
+            "IP": "104.16.112.122",
             "TLS_frag": 4
         },
         "x.com": {
-            "IP": "104.19.112.125",
+            "IP": "104.16.112.122",
             "TCP_frag": 5,
             "TCP_sleep": 0.02,
             "TLS_frag": 2
@@ -144,12 +145,12 @@
             "TLS_frag": 4
         },
         "twitter.com": {
-            "IP": "104.19.112.125",
+            "IP": "104.16.112.122",
             "TLS_frag": 4
         },
 
         "one.one.one.one": {
-            "IP": "104.19.112.129",
+            "IP": "104.16.112.129",
             "TLS_frag": 4
         },
         "nav-edge.smartscreen.microsoft.com": {
@@ -157,19 +158,15 @@
             "TLS_frag": 4
         },
         "cloudflare-dns.com": {
-            "IP": "104.19.112.119",
+            "IP": "104.16.112.119",
             "TLS_frag": 6
         },
-        "bridges.torproject.org": {
-            "IP": "116.202.120.184",
-            "TLS_frag": 8
-        },
         "freezhihu.org": {
-            "IP": "104.19.112.120",
+            "IP": "104.16.112.120",
             "TLS_frag": 6
         },
         "greatfire.org": {
-            "IP": "104.19.112.120",
+            "IP": "104.16.112.120",
             "TLS_frag": 6
         }
     }
