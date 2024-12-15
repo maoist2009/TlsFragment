@@ -6,7 +6,7 @@
     "num_TLS_fragment": 2,
     "TCP_frag": 4,
     "TCP_sleep": 0.01,
-    "TLS_frag": 5,
+    "TLS_frag": 4,
     "my_socket_timeout": 180,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "DNS_log_every": 5,
@@ -38,8 +38,7 @@
             "port": 1445
         },
         "googlevideo.com": {
-            "IPtype": "ipv6",
-            "TCP_frag": 8
+            "IPtype": "ipv6"
         },
         "googleusercontent.com": {
             "IP": "4.193.121.119",
