@@ -32,8 +32,9 @@
         "pixiv": {
             "TLS_frag": 3
         },
+		
         "google.com": {
-            "IP": "35.190.247.149",
+            "IP": "35.190.247.148",
             "port": 1445
         },
         "googlevideo.com": {
