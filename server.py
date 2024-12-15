@@ -4,7 +4,6 @@ import socket
 import aiohttp
 import aiohttp_socks
 import asyncio
-import threading
 import time
 import random
 import copy
@@ -429,7 +428,6 @@ class AsyncServer(object):
         host,port = host_and_port.split(':')
         return (host,int(port)) 
 
-
 async def split_other_data(data, num_fragment, split):
     # print("sending: ", data)
     L_data = len(data)
@@ -438,7 +436,7 @@ async def split_other_data(data, num_fragment, split):
         indices = random.sample(range(1,L_data-1), min(num_fragment,L_data-2))
     except:
         await split(data)
-        return
+        return 0
     indices.sort()
     # print('indices=',indices)
 
@@ -446,25 +444,38 @@ async def split_other_data(data, num_fragment, split):
     for i in indices:
         fragment_data = data[i_pre:i]
         i_pre=i
-        
+        # sock.send(fragment_data)
         # print(fragment_data)
         await split(new_frag=fragment_data)
         
     fragment_data = data[i_pre:L_data]
     await split(fragment_data)
+
+    return 1
 # http114=b""
 
 async def split_data(data, sni, L_snifrag, num_fragment,split):
     stt=data.find(sni)
+    if output_data:
+        print(sni,stt)
+    else:
+        print("start of sni:",stt)
+
+    if stt==-1:
+        await split_other_data(data, num_fragment, split)
+        return 0,0
 
     L_sni=len(sni)
     L_data=len(data)
 
     if L_snifrag==0:
         await split_other_data(data, num_fragment, split)
-        return sni
+        return 0,0
 
-    await split_other_data(data[0:stt+L_snifrag], num_fragment, split)
+    nstt=stt
+
+    if await split_other_data(data[0:stt+L_snifrag], num_fragment, split):
+         nstt=nstt+num_fragment*5
     
     nst=L_snifrag
 
@@ -473,9 +484,12 @@ async def split_data(data, sni, L_snifrag, num_fragment,split):
         await split(fragment_data)
         nst=nst+L_snifrag
 
-    await split_other_data(data[stt+nst:L_data], num_fragment, split)
+    fraged_sni=data[stt:stt+nst]
 
-    return data[stt:stt+L_sni]
+    if await split_other_data(data[stt+nst:L_data], num_fragment, split):
+          nstt=nstt+num_fragment*5
+
+    return nstt,int(nstt+nst+nst*5/L_snifrag)
 
 async def send_data_in_fragment(sni, settings, data , sock):
     print("To send: ",len(data)," Bytes. ")
@@ -491,8 +505,12 @@ async def send_data_in_fragment(sni, settings, data , sock):
         print("adding frag:",len(new_frag)," bytes. ")
         if output_data:
             print("adding frag: ",new_frag,"\n")
-    first_sni_frag=await split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
-    
+    stsni,edsni=await split_data(record, sni, settings.get("TLS_frag"), settings.get("num_TLS_fragment"),TLS_add_frag)
+    if edsni>0:
+        first_sni_frag=TLS_ans[stsni:edsni]
+    else: 
+        first_sni_frag=b''
+
     print("TLS fraged: ",len(TLS_ans)," Bytes. ")
     if output_data:
         print("TLS fraged: ",TLS_ans,"\n")
