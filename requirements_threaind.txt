@@ -1,0 +1,11 @@
+<<<<<<< HEAD:requirements_threaind.txt
+ahocorasick-python==0.0.9
+requests==2.32.3
+dnspython==2.3.0
+=======
+ahocorasick-python==0.0.9
+aiohttp==3.10.11
+aiohttp_socks==0.9.1
+dnspython==2.3.0
+chardet==5.2.0
+>>>>>>> eab35708fc437d392b6c927012fdd7202c7c059c:requirements.txt
