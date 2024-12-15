@@ -4,7 +4,7 @@
     "DOH_PORT": 2500,
     "num_TCP_fragment": 3,
     "num_TLS_fragment": 2,
-    "TCP_frag": 0,
+    "TCP_frag": 9,
     "TCP_sleep": 0.01,
     "TLS_frag": 5,
     "my_socket_timeout": 180,
