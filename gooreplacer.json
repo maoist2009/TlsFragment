@@ -1,8 +1,14 @@
 {
   "createBy": "http://liujiacai.net/gooreplacer/",
   "version": "3.13.0",
-  "createAt": "2024/12/8 18:01:01",
+  "createAt": "2024/12/15 15:27:42",
   "redirect-rules": [
+    {
+      "src": "cdn.jsdelivr.net",
+      "kind": "wildcard",
+      "dst": "gcore.jsdelivr.net",
+      "enable": true
+    },
     {
       "src": "raw.githubusercontent.com",
       "kind": "wildcard",
