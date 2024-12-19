@@ -96,6 +96,7 @@
             "TCP_frag": 5
         },
 
+
         "dropbox.com": 
         {
             "IP": "162.125.2.18"
@@ -147,6 +148,10 @@
         "twitter.com": {
             "IP": "104.16.112.122",
             "TLS_frag": 4
+        },
+        "video.pscp.tv": {
+           "TLS_frag": 9,
+           "IPcache": false
         },
 
         "one.one.one.one": {
