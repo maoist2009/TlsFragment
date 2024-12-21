@@ -17,7 +17,6 @@
       "TLS_frag": 3,
       "TCP_frag": 5
     },
-
     "wiki": {
       "IP": "185.15.58.224",
       "TLS_frag": 2,
@@ -32,7 +31,6 @@
     "pixiv": {
       "TLS_frag": 3
     },
-
     "google.com": {
       "IP": "35.190.247.149",
       "port": 1445
@@ -68,7 +66,6 @@
       "IP": "4.193.121.119",
       "port": 41620
     },
-
     "facebook.com": {
       "IP": "157.240.229.35",
       "TLSfrag": 3,
@@ -95,13 +92,9 @@
       "TLS_frag": 3,
       "TCP_frag": 5
     },
-
-
-    "dropbox.com":
-    {
+    "dropbox.com": {
       "IP": "162.125.2.18"
     },
-
     "telegram.org": {
       "IP": "2001:67c:4e8:f004::8"
     },
@@ -134,25 +127,23 @@
     "aurora.web.telegram.org": {
       "IP": "2001:b28:f23d:8007::805:532"
     },
-
     "xcannel.com": {
       "IP": "198.98.60.34"
     },
     "cdn.xcannel.com": {
       "IP": "129.80.246.62"
     },
-
     "video.twimg.com": {
       "CDN": "Fastly: 2024/11/13: 151.101.40.158",
       "TCP_frag": 8,
       "IPcache": false
     },
     "twimg.com": {
-      "IP": "104.16.112.122",
+      "IP": "104.18.39.24",
       "TLS_frag": 4
     },
     "x.com": {
-      "IP": "104.16.112.122",
+      "IP": "104.18.39.24",
       "TCP_frag": 5,
       "TCP_sleep": 0.02,
       "TLS_frag": 2
@@ -162,16 +153,15 @@
       "TLS_frag": 4
     },
     "twitter.com": {
-      "IP": "104.16.112.122",
+      "IP": "104.18.39.24",
       "TLS_frag": 4
     },
     "video.pscp.tv": {
       "TLS_frag": 9,
       "IPcache": false
     },
-
     "one.one.one.one": {
-      "IP": "104.16.112.129",
+      "IP": "104.16.248.249",
       "TLS_frag": 4
     },
     "nav-edge.smartscreen.microsoft.com": {
@@ -179,15 +169,7 @@
       "TLS_frag": 4
     },
     "cloudflare-dns.com": {
-      "IP": "104.16.112.119",
-      "TLS_frag": 6
-    },
-    "freezhihu.org": {
-      "IP": "104.16.112.120",
-      "TLS_frag": 6
-    },
-    "greatfire.org": {
-      "IP": "104.16.112.120",
+      "IP": "104.16.248.249",
       "TLS_frag": 6
     }
   }
