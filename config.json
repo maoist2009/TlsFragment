@@ -1,178 +1,194 @@
 {
-    "output_data": false,
-    "listen_PORT": 2500,
-    "DOH_PORT": 2500,
-    "num_TCP_fragment": 3,
-    "num_TLS_fragment": 2,
-    "TCP_frag": 4,
-    "TCP_sleep": 0.01,
-    "TLS_frag": 4,
-    "my_socket_timeout": 180,
-    "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
-    "DNS_log_every": 5,
-    "IPtype": "ipv4",
-    "domains": {
-        "github.com": {
-            "IP": "140.82.121.3",
-            "TLS_frag": 3,
-            "TCP_frag": 5
-        },
+  "output_data": false,
+  "listen_PORT": 2500,
+  "DOH_PORT": 2500,
+  "num_TCP_fragment": 3,
+  "num_TLS_fragment": 2,
+  "TCP_frag": 4,
+  "TCP_sleep": 0.01,
+  "TLS_frag": 4,
+  "my_socket_timeout": 180,
+  "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
+  "DNS_log_every": 5,
+  "IPtype": "ipv4",
+  "domains": {
+    "github.com": {
+      "IP": "140.82.121.3",
+      "TLS_frag": 3,
+      "TCP_frag": 5
+    },
 
-        "wiki": {
-            "IP": "185.15.58.224",
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 3,
-            "TCP_sleep": 0.01
-        },
-		"upload.wikimedia.org": {
-			"IP": "185.15.58.240"
-		},
-        "pixiv": {
-            "TLS_frag": 3
-        },
-		
-        "google.com": {
-            "IP": "35.190.247.149",
-            "port": 1445
-        },
-        "googlevideo.com": {
-            "IPtype": "ipv6"
-        },
-        "googleusercontent.com": {
-            "IP": "4.193.121.119",
-            "port": 41620
-        },
-        ".translate.goog": {
-            "IP": "4.193.121.119",
-            "port": 41620
-        },
-        "ggpht.com": {
-            "IP": "4.193.121.119",
-            "port": 41620
-        },
-        "gstatic.com": {
-            "IP": "13.230.98.94",
-            "port": 5128
-        },
-        "googleapis.com": {
-            "IP": "13.230.98.94",
-            "port": 5128
-        },
-        "youtube.com": {
-            "IP": "35.190.247.149",
-            "port": 1445
-        },
-        "ytimg.com": {
-            "IP": "4.193.121.119",
-            "port": 41620
-        },
+    "wiki": {
+      "IP": "185.15.58.224",
+      "TLS_frag": 2,
+      "TCP_frag": 3,
+      "num_TCP_fragment": 3,
+      "num_TLS_fragment": 3,
+      "TCP_sleep": 0.01
+    },
+    "upload.wikimedia.org": {
+      "IP": "185.15.58.240"
+    },
+    "pixiv": {
+      "TLS_frag": 3
+    },
 
-        "facebook.com": {
-            "IP": "157.240.229.35",
-            "TLSfrag": 3,
-            "TCPfrag": 5
-        },
-        "www.instagram.com": {
-            "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
-        },
-        "meta": {
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "TCP_sleep": 0.01
-        },
-        "static.cdninstagram.com": {
-            "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
-        },
-        "fbcdn.net": {
-            "IP": "157.240.229.35",
-            "TLS_frag": 3,
-            "TCP_frag": 5
-        },
-        "fbsbx.com": {
-            "IP": "2a03:2880:f115:83:face:b00c:0:25de",
-            "TLS_frag": 3,
-            "TCP_frag": 5
-        },
+    "google.com": {
+      "IP": "35.190.247.149",
+      "port": 1445
+    },
+    "googlevideo.com": {
+      "IPtype": "ipv6"
+    },
+    "googleusercontent.com": {
+      "IP": "4.193.121.119",
+      "port": 41620
+    },
+    ".translate.goog": {
+      "IP": "4.193.121.119",
+      "port": 41620
+    },
+    "ggpht.com": {
+      "IP": "4.193.121.119",
+      "port": 41620
+    },
+    "gstatic.com": {
+      "IP": "13.230.98.94",
+      "port": 5128
+    },
+    "googleapis.com": {
+      "IP": "13.230.98.94",
+      "port": 5128
+    },
+    "youtube.com": {
+      "IP": "35.190.247.149",
+      "port": 1445
+    },
+    "ytimg.com": {
+      "IP": "4.193.121.119",
+      "port": 41620
+    },
+
+    "facebook.com": {
+      "IP": "157.240.229.35",
+      "TLSfrag": 3,
+      "TCPfrag": 5
+    },
+    "www.instagram.com": {
+      "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
+    },
+    "meta": {
+      "TLS_frag": 2,
+      "TCP_frag": 3,
+      "TCP_sleep": 0.01
+    },
+    "static.cdninstagram.com": {
+      "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
+    },
+    "fbcdn.net": {
+      "IP": "157.240.229.35",
+      "TLS_frag": 3,
+      "TCP_frag": 5
+    },
+    "fbsbx.com": {
+      "IP": "2a03:2880:f115:83:face:b00c:0:25de",
+      "TLS_frag": 3,
+      "TCP_frag": 5
+    },
 
 
-        "dropbox.com": 
-        {
-            "IP": "162.125.2.18"
-        },
+    "dropbox.com":
+    {
+      "IP": "162.125.2.18"
+    },
 
-        "telegram.org": {
-            "IP": "2001:67c:4e8:f004::8"
-        },
-        "telegram.me": {
-            "IP": "2001:67c:4e8:f004::8"
-        },
-        "t.me": {
-            "IP": "2001:67c:4e8:f004::8",
-            "TLS_frag": 1,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 5,
-            "TCP_frag": 2
-        },
-        "cdn-telegram.org": {
-            "IPtype": "ipv4"
-        },
+    "telegram.org": {
+      "IP": "2001:67c:4e8:f004::8"
+    },
+    "telegram.me": {
+      "IP": "2001:67c:4e8:f004::8"
+    },
+    "t.me": {
+      "IP": "2001:67c:4e8:f004::8",
+      "TLS_frag": 1,
+      "num_TCP_fragment": 3,
+      "num_TLS_fragment": 5,
+      "TCP_frag": 2
+    },
+    "cdn-telegram.org": {
+      "IPtype": "ipv4"
+    },
+    ".web.telegram.org": {},
+    "venus.web.telegram.org": {
+      "IP": "2001:67c:4e8:f004::8"
+    },
+    "kws2.web.telegram.org": {
+      "IP": "2001:67c:4e8:f004::8"
+    },
+    "kws4.web.telegram.org": {
+      "IP": "2001:67c:4e8:f004::8"
+    },
+    "pluto.web.telegram.org": {
+      "IP": "2001:b28:f23d:8007::805:532"
+    },
+    "aurora.web.telegram.org": {
+      "IP": "2001:b28:f23d:8007::805:532"
+    },
 
-        "xcannel.com": {
-            "IP": "198.98.60.34"
-        },
-        "cdn.xcannel.com": {
-            "IP": "129.80.246.62"
-        },
+    "xcannel.com": {
+      "IP": "198.98.60.34"
+    },
+    "cdn.xcannel.com": {
+      "IP": "129.80.246.62"
+    },
 
-        "video.twimg.com": {
-            "CDN": "Fastly: 2024/11/13: 151.101.40.158",
-            "TCP_frag": 8,
-            "IPcache": false
-        },
-        "twimg.com": {
-            "IP": "104.16.112.122",
-            "TLS_frag": 4
-        },
-        "x.com": {
-            "IP": "104.16.112.122",
-            "TCP_frag": 5,
-            "TCP_sleep": 0.02,
-            "TLS_frag": 2
-        },
-        "platform.twitter.com": {
-            "IP": "146.75.120.157",
-            "TLS_frag": 4
-        },
-        "twitter.com": {
-            "IP": "104.16.112.122",
-            "TLS_frag": 4
-        },
-        "video.pscp.tv": {
-           "TLS_frag": 9,
-           "IPcache": false
-        },
+    "video.twimg.com": {
+      "CDN": "Fastly: 2024/11/13: 151.101.40.158",
+      "TCP_frag": 8,
+      "IPcache": false
+    },
+    "twimg.com": {
+      "IP": "104.16.112.122",
+      "TLS_frag": 4
+    },
+    "x.com": {
+      "IP": "104.16.112.122",
+      "TCP_frag": 5,
+      "TCP_sleep": 0.02,
+      "TLS_frag": 2
+    },
+    "platform.twitter.com": {
+      "IP": "146.75.120.157",
+      "TLS_frag": 4
+    },
+    "twitter.com": {
+      "IP": "104.16.112.122",
+      "TLS_frag": 4
+    },
+    "video.pscp.tv": {
+      "TLS_frag": 9,
+      "IPcache": false
+    },
 
-        "one.one.one.one": {
-            "IP": "104.16.112.129",
-            "TLS_frag": 4
-        },
-        "nav-edge.smartscreen.microsoft.com": {
-            "IP": "0.0.0.0",
-            "TLS_frag": 4
-        },
-        "cloudflare-dns.com": {
-            "IP": "104.16.112.119",
-            "TLS_frag": 6
-        },
-        "freezhihu.org": {
-            "IP": "104.16.112.120",
-            "TLS_frag": 6
-        },
-        "greatfire.org": {
-            "IP": "104.16.112.120",
-            "TLS_frag": 6
-        }
+    "one.one.one.one": {
+      "IP": "104.16.112.129",
+      "TLS_frag": 4
+    },
+    "nav-edge.smartscreen.microsoft.com": {
+      "IP": "0.0.0.0",
+      "TLS_frag": 4
+    },
+    "cloudflare-dns.com": {
+      "IP": "104.16.112.119",
+      "TLS_frag": 6
+    },
+    "freezhihu.org": {
+      "IP": "104.16.112.120",
+      "TLS_frag": 6
+    },
+    "greatfire.org": {
+      "IP": "104.16.112.120",
+      "TLS_frag": 6
     }
+  }
 }
