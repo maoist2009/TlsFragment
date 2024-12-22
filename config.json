@@ -12,6 +12,7 @@
   "DNS_log_every": 5,
   "IPtype": "ipv4",
   "domains": {
+
     "github.com": {
       "IP": "140.82.121.3",
       "TLS_frag": 3,
@@ -111,15 +112,11 @@
     "cdn-telegram.org": {
       "IPtype": "ipv4"
     },
-    ".web.telegram.org": {},
-    "venus.web.telegram.org": {
-      "IP": "2001:67c:4e8:f004::8"
+    "zws5.web.telegram.org": {
+      "IP": "149.154.170.200"
     },
-    "kws2.web.telegram.org": {
-      "IP": "2001:67c:4e8:f004::8"
-    },
-    "kws4.web.telegram.org": {
-      "IP": "2001:67c:4e8:f004::8"
+    "zws5-1.web.telegram.org": {
+      "IP": "149.154.170.200"
     },
     "pluto.web.telegram.org": {
       "IP": "2001:b28:f23d:8007::805:532"
