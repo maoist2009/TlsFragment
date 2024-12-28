@@ -104,9 +104,6 @@
       "TLS_frag": 3,
       "TCP_frag": 5
     },
-    "dropbox.com": {
-      "IP": "162.125.2.18"
-    },
     "telegram.org": {
       "IP": "2001:67c:4e8:f004::8"
     },
