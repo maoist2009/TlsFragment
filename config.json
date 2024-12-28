@@ -12,11 +12,22 @@
   "DNS_log_every": 5,
   "IPtype": "ipv4",
   "domains": {
-
+    "reddit": {
+      "IP": "146.75.37.140",
+      "TLS_frag": 3,
+      "TCP_frag": 5
+    },
+    "redd.it": {
+      "IP": "146.75.37.140",
+      "TLS_frag": 3,
+      "TCP_frag": 5
+    },
     "github.com": {
       "IP": "140.82.121.3",
       "TLS_frag": 3,
       "TCP_frag": 5
+    },
+    "githubusercontent.com": {
     },
     "wiki": {
       "IP": "185.15.58.224",
