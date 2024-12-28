@@ -165,6 +165,7 @@
       "TLS_frag": 4
     },
     "video.pscp.tv": {
+      "IP": "146.75.34.164",
       "TLS_frag": 9,
       "IPcache": false
     },
