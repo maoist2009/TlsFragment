@@ -12,6 +12,9 @@
   "DNS_log_every": 5,
   "IPtype": "ipv4",
   "domains": {
+    "pages.dev": {
+      "IP": "172.66.44.87"
+    },
     "reddit": {
       "IP": "146.75.37.140",
       "TLS_frag": 3,
@@ -75,6 +78,10 @@
     },
     "youtube.com": {
       "IP": "35.190.247.149",
+      "port": 1445
+    },
+    "youtu.be": {
+      "IP": "35.190.247.147",
       "port": 1445
     },
     "ytimg.com": {
