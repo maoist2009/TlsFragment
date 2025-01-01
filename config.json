@@ -12,6 +12,16 @@
   "DNS_log_every": 5,
   "IPtype": "ipv4",
   "domains": {
+    "web.archive.org": {
+      "IP": "207.241.237.3"
+    },
+    "archive.org": {
+      "IP": "207.241.224.28"
+    },
+    "www.archive.org": {
+      "IP": "207.241.224.28"
+    },
+    ".archive.org": {},
     "pages.dev": {
       "IP": "172.66.44.87"
     },
@@ -104,10 +114,13 @@
     "static.cdninstagram.com": {
       "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
     },
-    "fbcdn.net": {
+    "static.xx.fbcdn.net": {
       "IP": "157.240.229.35",
       "TLS_frag": 3,
       "TCP_frag": 5
+    },
+    "fbcdn.net": {
+      "IPtype": "ipv6"
     },
     "fbsbx.com": {
       "IP": "2a03:2880:f115:83:face:b00c:0:25de",
