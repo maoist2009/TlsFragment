@@ -183,7 +183,7 @@ class GET_settings:
                         res["IPtype"]="ipv4"
                     elif res["IPtype"]=="ipv4":
                         res["IPtype"]="ipv6"
-                    res["IP"]=self.query_DNS(domain,res)
+                    res["IP"]=await self.query_DNS(domain,res)
                 global cnt_chg
                 cnt_chg=cnt_chg+1
                 if cnt_chg>DNS_log_every:
