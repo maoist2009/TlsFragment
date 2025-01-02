@@ -1,3 +1,0 @@
-ahocorasick-python==0.0.9
-requests==2.32.3
-dnspython==2.3.0
