@@ -159,7 +159,7 @@ class GET_settings:
             raise e
 
 
-    async def query(self,domain):
+    async def query(self,domain,todns=True):
         # print("Query:",domain)
         res=domain_settings_tree.search(domain)
         # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
@@ -168,29 +168,29 @@ class GET_settings:
         except:
             res={}
         
-        
-        if res.get("IPtype")==None:
-            res["IPtype"]=IPtype
-
-        if res.get("IP")==None:
-            if DNS_cache.get(domain)!=None:
-                res["IP"]=DNS_cache[domain]
-            else:
-                res["IP"]=await self.query_DNS(domain,res)
-                if res["IP"]==None:
-                    print("Faild to resolve domain, try again with other IP type")
-                    if res["IPtype"]=="ipv6":                        
-                        res["IPtype"]="ipv4"
-                    elif res["IPtype"]=="ipv4":
-                        res["IPtype"]="ipv6"
-                    res["IP"]=await self.query_DNS(domain,res)
-                global cnt_chg
-                cnt_chg=cnt_chg+1
-                if cnt_chg>DNS_log_every:
-                    cnt_chg=0
-                    with open("DNS_cache.json",'w', encoding='UTF-8') as f:
-                        json.dump(DNS_cache,f)
-            # res["IP"]="127.0.0.1"
+        if todns:
+          if res.get("IPtype")==None:
+              res["IPtype"]=IPtype
+  
+          if res.get("IP")==None:
+              if DNS_cache.get(domain)!=None:
+                  res["IP"]=DNS_cache[domain]
+              else:
+                  res["IP"]=await self.query_DNS(domain,res)
+                  if res["IP"]==None:
+                      print("Faild to resolve domain, try again with other IP type")
+                      if res["IPtype"]=="ipv6":                        
+                          res["IPtype"]="ipv4"
+                      elif res["IPtype"]=="ipv4":
+                          res["IPtype"]="ipv6"
+                      res["IP"]=await self.query_DNS(domain,res)
+                  global cnt_chg
+                  cnt_chg=cnt_chg+1
+                  if cnt_chg>DNS_log_every:
+                      cnt_chg=0
+                      with open("DNS_cache.json",'w', encoding='UTF-8') as f:
+                          json.dump(DNS_cache,f)
+              # res["IP"]="127.0.0.1"
         if res.get("TCP_frag")==None:
             res["TCP_frag"]=TCP_frag
         if res.get("TCP_sleep")==None:
@@ -214,12 +214,6 @@ class AsyncServer(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
-        self.sni = b""
-        self.settings = {
-            "IP": "127.0.0.1",
-            "frag": 114514,
-            "sleep": 0.001
-        }
 
     async def listen(self):
         await self.DoH.init_session()
@@ -270,24 +264,27 @@ class AsyncServer(object):
 
         
         print(server_name,'-->',server_port)
-        self.sni=bytes(server_name,encoding="utf-8")
+        
 
         try:
             try:
                 socket.inet_aton(server_name)
-                # print('legal IP')
                 server_IP = server_name
+                settings={}
+                
             except socket.error:
                 # print('Not IP , its domain , try to resolve it')
                 try:
-                    self.settings=await self.DoH.query(server_name)
+                    settings=await self.DoH.query(server_name)
                 except Exception as e:
                     raise e
-                if self.settings==None:                    
-                    self.settings={}
-                server_IP=self.settings.get("IP")
-                if self.settings.get("port"):
-                    server_port=self.settings.get("port")
+                if settings==None:                    
+                    settings={}
+                settings["sni"]=bytes(server_name,encoding="utf-8")
+                # print("hdxl",settings)
+                server_IP=settings.get("IP")
+                if settings.get("port"):
+                    server_port=settings.get("port")
                 print("send to ",server_IP,":",server_port)
                 
             if server_IP.find(":")==-1:
@@ -304,7 +301,7 @@ class AsyncServer(object):
                 # Send HTTP 200 OK
                 response_data = b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
                 await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
-                return server_socket
+                return server_socket, settings
             except socket.error:
                 print("@@@ "+server_IP+":"+str(server_port)+ " ==> filtered @@@")
                 # Send HTTP ERR 502
@@ -332,8 +329,10 @@ class AsyncServer(object):
 
     async def my_upstream(self, client_sock):
         first_flag = True
-        backend_sock = await self.handle_client_request(client_sock)
-
+        
+        backend_sock, settings = await self.handle_client_request(client_sock)
+        # print("upst",settings)
+        
         if(backend_sock==None):
             client_sock.close()
             return False
@@ -364,10 +363,21 @@ class AsyncServer(object):
                     #print('user talk :')
 
                     if data:                                                                                            
-                        asyncio.create_task(self.my_downstream(backend_sock , client_sock))
+                        asyncio.create_task(self.my_downstream(backend_sock , client_sock, settings))
                         
-                        
-                        await send_data_in_fragment(self.sni,self.settings,data,backend_sock)
+                        # print(data)
+                        try:
+                            if settings.get("sni")==None:
+                              print("No sni? try to dig it in packet like gfwm ")
+                              settings["sni"]=parse_client_hello(data)
+                              if settings["sni"]:
+                                  settings=await self.DoH.query(str(settings.get("sni")),todns=False)
+                        except Exception as e:
+                          print(e)
+                          import traceback
+                          traceback_info = traceback.format_exc()
+                          print(traceback_info)
+                        await send_data_in_fragment(settings.get("sni"),settings,data,backend_sock)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
 
                     else:                   
@@ -382,7 +392,7 @@ class AsyncServer(object):
                         raise Exception('cli pipe close')
                     
             except Exception as e:
-                print('upstream : '+ repr(e) + 'from' , self.sni )
+                print('upstream : '+ repr(e) + 'from' , settings.get("sni") )
                 
                 client_sock.close()
                 backend_sock.close()
@@ -391,7 +401,7 @@ class AsyncServer(object):
 
 
             
-    async def my_downstream(self, backend_sock , client_sock):
+    async def my_downstream(self, backend_sock , client_sock, settings):
         this_ip = backend_sock.getpeername()[0]        
 
         first_flag = True
@@ -415,7 +425,7 @@ class AsyncServer(object):
                         raise Exception('backend pipe close')
             
             except Exception as e:
-                print('downstream '+' : '+ repr(e) , self.sni) 
+                print('downstream '+' : '+ repr(e) , settings.get("sni")) 
                 
                 backend_sock.close()
                 client_sock.close()
@@ -427,6 +437,57 @@ class AsyncServer(object):
         host_and_port = str(data).split()[1]
         host,port = host_and_port.split(':')
         return (host,int(port)) 
+        
+    import struct
+
+
+def parse_client_hello(data):
+  import struct
+  # print(struct.calcsize(">BHH"))
+  # 解析TLS记录
+  content_type, version_major, version_minor, length = struct.unpack(">BBBH", data[:5])
+  if content_type!= 0x16:  # 0x16表示TLS Handshake
+      raise ValueError("Not a TLS Handshake message")
+  handshake_data = data[5:5 + length]
+
+  # 解析握手消息头
+  handshake_type, tmp, length = struct.unpack(">BBH", handshake_data[:4])
+  length=tmp*64+length
+  if handshake_type!= 0x01:  # 0x01表示Client Hello
+      raise ValueError("Not a Client Hello message")
+  client_hello_data = handshake_data[4:4 + length]
+
+  # 解析Client Hello消息
+  client_version_major, client_version_minor, random_bytes, session_id_length = struct.unpack(">BB32sB", client_hello_data[:35])
+  session_id = client_hello_data[35:35 + session_id_length]
+  # print(client_hello_data[35 + session_id_length:35 + session_id_length + 2])
+  cipher_suites_length = struct.unpack(">H", client_hello_data[35 + session_id_length:35 + session_id_length + 2])[0]
+  cipher_suites = client_hello_data[35 + session_id_length + 2:35 + session_id_length + 2 + cipher_suites_length]
+  compression_methods_length = struct.unpack(">B", client_hello_data[35 + session_id_length + 2 + cipher_suites_length:35 + session_id_length + 2 + cipher_suites_length + 1])[0]
+  compression_methods = client_hello_data[35 + session_id_length + 2 + cipher_suites_length + 1:35 + session_id_length + 2 + cipher_suites_length + 1 + compression_methods_length]
+
+  # 定位扩展部分
+  extensions_offset = 35 + session_id_length + 2 + cipher_suites_length + 1 + compression_methods_length
+  extensions_length = struct.unpack(">H", client_hello_data[extensions_offset:extensions_offset + 2])[0]
+  extensions_data = client_hello_data[extensions_offset + 2:extensions_offset + 2 + extensions_length]
+
+  offset = 0
+  while offset < extensions_length:
+      extension_type, extension_length = struct.unpack(">HH", extensions_data[offset:offset + 4])
+      if extension_type == 0x0000:  # SNI扩展的类型是0x0000
+          sni_extension = extensions_data[offset + 4:offset + 4 + extension_length]
+          # 解析SNI扩展
+          list_length = struct.unpack(">H", sni_extension[:2])[0]
+          if list_length!= 0:
+              name_type, name_length = struct.unpack(">BH", sni_extension[2:5])
+              if name_type == 0:  # 域名类型
+                  sni = sni_extension[5:5 + name_length]
+                  return sni
+      offset += 4 + extension_length
+  return None
+
+
+
 
 async def split_other_data(data, num_fragment, split):
     # print("sending: ", data)
@@ -492,6 +553,7 @@ async def split_data(data, sni, L_snifrag, num_fragment,split):
     return nstt,int(nstt+nst+nst*5/L_snifrag)
 
 async def send_data_in_fragment(sni, settings, data , sock):
+    # print(sni,settings)
     print("To send: ",len(data)," Bytes. ")
     if output_data:
         print("sending:    ",data,"\n")
