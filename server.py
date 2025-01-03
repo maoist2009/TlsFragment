@@ -222,9 +222,11 @@ class AsyncServer(object):
                         
         while True:
             client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)                    
+            client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)                    
             client_sock.setblocking(False)
                         
             asyncio.create_task(self.my_upstream(client_sock))
+            await asyncio.sleep(0)
     
 
 
@@ -296,7 +298,43 @@ class AsyncServer(object):
             server_socket.setblocking(False)
             
             try:
-                await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
+                try:
+                    await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
+                except Exception:
+                    # strange error
+                    """
+  Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/tlsp/server.py", line 299, in handle_client_request
+    await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 649, in sock_connect
+    self._sock_connect(fut, sock, address)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 666, in _sock_connect
+    handle = self._add_writer(
+             ^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 325, in _add_writer
+    self._selector.modify(fd, mask | selectors.EVENT_WRITE,
+  File "/data/data/com.termux/files/usr/lib/python3.12/selectors.py", line 389, in modify
+    self._selector.modify(key.fd, selector_events)
+FileNotFoundError: [Errno 2] No such file or directory
+^CTraceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 686, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/tlsp/server.py", line 224, in listen
+    client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 717, in sock_accept
+    return await fut
+           ^^^^^^^^^
+asyncio.exceptions.CancelledError
+                    """
+                    await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
                 # server_socket.connect((server_IP, server_port))
                 # Send HTTP 200 OK
                 response_data = b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
@@ -304,6 +342,8 @@ class AsyncServer(object):
                 return server_socket, settings
             except socket.error:
                 print("@@@ "+server_IP+":"+str(server_port)+ " ==> filtered @@@")
+                import traceback
+                traceback.print_exc()
                 # Send HTTP ERR 502
                 response_data = b'HTTP/1.1 502 Bad Gateway (is IP filtered?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
                 await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
@@ -591,6 +631,13 @@ async def send_data_in_fragment(sni, settings, data , sock):
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
+    try:
+        # 检查是否有 --logfile 参数
+        if "--logfile" in sys.argv:
+            # 打开 log.txt 文件，使用 'w' 模式表示写入，如果文件不存在则创建，如果存在则覆盖
+            sys.stdout = open('log.txt', 'w+')
+    except Exception as e:
+        print(f"An error occurred: {e}")
     asyncio.run(AsyncServer('',listen_PORT).listen())
 
 if (__name__ == "__main__"):
