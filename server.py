@@ -569,6 +569,13 @@ def send_data_in_fragment(sni, settings, data , sock):
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
+    try:
+        # 检查是否有 --logfile 参数
+        if "--logfile" in sys.argv:
+            # 打开 log.txt 文件，使用 'w' 模式表示写入，如果文件不存在则创建，如果存在则覆盖
+            sys.stdout = open('log.txt', 'w+')
+    except Exception as e:
+        print(f"An error occurred: {e}")
     ThreadedServer('',listen_PORT).listen()
 
 if (__name__ == "__main__"):

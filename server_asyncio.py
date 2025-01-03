@@ -301,39 +301,6 @@ class AsyncServer(object):
                 try:
                     await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
                 except Exception:
-                    # strange error
-                    """
-  Traceback (most recent call last):
-  File "/data/data/com.termux/files/home/tlsp/server.py", line 299, in handle_client_request
-    await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
-    return await fut
-           ^^^^^^^^^
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 649, in sock_connect
-    self._sock_connect(fut, sock, address)
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 666, in _sock_connect
-    handle = self._add_writer(
-             ^^^^^^^^^^^^^^^^^
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 325, in _add_writer
-    self._selector.modify(fd, mask | selectors.EVENT_WRITE,
-  File "/data/data/com.termux/files/usr/lib/python3.12/selectors.py", line 389, in modify
-    self._selector.modify(key.fd, selector_events)
-FileNotFoundError: [Errno 2] No such file or directory
-^CTraceback (most recent call last):
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 686, in run_until_complete
-    return future.result()
-           ^^^^^^^^^^^^^^^
-  File "/data/data/com.termux/files/home/tlsp/server.py", line 224, in listen
-    client_sock , client_addr = await asyncio.get_running_loop().sock_accept(self.sock)
-                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 717, in sock_accept
-    return await fut
-           ^^^^^^^^^
-asyncio.exceptions.CancelledError
-                    """
                     await asyncio.wait_for(asyncio.get_running_loop().sock_connect(server_socket,(server_IP, server_port)),my_socket_timeout)
                 # server_socket.connect((server_IP, server_port))
                 # Send HTTP 200 OK
