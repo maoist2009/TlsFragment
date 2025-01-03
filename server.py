@@ -254,13 +254,13 @@ class AsyncServer(object):
             response_data = 'HTTP/1.1 302 Found\r\nLocation: '+q_url+'\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
             await asyncio.get_running_loop().sock_sendall(client_socket,response_data.encode())
             client_socket.close()            
-            return None
+            return None, {}
         else:
             print('Unknown Method',str(data[:10]))            
             response_data = b'HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
             await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
             client_socket.close()            
-            return None
+            return None, {}
 
         
         print(server_name,'-->',server_port)
@@ -309,7 +309,7 @@ class AsyncServer(object):
                 await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
                 client_socket.close()
                 server_socket.close()
-                return server_IP
+                return server_IP, {}
 
             
         except Exception as e:
@@ -319,7 +319,7 @@ class AsyncServer(object):
             await asyncio.get_running_loop().sock_sendall(client_socket,response_data)
             client_socket.close()
             server_socket.close()
-            return None
+            return None, {}
 
 
 
