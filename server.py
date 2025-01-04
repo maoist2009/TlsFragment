@@ -267,12 +267,12 @@ class ThreadedServer(object):
                 settings=self.DoH.query(server_name)
                 if settings==None:                    
                     settings={}
+                settings["sni"]=bytes(server_name,encoding="utf-8")
                 server_IP=settings.get("IP")
                 if settings.get("port"):
                     server_port=settings.get("port")
                 print("send to ",server_IP,":",server_port)
 
-            settings["sni"]=bytes(server_name,encoding="utf-8")
                 
             if server_IP.find(":")==-1:
                 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -342,6 +342,7 @@ class ThreadedServer(object):
 
                     time.sleep(first_time_sleep)   # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
+                    # print(data)
                     #print('len data -> ',str(len(data)))                
                     #print('user talk :')
 
@@ -351,11 +352,15 @@ class ThreadedServer(object):
                         thread_down.start()
                         # backend_sock.sendall(data)    
                         try:
+                            # print(settings)
                             if settings.get("sni")==None:
+                                # print(data,parse_client_hello(data))
                                 print("No sni? try to dig it in packet like gfwm ")
                                 settings["sni"]=parse_client_hello(data)
+                                tmp=settings.get("sni")
                                 if settings["sni"]:
                                     settings=self.DoH.query(str(settings.get("sni")),todns=False)
+                                settings["sni"]=tmp
                         except Exception as e:
                             print(e)
                             import traceback
@@ -366,9 +371,13 @@ class ThreadedServer(object):
 
                     else:                   
                         raise Exception('cli syn close')
+                        import traceback
+                        traceback_info = traceback.format_exc()
+                        print(traceback_info)
 
                 else:
                     data = client_sock.recv(16384)
+                    # print(data)
                     if data:
                         backend_sock.sendall(data)  
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)                      
