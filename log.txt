@@ -1,0 +1,561 @@
+accounts.google.com --> 443
+accounts.google.com --> {'IP': '35.190.247.149', 'port': 1445, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'TLS_frag': 4, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  35.190.247.149 : 1445
+x.com --> 443
+x.com --> {'IP': '104.18.38.25', 'TCP_frag': 5, 'TCP_sleep': 0.02, 'TLS_frag': 2, 'IPtype': 'ipv4', 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.38.25 : 443
+analytics.twitter.com --> 443
+analytics.twitter.com --> {'IP': '104.18.38.25', 'TLS_frag': 4, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.38.25 : 443
+To send:  603  Bytes. 
+start of sni: 122
+adding frag: 58  bytes. 
+adding frag: 8  bytes. 
+adding frag: 60  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 223  bytes. 
+adding frag: 138  bytes. 
+adding frag: 95  bytes. 
+TLS fraged:  648  Bytes. 
+start of sni: 142
+TCP send:  74  bytes. And 'll sleep for  0.01 seconds. 
+To send:  517  Bytes. 
+start of sni: 217
+adding frag: 78  bytes. 
+adding frag: 50  bytes. 
+adding frag: 91  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 110  bytes. 
+adding frag: 137  bytes. 
+adding frag: 42  bytes. 
+TLS fraged:  552  Bytes. 
+start of sni: 237
+TCP send:  96  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  7  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  38  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  26  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  27  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  15  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  105  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  29  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  26  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  39  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  335  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  55  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  50  bytes. And 'll sleep for  0.02 seconds. 
+----------finish------------
+TCP send:  164  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  50  bytes. And 'll sleep for  0.02 seconds. 
+----------finish------------
+To send:  573  Bytes. 
+start of sni: 133
+adding frag: 79  bytes. 
+adding frag: 18  bytes. 
+adding frag: 40  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 14  bytes. 
+adding frag: 85  bytes. 
+adding frag: 312  bytes. 
+TLS fraged:  623  Bytes. 
+start of sni: 153
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  130  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  3  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  20  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  100  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  91  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  195  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  28  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+api.x.com --> 443
+api.x.com --> {'IP': '104.18.38.25', 'TCP_frag': 5, 'TCP_sleep': 0.02, 'TLS_frag': 2, 'IPtype': 'ipv4', 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.38.25 : 443
+clients2.google.com --> 443
+clients2.google.com --> {'IP': '35.190.247.149', 'port': 1445, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'TLS_frag': 4, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  35.190.247.149 : 1445
+To send:  561  Bytes. 
+start of sni: 182
+adding frag: 94  bytes. 
+adding frag: 63  bytes. 
+adding frag: 27  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 154  bytes. 
+adding frag: 206  bytes. 
+adding frag: 4  bytes. 
+TLS fraged:  606  Bytes. 
+start of sni: 202
+TCP send:  26  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  20  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  156  bytes. And 'll sleep for  0.02 seconds. 
+To send:  603  Bytes. 
+start of sni: 133
+adding frag: 41  bytes. 
+adding frag: 90  bytes. 
+adding frag: 6  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 10  bytes. 
+adding frag: 155  bytes. 
+adding frag: 280  bytes. 
+TLS fraged:  648  Bytes. 
+start of sni: 153
+TCP send:  45  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  44  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  19  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  49  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  64  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  59  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  95  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  77  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  84  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  202  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  227  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+TCP send:  3  bytes. And 'll sleep for  0.02 seconds. 
+----------finish------------
+pbs.twimg.com --> 443
+pbs.twimg.com --> {'IP': '104.18.39.25', 'TLS_frag': 4, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.39.25 : 443
+api.x.com --> 443
+api.x.com --> {'IP': '104.18.38.25', 'TCP_frag': 5, 'TCP_sleep': 0.02, 'TLS_frag': 2, 'IPtype': 'ipv4', 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.38.25 : 443
+pbs.twimg.com --> 443
+pbs.twimg.com --> {'IP': '104.18.39.25', 'TLS_frag': 4, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.39.25 : 443
+To send:  533  Bytes. 
+start of sni: 479
+adding frag: 282  bytes. 
+adding frag: 154  bytes. 
+adding frag: 47  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 22  bytes. 
+adding frag: 8  bytes. 
+adding frag: 3  bytes. 
+TLS fraged:  573  Bytes. 
+start of sni: 499
+To send:  593  Bytes. 
+start of sni: 564
+adding frag: 41  bytes. 
+adding frag: 210  bytes. 
+adding frag: 315  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 2  bytes. 
+adding frag: 4  bytes. 
+adding frag: 2  bytes. 
+adding frag: 8  bytes. 
+TLS fraged:  638  Bytes. 
+start of sni: 584
+TCP send:  84  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  452  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  219  bytes. And 'll sleep for  0.01 seconds. 
+video.twimg.com --> 443
+online DNS Query video.twimg.com
+TCP send:  59  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  19  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  141  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  56  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+cloudflare-dns.com --> 443
+cloudflare-dns.com --> {'IP': '104.16.248.249', 'TLS_frag': 6, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.16.248.249 : 443
+TCP send:  62  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  16  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  12  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  2  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  3  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.02 seconds. 
+TCP send:  2  bytes. And 'll sleep for  0.02 seconds. 
+----------finish------------
+video.twimg.com --> 443
+online DNS Query video.twimg.com
+To send:  517  Bytes. 
+start of sni: 122
+adding frag: 13  bytes. 
+adding frag: 70  bytes. 
+adding frag: 45  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 19  bytes. 
+adding frag: 279  bytes. 
+adding frag: 68  bytes. 
+TLS fraged:  557  Bytes. 
+start of sni: 142
+TCP send:  41  bytes. And 'll sleep for  0.01 seconds. 
+cloudflare-dns.com --> 443
+cloudflare-dns.com --> {'IP': '104.16.248.249', 'TLS_frag': 6, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.16.248.249 : 443
+TCP send:  20  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  18  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  67  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  35  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  83  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  244  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+To send:  565  Bytes. 
+start of sni: 439
+adding frag: 168  bytes. 
+adding frag: 48  bytes. 
+adding frag: 227  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 9  bytes. 
+adding frag: 67  bytes. 
+adding frag: 29  bytes. 
+TLS fraged:  605  Bytes. 
+start of sni: 459
+TCP send:  133  bytes. And 'll sleep for  0.01 seconds. 
+To send:  517  Bytes. 
+start of sni: 122
+adding frag: 17  bytes. 
+adding frag: 41  bytes. 
+adding frag: 70  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 111  bytes. 
+adding frag: 50  bytes. 
+adding frag: 205  bytes. 
+TLS fraged:  557  Bytes. 
+start of sni: 142
+TCP send:  59  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  189  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  14  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  78  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  10  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  63  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  63  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  1  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  21  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  46  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  12  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  38  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  131  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+TCP send:  66  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  158  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+upstream : Exception('cli pipe close')from b'pbs.twimg.com'
+abs.twimg.com --> 443
+abs.twimg.com --> {'IP': '104.18.39.25', 'TLS_frag': 4, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.39.25 : 443
+optimizationguide-pa.googleapis.com --> 443
+optimizationguide-pa.googleapis.com --> {'IP': '13.230.98.94', 'port': 5128, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'TLS_frag': 4, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  13.230.98.94 : 5128
+video.twimg.com --> 443
+online DNS Query video.twimg.com
+cloudflare-dns.com --> 443
+cloudflare-dns.com --> {'IP': '104.16.248.249', 'TLS_frag': 6, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.16.248.249 : 443
+To send:  523  Bytes. 
+start of sni: 137
+adding frag: 87  bytes. 
+adding frag: 40  bytes. 
+adding frag: 14  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 185  bytes. 
+adding frag: 73  bytes. 
+adding frag: 87  bytes. 
+TLS fraged:  588  Bytes. 
+start of sni: 157
+TCP send:  57  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  56  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  12  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  36  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+abs.twimg.com --> 443
+abs.twimg.com --> {'IP': '104.18.39.25', 'TLS_frag': 4, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.18.39.25 : 443
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  3  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  212  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  83  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  49  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+video.twimg.com --> 443
+online DNS Query video.twimg.com
+cloudflare-dns.com --> 443
+cloudflare-dns.com --> {'IP': '104.16.248.249', 'TLS_frag': 6, 'IPtype': 'ipv4', 'TCP_frag': 4, 'TCP_sleep': 0.01, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  104.16.248.249 : 443
+To send:  517  Bytes. 
+start of sni: 128
+adding frag: 108  bytes. 
+adding frag: 15  bytes. 
+adding frag: 9  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 141  bytes. 
+adding frag: 223  bytes. 
+TLS fraged:  557  Bytes. 
+start of sni: 148
+TCP send:  5  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  15  bytes. And 'll sleep for  0.01 seconds. 
+To send:  517  Bytes. 
+start of sni: 122
+adding frag: 15  bytes. 
+adding frag: 56  bytes. 
+adding frag: 57  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 40  bytes. 
+adding frag: 186  bytes. 
+adding frag: 140  bytes. 
+TLS fraged:  557  Bytes. 
+start of sni: 142
+TCP send:  60  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  128  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  17  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  52  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  17  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  68  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+online DNS --> Resolved video.twimg.com to 151.101.40.158
+video.twimg.com --> {'CDN': 'Fastly: 2024/11/13: 151.101.40.158', 'TCP_frag': 8, 'IPcache': False, 'IPtype': 'ipv4', 'IP': '151.101.40.158', 'TCP_sleep': 0.01, 'TLS_frag': 4, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  151.101.40.158 : 443
+TCP send:  193  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  17  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  91  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  146  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+TCP send:  41  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  103  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  77  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+video.twimg.com --> 443
+online DNS Query video.twimg.com
+To send:  599  Bytes. 
+start of sni: 122
+adding frag: 43  bytes. 
+adding frag: 42  bytes. 
+adding frag: 41  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 229  bytes. 
+adding frag: 31  bytes. 
+adding frag: 196  bytes. 
+TLS fraged:  639  Bytes. 
+start of sni: 142
+TCP send:  2  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  63  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  24  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  61  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  8  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  8  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  8  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  8  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  132  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  96  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  216  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  13  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+To send:  517  Bytes. 
+start of sni: 122
+adding frag: 10  bytes. 
+adding frag: 50  bytes. 
+adding frag: 68  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 6  bytes. 
+adding frag: 310  bytes. 
+adding frag: 7  bytes. 
+adding frag: 49  bytes. 
+TLS fraged:  557  Bytes. 
+start of sni: 142
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  96  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  41  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  5  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  4  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  42  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  279  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  3  bytes. And 'll sleep for  0.01 seconds. 
+TCP send:  43  bytes. And 'll sleep for  0.01 seconds. 
+----------finish------------
+online DNS --> Resolved video.twimg.com to 151.101.40.158
+video.twimg.com --> {'CDN': 'Fastly: 2024/11/13: 151.101.40.158', 'TCP_frag': 8, 'IPcache': False, 'IPtype': 'ipv4', 'IP': '151.101.40.158', 'TCP_sleep': 0.01, 'TLS_frag': 4, 'num_TCP_fragment': 3, 'num_TLS_fragment': 2}
+send to  151.101.40.158 : 443
+To send:  822  Bytes. 
+start of sni: 140
+adding frag: 32  bytes. 
+adding frag: 59  bytes. 
+adding frag: 53  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 4  bytes. 
+adding frag: 123  bytes. 
+adding frag: 167  bytes. 
+adding frag:
