@@ -12,6 +12,7 @@
   "DNS_log_every": 5,
   "IPtype": "ipv4",
   "domains": {
+    "cn.nytimes.com": {},
     "nytimes.com":
     {
       "IP": "199.232.137.164"
