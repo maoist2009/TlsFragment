@@ -64,10 +64,13 @@ BUILD_WINDOWS
 | `port`    | 端口（不填默认443） |
 | `IPcache` | 是否缓存            |
 
-
 ## 域名匹配规则
 
 如果特定域名（若有多个取最长的，再有多个问python的sort）为sni的子串，则取。（使用AC自动机实现以应对巨大列表）
 
+## IP查找
+
+建议使用[HTTPS_IP_finder](https://github.com/maoist2009/HTTPS_IP_finder)
+我本人也会维护已知的被ip封锁的网站。
 
 ## 细节看`server.py`
