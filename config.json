@@ -13,8 +13,9 @@
   "IPtype": "ipv4",
   "domains": {
     "pornhub.com": {
-      "IP": "66.254.114.63"
+      "IP": "216.18.168.16"
     },
+    "help.pornhub.com": {},
     "web.archive.org": {
       "IP": "207.241.237.3"
     },
