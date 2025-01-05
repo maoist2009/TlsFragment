@@ -11,7 +11,23 @@ var FindProxyForURL = function(init, profiles) {
 }("+auto switch", {
     "+auto switch": function(url, host, scheme) {
         "use strict";
+        if (/(?:^|\.)nyt\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)nytimes\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)freeflarum\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)thepiratebay\.org$/.test(host)) return "+proxy";
+        if (/(?:^|\.)pornhub\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)archive\.org$/.test(host)) return "+proxy";
+        if (/(?:^|\.)rutube\.ru$/.test(host)) return "+proxy";
+        if (/(?:^|\.)youtu\.be$/.test(host)) return "+proxy";
+        if (/(?:^|\.)pximg\.net$/.test(host)) return "+proxy";
+        if (/(?:^|\.)vercel\.app$/.test(host)) return "+proxy";
+        if (/(?:^|\.)nicovideo\.jp$/.test(host)) return "+proxy";
+        if (/(?:^|\.)chrome\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)archive-it\.org$/.test(host)) return "+proxy";
+        if (/(?:^|\.)croxy\.network$/.test(host)) return "+proxy";
+        if (/(?:^|\.)proton\.me$/.test(host)) return "+proxy";
         if (/(?:^|\.)cookielaw\.org$/.test(host)) return "+proxy";
+        if (/(?:^|\.)phncdn\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)docker\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)discord\.gg$/.test(host)) return "+proxy";
         if (/(?:^|\.)discordapp\.com$/.test(host)) return "+proxy";
@@ -69,17 +85,17 @@ var FindProxyForURL = function(init, profiles) {
         if (/(?:^|\.)xcancel\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)geph\.io$/.test(host)) return "+proxy";
         if (/(?:^|\.)1lib\.sk$/.test(host)) return "+proxy";
-        if (/(?:^|\.)z-library\.sk$/.test(host)) return "+proxy";
         if (/(?:^|\.)freeweibo\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)odycdn\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)odysee\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)torproject\.org$/.test(host)) return "+proxy";
+        if (/^fonts\.gstatic\.com$/.test(host)) return "DIRECT";
         if (/(?:^|\.)mastodon\.social$/.test(host)) return "+proxy";
         if (/(?:^|\.)freezhihu\.org$/.test(host)) return "+proxy";
+        if (/(?:^|\.)z-library\.sk$/.test(host)) return "+proxy";
         if (/^pages\.dev$/.test(host)) return "+proxy";
         if (/(?:^|\.)greatfire\.org$/.test(host)) return "+proxy";
         if (/^www\.gstatic\.com$/.test(host)) return "DIRECT";
-        if (/^fonts\.gstatic\.com$/.test(host)) return "DIRECT";
         if (/(?:^|\.)gstatic\.com$/.test(host)) return "+proxy";
         return "DIRECT";
     },
