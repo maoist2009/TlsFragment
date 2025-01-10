@@ -519,7 +519,7 @@ def split_data(data, sni, L_snifrag, num_fragment,split):
 
     if L_snifrag==0:
         split_other_data(data, num_fragment, split)
-        return 0,0
+        return stt,stt+L_sni
 
     nstt=stt
 

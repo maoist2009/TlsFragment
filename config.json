@@ -10,8 +10,15 @@
   "my_socket_timeout": 180,
   "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
   "DNS_log_every": 5,
+  "method": "TLSfrag",
   "IPtype": "ipv4",
   "domains": {
+    "vercel.app": {
+      "method": "desync",
+      "TLS_frag": 0,
+      "num_TLS_fragment": 0,
+      "TCP_sleep": 0.2
+    },
     "cn.nytimes.com": {},
     "nytimes.com":
     {
