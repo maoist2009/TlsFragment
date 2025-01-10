@@ -11,6 +11,7 @@ var FindProxyForURL = function(init, profiles) {
 }("+auto switch", {
     "+auto switch": function(url, host, scheme) {
         "use strict";
+        if (/(?:^|\.)huggingface\.co$/.test(host)) return "+proxy";
         if (/(?:^|\.)nyt\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)nytimes\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)freeflarum\.com$/.test(host)) return "+proxy";
