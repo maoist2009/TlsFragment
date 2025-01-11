@@ -22,6 +22,7 @@
       "TCP_sleep": 0.2
     },
     "vercel.app": {
+      "IP": "64.29.17.65",
       "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
