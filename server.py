@@ -12,6 +12,7 @@ import ahocorasick
 import dns.message   #  --> pip install dnspython
 import dns.rdatatype
 import base64
+import ipaddress
 
 
 listen_PORT = 2500    # pyprox listening to 127.0.0.1:listen_PORT
@@ -258,11 +259,11 @@ class ThreadedServer(object):
 
         try:
             try:
-                socket.inet_aton(server_name)
+                ipaddress.ip_address(server_name)
                 # print('legal IP')
                 server_IP = server_name
                 settings={}
-            except socket.error:
+            except ValueError:
                 # print('Not IP , its domain , try to resolve it')
                 settings=self.DoH.query(server_name)
                 if settings==None:                    
@@ -369,11 +370,9 @@ class ThreadedServer(object):
                         send_data_in_fragment(settings.get("sni"),settings,data,backend_sock)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
 
-                    else:                   
+                    else:            
                         raise Exception('cli syn close')
-                        import traceback
-                        traceback_info = traceback.format_exc()
-                        print(traceback_info)
+
 
                 else:
                     data = client_sock.recv(16384)
@@ -542,6 +541,9 @@ def split_data(data, sni, L_snifrag, num_fragment,split):
 
 def send_data_in_fragment(sni, settings, data , sock):
     print("To send: ",len(data)," Bytes. ")
+    if sni==None:
+        sock.sendall(data)
+        return
     if output_data:
         print("sending:    ",data,"\n")
     base_header = data[:3]
