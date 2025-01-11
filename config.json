@@ -7,6 +7,8 @@
   "TCP_frag": 4,
   "TCP_sleep": 0.01,
   "TLS_frag": 4,
+  "FAKE_packet": "",
+  "FAKE_ttl": 10,
   "my_socket_timeout": 180,
   "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
   "DNS_log_every": 5,
@@ -14,13 +16,13 @@
   "IPtype": "ipv4",
   "domains": {
     "onedrive.live.com": {
-      "method": "desync",
+      "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
       "TCP_sleep": 0.2
     },
     "vercel.app": {
-      "method": "desync",
+      "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
       "TCP_sleep": 0.2
@@ -123,6 +125,9 @@
     "youtu.be": {
       "IP": "35.190.247.147",
       "port": 1445
+    },
+    "kstatic.googleusercontent.com": {
+      "IP": "35.241.11.240"
     },
     "ytimg.com": {
       "IP": "4.193.121.119",
