@@ -205,6 +205,7 @@ class GET_settings:
             res["FAKE_packet"]=FAKE_packet
         else:
             res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
+        
         print(domain,'-->',res)
         return res
     
@@ -277,6 +278,7 @@ class ThreadedServer(object):
                 # print('legal IP')
                 server_IP = server_name
                 settings={}
+                settings["IP"]=server_IP
             except ValueError:
                 # print('Not IP , its domain , try to resolve it')
                 settings=self.DoH.query(server_name)
@@ -381,7 +383,13 @@ class ThreadedServer(object):
                             import traceback
                             traceback_info = traceback.format_exc()
                             print(traceback_info)
-                        send_data_in_fragment(settings.get("sni"),settings,data,backend_sock)
+                        if settings.get("method")=="TLSfrag":
+                            send_data_in_fragment(settings.get("sni"),settings,data,backend_sock)
+                        elif settings.get("method")=="FAKEdesync":
+                            send_data_with_fake(settings.get("sni"),settings,data,backend_sock)
+                        else:
+                            print("unknown method")
+                            backend_sock.sendall(data)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
 
                     else:            
@@ -591,6 +599,157 @@ def send_data_in_fragment(sni, settings, data , sock):
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
     print("----------finish------------")
+
+import platform
+if platform.system() == "Windows":
+    
+    # import ctypes
+    # from ctypes import wintypes
+    # # 加载 mswsock.dll 库
+    # mswsock = ctypes.WinDLL('mswsock')
+    # # 加载 ws2_32.dll 库
+    # ws2_32 = ctypes.windll.ws2_32
+    # # 加载 kernel32.dll 库
+    # kernel32 = ctypes.windll.kernel32
+    # class _DUMMYSTRUCTNAME(ctypes.Structure):
+    #     _fields_ = [
+    #         ("Offset", wintypes.DWORD ),
+    #         ("OffsetHigh", wintypes.DWORD ),
+    #     ]
+    # # 定义 TransmitFile 函数的参数类型
+    # class _DUMMYUNIONNAME(ctypes.Union):
+    #     _fields_ = [
+    #         ("Pointer", ctypes.POINTER(ctypes.c_void_p)),
+    #         ("DUMMYSTRUCTNAME", _DUMMYSTRUCTNAME),
+    #     ]
+
+    # class OVERLAPPED(ctypes.Structure):
+    #     _fields_ = [
+    #         ("Internal", wintypes.ULONG),
+    #         ("InternalHigh", wintypes.ULONG),
+    #         ("DUMMYUNIONNAME", _DUMMYUNIONNAME),
+    #         ("hEvent", wintypes.HANDLE),
+    #     ]
+    
+    # mswsock.TransmitFile.argtypes = [
+    #     wintypes.HANDLE,  # 套接字句柄
+    #     wintypes.HANDLE,  # 文件句柄
+    #     wintypes.DWORD,  # 要发送的字节数
+    #     wintypes.DWORD,  # 每次发送的字节数
+    #     ctypes.POINTER(OVERLAPPED),  # 重叠结构指针
+    #     ctypes.POINTER(ctypes.c_void_p),  # 传输缓冲区指针
+    #     wintypes.DWORD  # 保留参数
+    # ]
+    # # 定义 TransmitFile 函数的返回值类型
+    # mswsock.TransmitFile.restype = wintypes.BOOL
+    # ws2_32.WSASocketW.argtypes = [
+    #     wintypes.INT, wintypes.INT, wintypes.INT,
+    #     None,wintypes.GROUP, wintypes.DWORD
+    # ]
+    # ws2_32.WSASocketW.restype = wintypes.SOCKET
+
+    # kernel32.GetTempPathA.argtypes = [wintypes.DWORD, wintypes.LPSTR]
+    # kernel32.GetTempPathA.restype = wintypes.DWORD
+    # kernel32.GetTempFileNameA.argtypes = [wintypes.LPCSTR, wintypes.LPCSTR, wintypes.UINT, wintypes.LPSTR]
+    # kernel32.GetTempFileNameA.restype = wintypes.UINT
+    # kernel32.CreateFileA.argtypes = [wintypes.LPCSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
+    # kernel32.CreateFileA.restype = wintypes.HANDLE
+    # kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+    # kernel32.WriteFile.restype = wintypes.BOOL
+    # kernel32.SetFilePointer.argtypes = [wintypes.HANDLE, ctypes.c_long, wintypes.LONG, wintypes.DWORD]
+    # kernel32.SetFilePointer.restype = ctypes.c_long
+    # kernel32.SetEndOfFile.argtypes = [wintypes.HANDLE]
+    # kernel32.SetEndOfFile.restype = wintypes.BOOL
+    # kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    # kernel32.CloseHandle.restype = wintypes.BOOL
+    pass
+    
+
+def send_data_with_fake(sni, settings, data , sock):
+    print("Fake not implemented yet.")
+    print("To send: ",len(data)," Bytes. ")
+    
+    # if sni==None:
+    #     sock.sendall(data)
+    #     return
+    # # check os
+    # # if windows, use TransmitFile
+    # default_ttl=sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
+    
+    # import platform
+    # print(platform.system())
+    # if platform.system() == "Windows":
+    #     """
+    #     BOOL TransmitFile(
+    #         SOCKET                  hSocket,
+    #         HANDLE                  hFile,
+    #         DWORD                   nNumberOfBytesToWrite,
+    #         DWORD                   nNumberOfBytesPerSend,
+    #         LPOVERLAPPED            lpOverlapped,
+    #         LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
+    #         DWORD                   dwReserved
+    #     );
+    #     """
+    #     try:
+    #         # 假设已经有一个已连接的套接字，这里创建一个示例套接字
+    #         sock_file_descriptor = sock.fileno()
+            
+    #         if settings.get("IP").find(":")==-1:
+    #             protocol = socket.IPPROTO_TCP
+    #             flags = 0  # 可以根据需要设置不同的标志，如 WSA_FLAG_OVERLAPPED 等
+    #             hsock=ws2_32.WSASocketW(socket.AF_INET, socket.SOCK_STREAM, protocol, None, flags, sock_file_descriptor)
+    #         else:
+    #             hsock=ws2_32.WSASocketW(socket.AF_INET6, socket.SOCK_STREAM, 0, None, 0, sock_file_descriptor)
+            
+    #         if hsock == -1:
+    #             print("WSASocketW failed. Error code:", ws2_32.WSAGetLastError())
+    #             raise Exception("WSASocketW failed. Error code:", ws2_32.WSAGetLastError())
+    #         else:
+    #             print("WSASocketW succeeded.")
+                
+
+    #         # 打开文件
+    #         file_path = "example.txt"
+    #         file_handle = kernel32.CreateFileW(
+    #             file_path,
+    #             wintypes.DWORD(0x80000000),  # GENERIC_READ
+    #             wintypes.DWORD(1),  # FILE_SHARE_READ
+    #             None,
+    #             wintypes.DWORD(3),  # OPEN_EXISTING
+    #             wintypes.DWORD(0),
+    #             None
+    #         )
+
+    #         # 调用 TransmitFile 函数
+    #         result = mswsock.TransmitFile(
+    #             sock,
+    #             file_handle,
+    #             0,  # 发送整个文件
+    #             0,  # 使用默认的每次发送字节数
+    #             None,  # 不使用重叠结构，进行同步操作
+    #             None,  # 不使用传输缓冲区
+    #             0  # 保留参数
+    #         )
+    #         if result:
+    #             print("TransmitFile call was successful.")
+    #         else:
+    #             print("TransmitFile call failed. Error code:", kernel32.GetLastError())
+    #             raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
+
+    #         # 关闭文件和套接字
+            
+    #         # if unix like(linux, mac, android etc.), use mmap
+    #     except Exception as e:
+    #         print(f"An error occurred: {e}")
+    #         import traceback
+    #         traceback.print_exc()
+    # elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+    #     pass
+    # else:
+    #     print("unknown os")
+    #     sock.sendall(data)
+    #     return
+    
 
 def start_server():
     print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
