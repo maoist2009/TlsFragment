@@ -27,7 +27,6 @@ accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 soc
 output_data=True
 
 
-
 domain_settings={
     "null": {
         "IP": "127.0.0.1",
@@ -39,6 +38,7 @@ domain_settings={
     }
 }
 
+method="TLSfrag"
 num_TCP_fragment = 37
 num_TLS_fragment = 37
 TCP_sleep = 0.001
@@ -47,6 +47,8 @@ TLS_frag=0
 IPtype="ipv4"
 doh_server="https://127.0.0.1/dns-query"
 DNS_log_every=1
+FAKE_packet=b""
+FAKE_ttl=10
 
 domain_settings=None
 domain_settings_tree=None
@@ -73,6 +75,12 @@ with open("config.json",'r', encoding='UTF-8') as f:
     domain_settings=config.get("domains")
     DNS_log_every=config.get("DNS_log_every")
     IPtype=config.get("IPtype")
+    method=config.get("method")
+    FAKE_packet=config.get("FAKE_packet").encode(encoding='UTF-8')
+    FAKE_ttl=config.get("FAKE_ttl")
+    if FAKE_ttl=="auto":
+        # temp code for auto fake_ttl
+        FAKE_ttl=random.randint(10,60)
 
     # print(set(domain_settings.keys()))
     domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
@@ -191,6 +199,12 @@ class GET_settings:
             res["num_TCP_fragment"]=num_TCP_fragment
         if res.get("num_TLS_fragment")==None:
             res["num_TLS_fragment"]=num_TLS_fragment
+        if res.get("method")==None:
+            res["method"]=method
+        if res.get("FAKE_packet")==None:
+            res["FAKE_packet"]=FAKE_packet
+        else:
+            res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
         print(domain,'-->',res)
         return res
     
