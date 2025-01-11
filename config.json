@@ -13,11 +13,20 @@
   "method": "TLSfrag",
   "IPtype": "ipv4",
   "domains": {
+    "onedrive.live.com": {
+      "method": "desync",
+      "TLS_frag": 0,
+      "num_TLS_fragment": 0,
+      "TCP_sleep": 0.2
+    },
     "vercel.app": {
       "method": "desync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
       "TCP_sleep": 0.2
+    },
+    "cloudflare.com": {
+      "IP": "104.21.3.226"
     },
     "cn.nytimes.com": {},
     "nytimes.com":
