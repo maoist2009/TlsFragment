@@ -39,6 +39,7 @@ domain_settings={
 }
 
 method="TLSfrag"
+IPtype="ipv4"
 num_TCP_fragment = 37
 num_TLS_fragment = 37
 TCP_sleep = 0.001
@@ -49,6 +50,7 @@ doh_server="https://127.0.0.1/dns-query"
 DNS_log_every=1
 FAKE_packet=b""
 FAKE_ttl=10
+
 
 domain_settings=None
 domain_settings_tree=None
@@ -130,9 +132,10 @@ class GET_settings:
             ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
             
             # Parse the response as a DNS packet
+
             if ans.status_code == 200 and ans.headers.get('content-type') == 'application/dns-message':
                 answer_msg = dns.message.from_wire(ans.content)
-
+  
                 resolved_ip = None
                 for x in answer_msg.answer:
                     if ((settings["IPtype"] == "ipv6" and x.rdtype == dns.rdatatype.AAAA) or (settings["IPtype"] == "ipv4" and x.rdtype == dns.rdatatype.A)):
@@ -156,6 +159,7 @@ class GET_settings:
             return "127.0.0.1"
         except Exception as e:
             print("ERROR DNS query: ",repr(e))
+        return "ERROR"
 
     def query(self,domain, todns=True):
         # print("Query:",domain)

@@ -15,6 +15,10 @@
   "method": "TLSfrag",
   "IPtype": "ipv4",
   "domains": {
+    "quora": {
+      "IP": "104.21.3.225",
+      "TLS_frag": 3
+    },
     "onedrive.live.com": {
       "method": "FAKEdesync",
       "TLS_frag": 0,
@@ -233,7 +237,7 @@
       "IPcache": false
     },
     "one.one.one.one": {
-      "IP": "104.16.248.249",
+      "IP": "104.21.3.221",
       "TLS_frag": 4
     },
     "nav-edge.smartscreen.microsoft.com": {
@@ -241,7 +245,7 @@
       "TLS_frag": 4
     },
     "cloudflare-dns.com": {
-      "IP": "104.16.248.249",
+      "IP": "104.21.3.222",
       "TLS_frag": 6
     }
   }
