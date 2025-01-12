@@ -78,6 +78,9 @@
       "TCP_frag": 5
     },
     "githubusercontent.com": {},
+    "raw.githubusercontent.com": {
+      "IP": "185.199.110.154"
+    },
     "wiki": {
       "IP": "185.15.58.224",
       "TLS_frag": 2,
