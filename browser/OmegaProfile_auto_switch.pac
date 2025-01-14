@@ -49,10 +49,10 @@ var FindProxyForURL = function(init, profiles) {
         if (/(?:^|\.)gravatar\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)twitch\.tv$/.test(host)) return "+proxy";
         if (/(?:^|\.)bit\.ly$/.test(host)) return "+proxy";
-        if (/(?:^|\.)raw\.githubusercontent\.com$/.test(host)) return "DIRECT";
         if (/(?:^|\.)duckduckgo\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)cdn-telegram\.org$/.test(host)) return "+proxy";
-        if (/(?:^|\.)githubusercontent\.com$/.test(host)) return "DIRECT";
+        if (/(?:^|\.)githubusercontent\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)github\.io$/.test(host)) return "+proxy";
         if (/(?:^|\.)githubassets\.com$/.test(host)) return "DIRECT";
         if (/(?:^|\.)github\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)wikinews\.org$/.test(host)) return "+proxy";
