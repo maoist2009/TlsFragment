@@ -453,7 +453,19 @@ class ThreadedServer(object):
 
     def extract_servername_and_port(self,data):        
         host_and_port = str(data).split()[1]
-        host,port = host_and_port.split(':')
+        try:
+            host,port = host_and_port.split(':')
+        except:
+            #ipv6
+            if host_and_port.find('[')!=-1:
+                host,port = host_and_port.split(']:')
+                host=host[1:]
+            else:
+                idx=0
+                for i in range(0,6):
+                    idx=host_and_port.find(':',idx+1)
+                host=host_and_port[:idx]
+                port=host_and_port[idx+1:]
         return (host,int(port)) 
 
 def parse_client_hello(data):
