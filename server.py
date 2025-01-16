@@ -783,6 +783,61 @@ if platform.system() == "Windows":
     # kernel32._get_osfhandle.argtypes = [wintypes.INT]
     # kernel32._get_osfhandle.restype = wintypes.HANDLE
     pass
+elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+    import os
+    # 加载 libc 库
+    libc = ctypes.CDLL('libc.so.6')
+
+
+    # 定义 splice 函数的参数类型和返回类型
+    libc.splice.argtypes = [
+        ctypes.c_int,  # int fd_in
+        ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_in
+        ctypes.c_int,  # int fd_out
+        ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_out
+        ctypes.c_size_t,  # size_t len
+        ctypes.c_uint  # unsigned int flags
+    ]
+    libc.splice.restype = ctypes.c_ssize_t
+
+
+    # 定义 vmsplice 函数的参数类型和返回类型
+    libc.vmsplice.argtypes = [
+        ctypes.c_int,  # int fd
+        ctypes.POINTER(ctypes.c_void_p),  # struct iovec *iov
+        ctypes.c_size_t,  # size_t nr_segs
+        ctypes.c_uint  # unsigned int flags
+    ]
+    libc.vmsplice.restype = ctypes.c_ssize_t
+
+    libc.mmap.argtypes = [
+        ctypes.c_void_p,  # void *addr
+        ctypes.c_size_t,  # size_t length
+        ctypes.c_int,  # int prot
+        ctypes.c_int,  # int flags
+        ctypes.c_int,  # int fd
+        ctypes.c_size_t  # off_t offset
+    ]
+    libc.mmap.restype = ctypes.c_void_p
+
+    libc.memcpy.argtypes = [
+    ctypes.c_void_p,  # void *dest
+    ctypes.c_void_p,  # const void *src
+    ctypes.c_size_t  # size_t n
+    ]
+    libc.memcpy.restype = ctypes.c_void_p
+
+
+    libc.munmap.argtypes = [
+    ctypes.c_void_p,  # void *addr
+    ctypes.c_size_t  # size_t length
+    ]
+    libc.munmap.restype = ctypes.c_int
+
+    libc.pipe.argtypes = [ctypes.POINTER(ctypes.c_int)]
+    libc.pipe.restype = ctypes.c_int
+
+    pass
     
 
 def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_sleep):
@@ -898,6 +953,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         except Exception as e:
             raise e
     elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+
         raise Exception("Fake on linux not implemented yet.")
     else:
         raise Exception("unknown os")
