@@ -50,6 +50,7 @@ doh_server="https://127.0.0.1/dns-query"
 DNS_log_every=1
 FAKE_packet=b""
 FAKE_ttl=10
+FAKE_sleep=0.01
 
 
 domain_settings=None
@@ -80,6 +81,7 @@ with open("config.json",'r', encoding='UTF-8') as f:
     method=config.get("method")
     FAKE_packet=config.get("FAKE_packet").encode(encoding='UTF-8')
     FAKE_ttl=config.get("FAKE_ttl")
+    FAKE_sleep=config.get("FAKE_sleep")
     if FAKE_ttl=="auto":
         # temp code for auto fake_ttl
         FAKE_ttl=random.randint(10,60)
@@ -209,6 +211,10 @@ class GET_settings:
             res["FAKE_packet"]=FAKE_packet
         else:
             res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
+        if res.get("FAKE_ttl")==None:
+            res["FAKE_ttl"]=FAKE_ttl
+        if res.get("FAKE_sleep")==None:
+            res["FAKE_sleep"]=FAKE_sleep
         
         print(domain,'-->',res)
         return res
@@ -410,6 +416,9 @@ class ThreadedServer(object):
                         raise Exception('cli pipe close')
                     
             except Exception as e:
+                import traceback
+                traceback_info = traceback.format_exc()
+                print(traceback_info)
                 print('upstream : '+ repr(e) + 'from' , settings.get("sni") )
                 time.sleep(2) # wait two second for another thread to flush
                 client_sock.close()
@@ -619,25 +628,26 @@ def send_data_in_fragment(sni, settings, data , sock):
 import platform
 if platform.system() == "Windows":
     
-    # import ctypes
-    # from ctypes import wintypes
-    # # 加载 mswsock.dll 库
-    # mswsock = ctypes.WinDLL('mswsock')
-    # # 加载 ws2_32.dll 库
-    # ws2_32 = ctypes.windll.ws2_32
-    # # 加载 kernel32.dll 库
-    # kernel32 = ctypes.windll.kernel32
-    # class _DUMMYSTRUCTNAME(ctypes.Structure):
-    #     _fields_ = [
-    #         ("Offset", wintypes.DWORD ),
-    #         ("OffsetHigh", wintypes.DWORD ),
-    #     ]
-    # # 定义 TransmitFile 函数的参数类型
-    # class _DUMMYUNIONNAME(ctypes.Union):
-    #     _fields_ = [
-    #         ("Pointer", ctypes.POINTER(ctypes.c_void_p)),
-    #         ("DUMMYSTRUCTNAME", _DUMMYSTRUCTNAME),
-    #     ]
+    import ctypes
+    from ctypes import wintypes
+    # 加载 mswsock.dll 库
+    mswsock = ctypes.WinDLL('mswsock')
+    # 加载 ws2_32.dll 库
+    ws2_32 = ctypes.windll.ws2_32
+    # 加载 kernel32.dll 库
+    kernel32 = ctypes.windll.kernel32
+    msvcrt = ctypes.cdll.msvcrt
+    class _DUMMYSTRUCTNAME(ctypes.Structure):
+        _fields_ = [
+            ("Offset", wintypes.DWORD ),
+            ("OffsetHigh", wintypes.DWORD ),
+        ]
+    # 定义 TransmitFile 函数的参数类型
+    class _DUMMYUNIONNAME(ctypes.Union):
+        _fields_ = [
+            ("Pointer", ctypes.POINTER(ctypes.c_void_p)),
+            ("DUMMYSTRUCTNAME", _DUMMYSTRUCTNAME),
+        ]
 
     # class OVERLAPPED(ctypes.Structure):
     #     _fields_ = [
@@ -646,125 +656,212 @@ if platform.system() == "Windows":
     #         ("DUMMYUNIONNAME", _DUMMYUNIONNAME),
     #         ("hEvent", wintypes.HANDLE),
     #     ]
-    
-    # mswsock.TransmitFile.argtypes = [
-    #     wintypes.HANDLE,  # 套接字句柄
-    #     wintypes.HANDLE,  # 文件句柄
-    #     wintypes.DWORD,  # 要发送的字节数
-    #     wintypes.DWORD,  # 每次发送的字节数
-    #     ctypes.POINTER(OVERLAPPED),  # 重叠结构指针
-    #     ctypes.POINTER(ctypes.c_void_p),  # 传输缓冲区指针
-    #     wintypes.DWORD  # 保留参数
-    # ]
-    # # 定义 TransmitFile 函数的返回值类型
-    # mswsock.TransmitFile.restype = wintypes.BOOL
+
+    class OVERLAPPED(ctypes.Structure):
+        _fields_ = [
+            ("Internal", ctypes.c_void_p),
+            ("InternalHigh", ctypes.c_void_p),
+            ("Offset", ctypes.c_ulong),
+            ("OffsetHigh", ctypes.c_ulong),
+            ("hEvent", ctypes.c_void_p)
+        ]
+
+    # import pywintypes 
+    mswsock.TransmitFile.argtypes = [
+        wintypes.HANDLE,  # 套接字句柄
+        wintypes.HANDLE,  # 文件句柄
+        wintypes.DWORD,  # 要发送的字节数
+        wintypes.DWORD,  # 每次发送的字节数
+        ctypes.POINTER(OVERLAPPED),  # 重叠结构指针
+        ctypes.POINTER(ctypes.c_void_p),  # 传输缓冲区指针
+        wintypes.DWORD  # 保留参数
+    ]
+    # 定义 TransmitFile 函数的返回值类型
+    mswsock.TransmitFile.restype = wintypes.BOOL
     # ws2_32.WSASocketW.argtypes = [
     #     wintypes.INT, wintypes.INT, wintypes.INT,
-    #     None,wintypes.GROUP, wintypes.DWORD
+    #     wintypes.DWORD,wintypes.DWORD, wintypes.DWORD
     # ]
-    # ws2_32.WSASocketW.restype = wintypes.SOCKET
+    # ws2_32.WSASocketW.restype = ctypes.c_uint
 
-    # kernel32.GetTempPathA.argtypes = [wintypes.DWORD, wintypes.LPSTR]
-    # kernel32.GetTempPathA.restype = wintypes.DWORD
-    # kernel32.GetTempFileNameA.argtypes = [wintypes.LPCSTR, wintypes.LPCSTR, wintypes.UINT, wintypes.LPSTR]
-    # kernel32.GetTempFileNameA.restype = wintypes.UINT
-    # kernel32.CreateFileA.argtypes = [wintypes.LPCSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
-    # kernel32.CreateFileA.restype = wintypes.HANDLE
-    # kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
-    # kernel32.WriteFile.restype = wintypes.BOOL
-    # kernel32.SetFilePointer.argtypes = [wintypes.HANDLE, ctypes.c_long, wintypes.LONG, wintypes.DWORD]
-    # kernel32.SetFilePointer.restype = ctypes.c_long
-    # kernel32.SetEndOfFile.argtypes = [wintypes.HANDLE]
-    # kernel32.SetEndOfFile.restype = wintypes.BOOL
-    # kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
-    # kernel32.CloseHandle.restype = wintypes.BOOL
+    kernel32.CreateFileA.argtypes = [wintypes.LPCSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
+    kernel32.CreateFileA.restype = wintypes.HANDLE
+    kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+    kernel32.WriteFile.restype = wintypes.BOOL
+    kernel32.SetFilePointer.argtypes = [wintypes.HANDLE, ctypes.c_long, wintypes.LONG, wintypes.DWORD]
+    kernel32.SetFilePointer.restype = ctypes.c_long
+    kernel32.SetEndOfFile.argtypes = [wintypes.HANDLE]
+    kernel32.SetEndOfFile.restype = wintypes.BOOL
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    msvcrt._get_osfhandle.argtypes = [wintypes.INT]
+    msvcrt._get_osfhandle.restype = wintypes.HANDLE
+    # kernel32._get_osfhandle.argtypes = [wintypes.INT]
+    # kernel32._get_osfhandle.restype = wintypes.HANDLE
     pass
     
 
-def send_data_with_fake(sni, settings, data , sock):
-    print("Fake not implemented yet.")
-    print("To send: ",len(data)," Bytes. ")
-    
-    # if sni==None:
-    #     sock.sendall(data)
-    #     return
-    # # check os
-    # # if windows, use TransmitFile
-    # default_ttl=sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
-    
-    # import platform
-    # print(platform.system())
-    # if platform.system() == "Windows":
-    #     """
-    #     BOOL TransmitFile(
-    #         SOCKET                  hSocket,
-    #         HANDLE                  hFile,
-    #         DWORD                   nNumberOfBytesToWrite,
-    #         DWORD                   nNumberOfBytesPerSend,
-    #         LPOVERLAPPED            lpOverlapped,
-    #         LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
-    #         DWORD                   dwReserved
-    #     );
-    #     """
-    #     try:
-    #         # 假设已经有一个已连接的套接字，这里创建一个示例套接字
-    #         sock_file_descriptor = sock.fileno()
+def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_sleep):
+    import platform
+    print(platform.system())
+    if platform.system() == "Windows":
+        """
+        BOOL TransmitFile(
+            SOCKET                  hSocket,
+            HANDLE                  hFile,
+            DWORD                   nNumberOfBytesToWrite,
+            DWORD                   nNumberOfBytesPerSend,
+            LPOVERLAPPED            lpOverlapped,
+            LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
+            DWORD                   dwReserved
+        );
+        """
+        import tempfile,uuid
+        file_path = tempfile.gettempdir()+"\\"+ str(uuid.uuid4()) + ".txt"
+        try:
+            # 获取套接字的文件描述符
+            sock_file_descriptor = sock.fileno()
             
-    #         if settings.get("IP").find(":")==-1:
-    #             protocol = socket.IPPROTO_TCP
-    #             flags = 0  # 可以根据需要设置不同的标志，如 WSA_FLAG_OVERLAPPED 等
-    #             hsock=ws2_32.WSASocketW(socket.AF_INET, socket.SOCK_STREAM, protocol, None, flags, sock_file_descriptor)
-    #         else:
-    #             hsock=ws2_32.WSASocketW(socket.AF_INET6, socket.SOCK_STREAM, 0, None, 0, sock_file_descriptor)
             
-    #         if hsock == -1:
-    #             print("WSASocketW failed. Error code:", ws2_32.WSAGetLastError())
-    #             raise Exception("WSASocketW failed. Error code:", ws2_32.WSAGetLastError())
-    #         else:
-    #             print("WSASocketW succeeded.")
+            # hsock=kernel32._get_osfhandle(sock_file_descriptor)
+            print("file discriptor:",sock_file_descriptor)
+            # hsock=msvcrt._get_osfhandle(sock_file_descriptor)
+            
+            # if hsock == -1:
+            #     raise Exception("git handle of sock failed, Sock last Error code:", ws2_32.WSAGetLastError())
+            # else:
+            #     print("GETHANDLE success",hsock)
                 
 
-    #         # 打开文件
-    #         file_path = "example.txt"
-    #         file_handle = kernel32.CreateFileW(
-    #             file_path,
-    #             wintypes.DWORD(0x80000000),  # GENERIC_READ
-    #             wintypes.DWORD(1),  # FILE_SHARE_READ
-    #             None,
-    #             wintypes.DWORD(3),  # OPEN_EXISTING
-    #             wintypes.DWORD(0),
-    #             None
-    #         )
-
-    #         # 调用 TransmitFile 函数
-    #         result = mswsock.TransmitFile(
-    #             sock,
-    #             file_handle,
-    #             0,  # 发送整个文件
-    #             0,  # 使用默认的每次发送字节数
-    #             None,  # 不使用重叠结构，进行同步操作
-    #             None,  # 不使用传输缓冲区
-    #             0  # 保留参数
-    #         )
-    #         if result:
-    #             print("TransmitFile call was successful.")
-    #         else:
-    #             print("TransmitFile call failed. Error code:", kernel32.GetLastError())
-    #             raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
-
-    #         # 关闭文件和套接字
+            # 打开文件
+            # 获取TEMP文件夹绝对路径
             
-    #         # if unix like(linux, mac, android etc.), use mmap
-    #     except Exception as e:
-    #         print(f"An error occurred: {e}")
-    #         import traceback
-    #         traceback.print_exc()
-    # elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
-    #     pass
-    # else:
-    #     print("unknown os")
-    #     sock.sendall(data)
-    #     return
+            # print("file path:",file_path)
+            file_handle = kernel32.CreateFileA(
+                bytes(file_path,encoding="utf-8"),
+                wintypes.DWORD(0x40000000|0x80000000),  # GENERIC_READ | GENERIC_WRITE
+                wintypes.DWORD(0x00000001|0x00000002),  # FILE_SHARE_READ | FILE_SHARE_WRITE
+                None,
+                wintypes.DWORD(2),  # CREATE_ALWAYS
+                # 0,
+                0x00000100, # FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE
+                None
+            )
+
+            if file_handle == -1:
+                raise Exception("Create file failed, Error code:", kernel32.GetLastError())
+            else:
+                print("Create file success",file_handle)
+            try:
+                ov=OVERLAPPED()
+                ov.hEvent=kernel32.CreateEventA(None,True,False,None)
+                if ov.hEvent <= 0:
+                    raise Exception("Create event failed, Error code:", kernel32.GetLastError())
+                else:
+                    print("Create event success",ov.hEvent)
+
+                # print(ov.hEvent)
+                kernel32.SetFilePointer(file_handle, 0, 0, 0)
+                kernel32.WriteFile(file_handle, fake_data, data_len, None, None)
+                kernel32.SetEndOfFile(file_handle)
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, fake_ttl)
+                kernel32.SetFilePointer(file_handle, 0, 0, 0)
+
+                if output_data:
+                    print(fake_data,real_data,data_len)
+
+                # 调用 TransmitFile 函数
+                result = mswsock.TransmitFile(
+                    sock_file_descriptor,
+                    file_handle,
+                    wintypes.DWORD(data_len),
+                    wintypes.DWORD(data_len),
+                    ov,  
+                    None,
+                    32 | 4 # TF_USE_KERNEL_APC | TF_WRITE_BEHIND
+                )
+
+                print(FAKE_sleep)
+                time.sleep(FAKE_sleep)
+                kernel32.SetFilePointer(file_handle, 0, 0, 0)
+                kernel32.WriteFile(file_handle, real_data, data_len, None, None)
+                kernel32.SetEndOfFile(file_handle)
+                kernel32.SetFilePointer(file_handle, 0, 0, 0)
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, default_ttl)
+
+
+                val=kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(2000))
+                # print(val)
+
+                if val != 0xFFFFFFFF:
+                    # if result:
+                    #     print("TransmitFile call was successful.")
+                    # else:
+                    #     raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError(),ws2_32.WSAGetLastError())
+                    print("TransmitFile call was successful.",result)
+                else:
+                    raise Exception("TransmitFile call failed (on waiting for event). Error code:", kernel32.GetLastError(),ws2_32.WSAGetLastError())
+                    
+                kernel32.CloseHandle(file_handle)
+                kernel32.CloseHandle(ov.hEvent)
+                import os
+                os.remove(file_path)
+                return True
+            except:
+                kernel32.CloseHandle(file_handle)
+                kernel32.CloseHandle(ov.hEvent)
+                raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
+        except Exception as e:
+            raise e
+    elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+        raise Exception("Fake on linux not implemented yet.")
+    else:
+        raise Exception("unknown os")
+
+def send_data_with_fake(sni, settings, data , sock):
+    print("To send: ",len(data)," Bytes. ")
+    
+    if sni==None:
+        sock.sendall(data)
+        return
+    # check os
+    # if windows, use TransmitFile
+    default_ttl=sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
+    try:
+        fake_data=settings.get("FAKE_packet")
+        fake_ttl=int(settings.get("FAKE_ttl"))
+    except:
+        raise Exception("FAKE_packet or FAKE_ttl not set in settings.json")
+    
+    data_len=len(fake_data)
+    FAKE_sleep=settings.get("FAKE_sleep")
+    if send_fake_data(data_len,fake_data,fake_ttl,data[0:data_len],default_ttl,sock,FAKE_sleep):
+        print("Fake data sent.")
+    else:
+        raise Exception("Fake data send failed.")
+
+    data=data[data_len:]
+
+    if data.find(sni)==-1:
+        sock.sendall(data)
+        return
+    else:
+        T_sleep=settings.get("TCP_sleep")
+        def TCP_send_with_sleep(new_frag):
+            nonlocal sock,T_sleep
+            # print(new_frag)
+            # len_new_frag=len(new_frag)
+            # send_fake_data(len_new_frag,data[0:len_new_frag],fake_ttl,new_frag,default_ttl,sock,FAKE_sleep)
+            
+            sock.sendall(new_frag)
+            print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
+            if output_data:
+                print("TCP send: ",new_frag,"\n")
+            time.sleep(T_sleep)
+        split_data(data, sni, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
+        
+    
+
     
 
 def start_server():
