@@ -1,4 +1,5 @@
 DNS_cache.json
+TTL_cache.json
 dist
 build
 proxy.exe.spec
