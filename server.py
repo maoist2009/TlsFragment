@@ -22,6 +22,7 @@ log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache
 
 allow_insecure = True   # set true to allow certificate domain mismatch in DoH
 my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
+FAKE_ttl_auto_timeout = 1
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 output_data=True
@@ -48,6 +49,7 @@ TLS_frag=0
 IPtype="ipv4"
 doh_server="https://127.0.0.1/dns-query"
 DNS_log_every=1
+TTL_log_every=1
 FAKE_packet=b""
 FAKE_ttl=10
 FAKE_sleep=0.01
@@ -58,6 +60,7 @@ domain_settings_tree=None
 
 
 DNS_cache = {}      # resolved domains
+TTL_cache = {}      # TTL for each IP
 IP_DL_traffic = {}  # download usage for each ip
 IP_UL_traffic = {}  # upload usage for each ip
 
@@ -66,6 +69,7 @@ with open("config.json",'r', encoding='UTF-8') as f:
     output_data=config.get("output_data")
 
     my_socket_timeout=config.get("my_socket_timeout")
+    FAKE_ttl_auto_timeout=config.get("FAKE_ttl_auto_timeout")
     listen_PORT=config.get("listen_PORT")
     DOH_PORT=config.get("DOH_PORT")
     
@@ -77,6 +81,7 @@ with open("config.json",'r', encoding='UTF-8') as f:
     doh_server=config.get("doh_server")
     domain_settings=config.get("domains")
     DNS_log_every=config.get("DNS_log_every")
+    TTL_log_every=config.get("TTL_log_every")
     IPtype=config.get("IPtype")
     method=config.get("method")
     FAKE_packet=config.get("FAKE_packet").encode(encoding='UTF-8')
@@ -95,7 +100,54 @@ try:
 except Exception as e:
     print("ERROR DNS query: ",repr(e))
 
-cnt_chg = 0
+cnt_dns_chg = 0
+cnt_ttl_chg = 0
+lock_DNS_cache = threading.Lock()
+lock_TTL_cache = threading.Lock()
+
+def set_ttl(sock,ttl):
+    if sock.family==socket.AF_INET6:
+        sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_UNICAST_HOPS, ttl)
+    else:
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
+
+def check_ttl(ip,port,ttl):
+    # print(ip,port,ttl)
+    try:
+        if ip.find(":")!=-1:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        else:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        set_ttl(sock,ttl)
+        sock.settimeout(FAKE_ttl_auto_timeout)
+        # print(f"check_ttl {ip} {port} {ttl}")
+        sock.connect((ip, port))
+        sock.send(b"0")
+        sock.close()
+        return True
+    except Exception as e:
+        print(e)
+        # import traceback
+        # traceback.print_exc()
+        return False
+    
+def get_ttl(ip,port):
+    l=1
+    r=128
+    ans=-1
+    while l<=r:
+        mid=(l+r)//2
+        val=check_ttl(ip,port,mid)
+        print(l,r,mid,ans,val)
+        if val:
+            ans=mid
+            r=mid-1
+        else:
+            l=mid+1
+
+    print(f"get_ttl {ip} {port} {ans}")
+    return ans
+    
 
 class GET_settings:
     def __init__(self):
@@ -172,7 +224,7 @@ class GET_settings:
         except:
             res={}
         
-        if todns:
+        if todns==True:
             if res.get("IPtype")==None:
                 res["IPtype"]=IPtype
 
@@ -188,13 +240,19 @@ class GET_settings:
                         elif res["IPtype"]=="ipv4":
                             res["IPtype"]="ipv6"
                         res["IP"]=self.query_DNS(domain,res)
-                    global cnt_chg
-                    cnt_chg=cnt_chg+1
-                    if cnt_chg>DNS_log_every:
-                        cnt_chg=0
+                    lock_DNS_cache.acquire()
+                    global cnt_dns_chg
+                    cnt_dns_chg=cnt_dns_chg+1
+                    if cnt_dns_chg>=DNS_log_every:
+                        cnt_dns_chg=0
                         with open("DNS_cache.json",'w', encoding='UTF-8') as f:
                             json.dump(DNS_cache,f)
+                    lock_DNS_cache.release()
                 # res["IP"]="127.0.0.1"
+        else:
+            res["IP"]=todns
+        if res.get("port")==None:
+            res["port"]=443
         if res.get("TCP_frag")==None:
             res["TCP_frag"]=TCP_frag
         if res.get("TCP_sleep")==None:
@@ -215,6 +273,33 @@ class GET_settings:
             res["FAKE_ttl"]=FAKE_ttl
         if res.get("FAKE_sleep")==None:
             res["FAKE_sleep"]=FAKE_sleep
+
+        print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+
+        if (res.get("method")=="FAKEdesync") & (res.get("FAKE_ttl")=="query"):
+            # print("Not implemented yet")
+            # raise NotImplementedError
+            if TTL_cache.get(res.get("IP"))!=None:
+                res["FAKE_ttl"]=TTL_cache[res.get("IP")]-1
+                print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+            else:
+                print(res.get("IP"),res.get("port"))
+                val=get_ttl(res.get("IP"),res.get("port"))
+                if val==-1:
+                    raise Exception("ERROR get ttl")
+                TTL_cache[res.get("IP")]=val
+                res["FAKE_ttl"]=val-1
+                print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+
+                lock_DNS_cache.acquire()
+                global cnt_ttl_chg
+                cnt_ttl_chg=cnt_ttl_chg+1
+                print(f"cnt_ttl_chg {cnt_ttl_chg}",TTL_log_every)
+                if cnt_ttl_chg>=TTL_log_every:
+                    cnt_ttl_chg=0
+                    with open("TTL_cache.json",'w', encoding='UTF-8') as f:
+                        json.dump(TTL_cache,f)
+                lock_DNS_cache.release()
         
         print(domain,'-->',res)
         return res
@@ -296,8 +381,7 @@ class ThreadedServer(object):
                     settings={}
                 settings["sni"]=bytes(server_name,encoding="utf-8")
                 server_IP=settings.get("IP")
-                if settings.get("port"):
-                    server_port=settings.get("port")
+                server_port=settings.get("port")
                 print("send to ",server_IP,":",server_port)
 
                 
@@ -386,7 +470,7 @@ class ThreadedServer(object):
                                 settings["sni"]=parse_client_hello(data)
                                 tmp=settings.get("sni")
                                 if settings["sni"]:
-                                    settings=self.DoH.query(str(settings.get("sni")),todns=False)
+                                    settings=self.DoH.query(str(settings.get("sni")),todns=settings.get("IP"))
                                 settings["sni"]=tmp
                         except Exception as e:
                             print(e)
@@ -764,7 +848,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 kernel32.WriteFile(file_handle, fake_data, data_len, None, None)
                 kernel32.SetEndOfFile(file_handle)
-                sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, fake_ttl)
+                set_ttl(sock,fake_ttl)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
 
                 if output_data:
@@ -787,7 +871,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 kernel32.WriteFile(file_handle, real_data, data_len, None, None)
                 kernel32.SetEndOfFile(file_handle)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
-                sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, default_ttl)
+                set_ttl(sock,default_ttl)
 
 
                 val=kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(2000))
