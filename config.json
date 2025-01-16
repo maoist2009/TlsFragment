@@ -7,8 +7,9 @@
   "TCP_frag": 4,
   "TCP_sleep": 0.01,
   "TLS_frag": 4,
-  "FAKE_packet": "",
-  "FAKE_ttl": 10,
+  "FAKE_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
+  "FAKE_ttl": 115,
+  "FAKE_sleep": 0.01,
   "my_socket_timeout": 180,
   "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
   "DNS_log_every": 5,
@@ -17,6 +18,12 @@
   "domains": {
     "steampowered.com": {
       "IP": "23.202.181.157"
+    },
+    "api.steampowered.com": {
+      "IP": "184.85.112.102"
+    },
+    "login.steampowered.com": {
+      "IP": "23.199.145.239"
     },
     "quora": {
       "IP": "104.21.3.225",
@@ -29,14 +36,17 @@
       "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
-      "TCP_sleep": 0.2
+      "TCP_sleep": 0.2,
+      "FAKE_ttl": 23
     },
     "vercel.app": {
       "IP": "64.29.17.65",
       "method": "FAKEdesync",
+      "FAKE_ttl": 20,
+      "FAKE_sleep": 0.01,
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
-      "TCP_sleep": 0.2
+      "TCP_sleep": 0.01
     },
     "cloudflare.com": {
       "IP": "104.21.3.226"
