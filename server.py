@@ -100,6 +100,12 @@ try:
 except Exception as e:
     print("ERROR DNS query: ",repr(e))
 
+try:
+    with open("TTL_cache.json",'r+', encoding='UTF-8') as f:
+        TTL_cache=json.load(f)
+except Exception as e:
+    print("ERROR TTL query: ",repr(e))
+
 cnt_dns_chg = 0
 cnt_ttl_chg = 0
 lock_DNS_cache = threading.Lock()
