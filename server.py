@@ -714,137 +714,139 @@ def send_data_in_fragment(sni, settings, data , sock):
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
     print("----------finish------------")
-
-import platform
-if platform.system() == "Windows":
-    
-    import ctypes
-    from ctypes import wintypes
-    # 加载 mswsock.dll 库
-    mswsock = ctypes.WinDLL('mswsock')
-    # 加载 ws2_32.dll 库
-    ws2_32 = ctypes.windll.ws2_32
-    # 加载 kernel32.dll 库
-    kernel32 = ctypes.windll.kernel32
-    msvcrt = ctypes.cdll.msvcrt
-    class _DUMMYSTRUCTNAME(ctypes.Structure):
-        _fields_ = [
-            ("Offset", wintypes.DWORD ),
-            ("OffsetHigh", wintypes.DWORD ),
-        ]
-    # 定义 TransmitFile 函数的参数类型
-    class _DUMMYUNIONNAME(ctypes.Union):
-        _fields_ = [
-            ("Pointer", ctypes.POINTER(ctypes.c_void_p)),
-            ("DUMMYSTRUCTNAME", _DUMMYSTRUCTNAME),
-        ]
-
-    # class OVERLAPPED(ctypes.Structure):
-    #     _fields_ = [
-    #         ("Internal", wintypes.ULONG),
-    #         ("InternalHigh", wintypes.ULONG),
-    #         ("DUMMYUNIONNAME", _DUMMYUNIONNAME),
-    #         ("hEvent", wintypes.HANDLE),
-    #     ]
-
-    class OVERLAPPED(ctypes.Structure):
-        _fields_ = [
-            ("Internal", ctypes.c_void_p),
-            ("InternalHigh", ctypes.c_void_p),
-            ("Offset", ctypes.c_ulong),
-            ("OffsetHigh", ctypes.c_ulong),
-            ("hEvent", ctypes.c_void_p)
-        ]
-
-    # import pywintypes 
-    mswsock.TransmitFile.argtypes = [
-        wintypes.HANDLE,  # 套接字句柄
-        wintypes.HANDLE,  # 文件句柄
-        wintypes.DWORD,  # 要发送的字节数
-        wintypes.DWORD,  # 每次发送的字节数
-        ctypes.POINTER(OVERLAPPED),  # 重叠结构指针
-        ctypes.POINTER(ctypes.c_void_p),  # 传输缓冲区指针
-        wintypes.DWORD  # 保留参数
-    ]
-    # 定义 TransmitFile 函数的返回值类型
-    mswsock.TransmitFile.restype = wintypes.BOOL
-    # ws2_32.WSASocketW.argtypes = [
-    #     wintypes.INT, wintypes.INT, wintypes.INT,
-    #     wintypes.DWORD,wintypes.DWORD, wintypes.DWORD
-    # ]
-    # ws2_32.WSASocketW.restype = ctypes.c_uint
-
-    kernel32.CreateFileA.argtypes = [wintypes.LPCSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
-    kernel32.CreateFileA.restype = wintypes.HANDLE
-    kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
-    kernel32.WriteFile.restype = wintypes.BOOL
-    kernel32.SetFilePointer.argtypes = [wintypes.HANDLE, ctypes.c_long, wintypes.LONG, wintypes.DWORD]
-    kernel32.SetFilePointer.restype = ctypes.c_long
-    kernel32.SetEndOfFile.argtypes = [wintypes.HANDLE]
-    kernel32.SetEndOfFile.restype = wintypes.BOOL
-    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
-    kernel32.CloseHandle.restype = wintypes.BOOL
-    msvcrt._get_osfhandle.argtypes = [wintypes.INT]
-    msvcrt._get_osfhandle.restype = wintypes.HANDLE
-    # kernel32._get_osfhandle.argtypes = [wintypes.INT]
-    # kernel32._get_osfhandle.restype = wintypes.HANDLE
-    pass
-elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
-    import os
-    # 加载 libc 库
-    libc = ctypes.CDLL('libc.so.6')
-
-
-    # 定义 splice 函数的参数类型和返回类型
-    libc.splice.argtypes = [
-        ctypes.c_int,  # int fd_in
-        ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_in
-        ctypes.c_int,  # int fd_out
-        ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_out
-        ctypes.c_size_t,  # size_t len
-        ctypes.c_uint  # unsigned int flags
-    ]
-    libc.splice.restype = ctypes.c_ssize_t
-
-
-    # 定义 vmsplice 函数的参数类型和返回类型
-    libc.vmsplice.argtypes = [
-        ctypes.c_int,  # int fd
-        ctypes.POINTER(ctypes.c_void_p),  # struct iovec *iov
-        ctypes.c_size_t,  # size_t nr_segs
-        ctypes.c_uint  # unsigned int flags
-    ]
-    libc.vmsplice.restype = ctypes.c_ssize_t
-
-    libc.mmap.argtypes = [
-        ctypes.c_void_p,  # void *addr
-        ctypes.c_size_t,  # size_t length
-        ctypes.c_int,  # int prot
-        ctypes.c_int,  # int flags
-        ctypes.c_int,  # int fd
-        ctypes.c_size_t  # off_t offset
-    ]
-    libc.mmap.restype = ctypes.c_void_p
-
-    libc.memcpy.argtypes = [
-    ctypes.c_void_p,  # void *dest
-    ctypes.c_void_p,  # const void *src
-    ctypes.c_size_t  # size_t n
-    ]
-    libc.memcpy.restype = ctypes.c_void_p
-
-
-    libc.munmap.argtypes = [
-    ctypes.c_void_p,  # void *addr
-    ctypes.c_size_t  # size_t length
-    ]
-    libc.munmap.restype = ctypes.c_int
-
-    libc.pipe.argtypes = [ctypes.POINTER(ctypes.c_int)]
-    libc.pipe.restype = ctypes.c_int
-
-    pass
-    
+try:
+  import platform
+  if platform.system() == "Windows":
+      
+      import ctypes
+      from ctypes import wintypes
+      # 加载 mswsock.dll 库
+      mswsock = ctypes.WinDLL('mswsock')
+      # 加载 ws2_32.dll 库
+      ws2_32 = ctypes.windll.ws2_32
+      # 加载 kernel32.dll 库
+      kernel32 = ctypes.windll.kernel32
+      msvcrt = ctypes.cdll.msvcrt
+      class _DUMMYSTRUCTNAME(ctypes.Structure):
+          _fields_ = [
+              ("Offset", wintypes.DWORD ),
+              ("OffsetHigh", wintypes.DWORD ),
+          ]
+      # 定义 TransmitFile 函数的参数类型
+      class _DUMMYUNIONNAME(ctypes.Union):
+          _fields_ = [
+              ("Pointer", ctypes.POINTER(ctypes.c_void_p)),
+              ("DUMMYSTRUCTNAME", _DUMMYSTRUCTNAME),
+          ]
+  
+      # class OVERLAPPED(ctypes.Structure):
+      #     _fields_ = [
+      #         ("Internal", wintypes.ULONG),
+      #         ("InternalHigh", wintypes.ULONG),
+      #         ("DUMMYUNIONNAME", _DUMMYUNIONNAME),
+      #         ("hEvent", wintypes.HANDLE),
+      #     ]
+  
+      class OVERLAPPED(ctypes.Structure):
+          _fields_ = [
+              ("Internal", ctypes.c_void_p),
+              ("InternalHigh", ctypes.c_void_p),
+              ("Offset", ctypes.c_ulong),
+              ("OffsetHigh", ctypes.c_ulong),
+              ("hEvent", ctypes.c_void_p)
+          ]
+  
+      # import pywintypes 
+      mswsock.TransmitFile.argtypes = [
+          wintypes.HANDLE,  # 套接字句柄
+          wintypes.HANDLE,  # 文件句柄
+          wintypes.DWORD,  # 要发送的字节数
+          wintypes.DWORD,  # 每次发送的字节数
+          ctypes.POINTER(OVERLAPPED),  # 重叠结构指针
+          ctypes.POINTER(ctypes.c_void_p),  # 传输缓冲区指针
+          wintypes.DWORD  # 保留参数
+      ]
+      # 定义 TransmitFile 函数的返回值类型
+      mswsock.TransmitFile.restype = wintypes.BOOL
+      # ws2_32.WSASocketW.argtypes = [
+      #     wintypes.INT, wintypes.INT, wintypes.INT,
+      #     wintypes.DWORD,wintypes.DWORD, wintypes.DWORD
+      # ]
+      # ws2_32.WSASocketW.restype = ctypes.c_uint
+  
+      kernel32.CreateFileA.argtypes = [wintypes.LPCSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID]
+      kernel32.CreateFileA.restype = wintypes.HANDLE
+      kernel32.WriteFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
+      kernel32.WriteFile.restype = wintypes.BOOL
+      kernel32.SetFilePointer.argtypes = [wintypes.HANDLE, ctypes.c_long, wintypes.LONG, wintypes.DWORD]
+      kernel32.SetFilePointer.restype = ctypes.c_long
+      kernel32.SetEndOfFile.argtypes = [wintypes.HANDLE]
+      kernel32.SetEndOfFile.restype = wintypes.BOOL
+      kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+      kernel32.CloseHandle.restype = wintypes.BOOL
+      msvcrt._get_osfhandle.argtypes = [wintypes.INT]
+      msvcrt._get_osfhandle.restype = wintypes.HANDLE
+      # kernel32._get_osfhandle.argtypes = [wintypes.INT]
+      # kernel32._get_osfhandle.restype = wintypes.HANDLE
+      pass
+  elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+      import os
+      import ctypes
+      # 加载 libc 库
+      libc = ctypes.CDLL('libc.so.6')
+  
+  
+      # 定义 splice 函数的参数类型和返回类型
+      libc.splice.argtypes = [
+          ctypes.c_int,  # int fd_in
+          ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_in
+          ctypes.c_int,  # int fd_out
+          ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_out
+          ctypes.c_size_t,  # size_t len
+          ctypes.c_uint  # unsigned int flags
+      ]
+      libc.splice.restype = ctypes.c_ssize_t
+  
+  
+      # 定义 vmsplice 函数的参数类型和返回类型
+      libc.vmsplice.argtypes = [
+          ctypes.c_int,  # int fd
+          ctypes.POINTER(ctypes.c_void_p),  # struct iovec *iov
+          ctypes.c_size_t,  # size_t nr_segs
+          ctypes.c_uint  # unsigned int flags
+      ]
+      libc.vmsplice.restype = ctypes.c_ssize_t
+  
+      libc.mmap.argtypes = [
+          ctypes.c_void_p,  # void *addr
+          ctypes.c_size_t,  # size_t length
+          ctypes.c_int,  # int prot
+          ctypes.c_int,  # int flags
+          ctypes.c_int,  # int fd
+          ctypes.c_size_t  # off_t offset
+      ]
+      libc.mmap.restype = ctypes.c_void_p
+  
+      libc.memcpy.argtypes = [
+      ctypes.c_void_p,  # void *dest
+      ctypes.c_void_p,  # const void *src
+      ctypes.c_size_t  # size_t n
+      ]
+      libc.memcpy.restype = ctypes.c_void_p
+  
+  
+      libc.munmap.argtypes = [
+      ctypes.c_void_p,  # void *addr
+      ctypes.c_size_t  # size_t length
+      ]
+      libc.munmap.restype = ctypes.c_int
+  
+      libc.pipe.argtypes = [ctypes.POINTER(ctypes.c_int)]
+      libc.pipe.restype = ctypes.c_int
+  
+      pass
+except Exception as e:
+  print(e)
 
 def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_sleep):
     import platform
