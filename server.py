@@ -789,14 +789,15 @@ try:
         # kernel32._get_osfhandle.argtypes = [wintypes.INT]
         # kernel32._get_osfhandle.restype = wintypes.HANDLE
         pass
-  elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+    elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
         import os
         import ctypes
         # 加载 libc 库
-        if platform.system=="Android":
-            libc=ctypes.CDLL('/system/lib64/libc.so')
-        else:
+        
+        try:
             libc = ctypes.CDLL('libc.so.6')
+        except:
+            libc=ctypes.CDLL('/system/lib64/libc.so')
 
 
         # 定义 splice 函数的参数类型和返回类型
