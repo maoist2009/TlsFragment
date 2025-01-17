@@ -18,6 +18,9 @@
   "method": "TLSfrag",
   "IPtype": "ipv4",
   "domains": {
+    "bbc.com": {
+      "IP": "146.75.36.81"
+    },
     "steampowered.com": {
       "IP": "23.202.181.157"
     },
