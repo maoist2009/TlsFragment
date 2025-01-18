@@ -805,6 +805,12 @@ try:
         except:
             libc=ctypes.CDLL('/system/lib64/libc.so')
 
+        class iovec(ctypes.Structure):
+            _fields_ = [
+                ("iov_base", ctypes.c_void_p),
+                ("iov_len", ctypes.c_size_t)
+            ]
+
 
         # 定义 splice 函数的参数类型和返回类型
         libc.splice.argtypes = [
@@ -821,7 +827,7 @@ try:
         # 定义 vmsplice 函数的参数类型和返回类型
         libc.vmsplice.argtypes = [
           ctypes.c_int,  # int fd
-          ctypes.POINTER(ctypes.c_void_p),  # struct iovec *iov
+          ctypes.POINTER(ctypes.POINTER(iovec)),  # struct iovec *iov
           ctypes.c_size_t,  # size_t nr_segs
           ctypes.c_uint  # unsigned int flags
         ]
@@ -855,11 +861,6 @@ try:
 
         libc.pipe.argtypes = [ctypes.POINTER(ctypes.c_int)]
         libc.pipe.restype = ctypes.c_int
-        class iovec(ctypes.Structure):
-            _fields_ = [
-                ("iov_base", ctypes.c_void_p),
-                ("iov_len", ctypes.c_size_t)
-            ]
 
         pass
 except Exception as e:
