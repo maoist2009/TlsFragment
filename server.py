@@ -843,7 +843,9 @@ try:
         ctypes.c_size_t  # size_t n
         ]
         libc.memcpy.restype = ctypes.c_void_p
-
+        libc.close.argtypes = [ctypes.c_int]
+        libc.close.restype = ctypes.c_int
+        
 
         libc.munmap.argtypes = [
         ctypes.c_void_p,  # void *addr
@@ -853,6 +855,11 @@ try:
 
         libc.pipe.argtypes = [ctypes.POINTER(ctypes.c_int)]
         libc.pipe.restype = ctypes.c_int
+        class iovec(ctypes.Structure):
+            _fields_ = [
+                ("iov_base", ctypes.c_void_p),
+                ("iov_len", ctypes.c_size_t)
+            ]
 
         pass
 except Exception as e:
@@ -877,7 +884,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         file_path = tempfile.gettempdir()+"\\"+ str(uuid.uuid4()) + ".txt"
         try:
             sock_file_descriptor = sock.fileno()
-            print("file discriptor:",sock_file_descriptor)
+            print("sock file discriptor:",sock_file_descriptor)
             # print("file path:",file_path)
             file_handle = kernel32.CreateFileA(
                 bytes(file_path,encoding="utf-8"),
@@ -950,7 +957,44 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         except Exception as e:
             raise e
     elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
-        raise Exception("Fake on linux not implemented yet.")
+        print("Fake on linux not implemented yet.")
+        try:
+            sock_file_descriptor = sock.fileno()
+            print("sock file discriptor:",sock_file_descriptor)
+            fds=(ctypes.c_int * 2)()
+            if libc.pipe(fds)<0:
+                raise Exception("pipe creation failed")
+            else:
+                print("pipe creation success",fds[0],fds[1])
+            p=libc.mmap(0,((data_len-1)//4+1)*4,0x1|0x2,0x2|0x20,0,0)# PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS
+            if p==ctypes.c_void_p(-1):
+                raise Exception("mmap failed")
+            else:
+                print("mmap success",p)
+            libc.memcpy(p,fake_data,data_len)
+            set_ttl(sock,fake_ttl)
+            vec=iovec(p,data_len)
+            len=libc.vmsplice(fds[1],ctypes.byref(vec),1,2)# SPLICE_F_GIFT
+            if len<0:
+                raise Exception("vmsplice failed")
+            else:
+                print("vmsplice success",len)
+            len=libc.splice(fds[0],0,sock_file_descriptor,0,data_len,0)
+            if len<0:
+                raise Exception("splice failed")
+            else:
+                print("splice success",len)
+            print("sleep for: ",FAKE_sleep)
+            time.sleep(FAKE_sleep)
+            libc.memcpy(p,real_data,data_len)
+            set_ttl(sock,default_ttl)
+            return True
+        except Exception as e:
+            raise e
+        finally:
+            libc.munmap(p,((data_len-1)//4+1)*4)
+            libc.close(fds[0])
+            libc.close(fds[1])
     else:
         raise Exception("unknown os")
 
