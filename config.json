@@ -42,14 +42,14 @@
       "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
-      "TCP_sleep": 0.2
+      "TCP_sleep": 0.02
     },
     "skyapi.onedrive.live.com": {
       "IP": "13.107.42.12",
       "method": "FAKEdesync",
       "TLS_frag": 0,
       "num_TLS_fragment": 0,
-      "TCP_sleep": 0.2
+      "TCP_sleep": 0.02
     },
     "vercel.app": {
       "IP": "64.29.17.65",

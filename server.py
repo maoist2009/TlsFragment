@@ -713,7 +713,7 @@ def send_data_in_fragment(sni, settings, data , sock):
         time.sleep(T_sleep)
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
-    print("----------finish------------")
+    print("----------finish------------",sni)
 try:
     import platform
     if platform.system() == "Windows":
@@ -913,7 +913,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
 
                 # print(ov.hEvent)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
-                kernel32.WriteFile(file_handle, fake_data, data_len, None, None)
+                kernel32.WriteFile(file_handle, fake_data, data_len, ctypes.byref(wintypes.DWORD(0)), None)
                 kernel32.SetEndOfFile(file_handle)
                 set_ttl(sock,fake_ttl)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
@@ -935,7 +935,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 print(FAKE_sleep)
                 time.sleep(FAKE_sleep)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
-                kernel32.WriteFile(file_handle, real_data, data_len, None, None)
+                kernel32.WriteFile(file_handle, real_data, data_len, ctypes.byref(wintypes.DWORD(0)) , None)
                 kernel32.SetEndOfFile(file_handle)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 set_ttl(sock,default_ttl)
@@ -961,6 +961,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
             except:
                 kernel32.CloseHandle(file_handle)
                 kernel32.CloseHandle(ov.hEvent)
+                os.remove(file_path)
                 raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
         except Exception as e:
             raise e
@@ -1002,17 +1003,20 @@ def send_data_with_fake(sni, settings, data , sock):
         def TCP_send_with_sleep(new_frag):
             nonlocal sock,T_sleep
             # print(new_frag)
-            # len_new_frag=len(new_frag)
-            # send_fake_data(len_new_frag,data[0:len_new_frag],fake_ttl,new_frag,default_ttl,sock,FAKE_sleep)
+            len_new_frag=len(new_frag)
             
-            sock.sendall(new_frag)
+            if len_new_frag==settings.get("TCP_frag"): 
+                sock.sendall(new_frag)
+                # send_fake_data(len_new_frag,data[0:len_new_frag],fake_ttl,new_frag,default_ttl,sock,FAKE_sleep)
+            else:
+                sock.sendall(new_frag)
             print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
             if output_data:
                 print("TCP send: ",new_frag,"\n")
             time.sleep(T_sleep)
         split_data(data, sni, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
         
-    
+    print("----------finish------------",sni)
 
     
 
