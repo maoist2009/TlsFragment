@@ -815,9 +815,9 @@ try:
         # 定义 splice 函数的参数类型和返回类型
         libc.splice.argtypes = [
           ctypes.c_int,  # int fd_in
-          ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_in
+          ctypes.c_longlong,  # loff_t *off_in
           ctypes.c_int,  # int fd_out
-          ctypes.POINTER(ctypes.c_longlong),  # loff_t *off_out
+          ctypes.c_longlong,  # loff_t *off_out
           ctypes.c_size_t,  # size_t len
           ctypes.c_uint  # unsigned int flags
         ]
@@ -827,7 +827,7 @@ try:
         # 定义 vmsplice 函数的参数类型和返回类型
         libc.vmsplice.argtypes = [
           ctypes.c_int,  # int fd
-          ctypes.POINTER(ctypes.POINTER(iovec)),  # struct iovec *iov
+          ctypes.POINTER(iovec),  # struct iovec *iov
           ctypes.c_size_t,  # size_t nr_segs
           ctypes.c_uint  # unsigned int flags
         ]
