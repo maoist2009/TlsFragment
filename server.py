@@ -958,7 +958,6 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         except Exception as e:
             raise e
     elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
-        print("Fake on linux not implemented yet.")
         try:
             sock_file_descriptor = sock.fileno()
             print("sock file discriptor:",sock_file_descriptor)

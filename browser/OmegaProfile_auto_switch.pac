@@ -11,6 +11,10 @@ var FindProxyForURL = function(init, profiles) {
 }("+auto switch", {
     "+auto switch": function(url, host, scheme) {
         "use strict";
+        if (/onedrive\.live\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)bbci\.co\.uk$/.test(host)) return "+proxy";
+        if (/(?:^|\.)bbc\.com$/.test(host)) return "+proxy";
+        if (/(?:^|\.)giscus\.app$/.test(host)) return "+proxy";
         if (/(?:^|\.)huggingface\.co$/.test(host)) return "+proxy";
         if (/(?:^|\.)nyt\.com$/.test(host)) return "+proxy";
         if (/(?:^|\.)nytimes\.com$/.test(host)) return "+proxy";
