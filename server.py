@@ -512,9 +512,9 @@ class ThreadedServer(object):
                         raise Exception('cli pipe close')
                     
             except Exception as e:
-                import traceback
-                traceback_info = traceback.format_exc()
-                print(traceback_info)
+                # import traceback
+                # traceback_info = traceback.format_exc()
+                # print(traceback_info)
                 print('upstream : '+ repr(e) + 'from' , settings.get("sni") )
                 time.sleep(2) # wait two second for another thread to flush
                 client_sock.close()
