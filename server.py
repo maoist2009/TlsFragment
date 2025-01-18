@@ -259,53 +259,59 @@ class GET_settings:
             res["IP"]=todns
         if res.get("port")==None:
             res["port"]=443
+            
+        if res.get("method")==None:
+            res["method"]=method
+            
         if res.get("TCP_frag")==None:
             res["TCP_frag"]=TCP_frag
         if res.get("TCP_sleep")==None:
             res["TCP_sleep"]=TCP_sleep
-        if res.get("TLS_frag")==None:
-            res["TLS_frag"]=TLS_frag
         if res.get("num_TCP_fragment")==None:
             res["num_TCP_fragment"]=num_TCP_fragment
-        if res.get("num_TLS_fragment")==None:
-            res["num_TLS_fragment"]=num_TLS_fragment
-        if res.get("method")==None:
-            res["method"]=method
-        if res.get("FAKE_packet")==None:
-            res["FAKE_packet"]=FAKE_packet
-        else:
-            res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
-        if res.get("FAKE_ttl")==None:
-            res["FAKE_ttl"]=FAKE_ttl
-        if res.get("FAKE_sleep")==None:
-            res["FAKE_sleep"]=FAKE_sleep
+            
 
-        print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+           
 
-        if (res.get("method")=="FAKEdesync") & (res.get("FAKE_ttl")=="query"):
-            # print("Not implemented yet")
-            # raise NotImplementedError
-            if TTL_cache.get(res.get("IP"))!=None:
-                res["FAKE_ttl"]=TTL_cache[res.get("IP")]-1
-                print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+        if res.get("method")=="TLSfrag":
+            if res.get("TLS_frag")==None:
+                res["TLS_frag"]=TLS_frag
+            if res.get("num_TLS_fragment")==None:
+                res["num_TLS_fragment"]=num_TLS_fragment
+        elif res.get("method")=="FAKEdesync":
+            if res.get("FAKE_packet")==None:
+                res["FAKE_packet"]=FAKE_packet
             else:
-                print(res.get("IP"),res.get("port"))
-                val=get_ttl(res.get("IP"),res.get("port"))
-                if val==-1:
-                    raise Exception("ERROR get ttl")
-                TTL_cache[res.get("IP")]=val
-                res["FAKE_ttl"]=val-1
+                res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
+            if res.get("FAKE_ttl")==None:
+                res["FAKE_ttl"]=FAKE_ttl
+            if res.get("FAKE_sleep")==None:
+                res["FAKE_sleep"]=FAKE_sleep
+            if res.get("FAKE_ttl")=="query":
                 print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+                # print("Not implemented yet")
+                # raise NotImplementedError
+                if TTL_cache.get(res.get("IP"))!=None:
+                    res["FAKE_ttl"]=TTL_cache[res.get("IP")]-1
+                    print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
+                else:
+                    print(res.get("IP"),res.get("port"))
+                    val=get_ttl(res.get("IP"),res.get("port"))
+                    if val==-1:
+                        raise Exception("ERROR get ttl")
+                    TTL_cache[res.get("IP")]=val
+                    res["FAKE_ttl"]=val-1
+                    print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
 
-                lock_DNS_cache.acquire()
-                global cnt_ttl_chg
-                cnt_ttl_chg=cnt_ttl_chg+1
-                print(f"cnt_ttl_chg {cnt_ttl_chg}",TTL_log_every)
-                if cnt_ttl_chg>=TTL_log_every:
-                    cnt_ttl_chg=0
-                    with open("TTL_cache.json",'w', encoding='UTF-8') as f:
-                        json.dump(TTL_cache,f)
-                lock_DNS_cache.release()
+                    lock_DNS_cache.acquire()
+                    global cnt_ttl_chg
+                    cnt_ttl_chg=cnt_ttl_chg+1
+                    print(f"cnt_ttl_chg {cnt_ttl_chg}",TTL_log_every)
+                    if cnt_ttl_chg>=TTL_log_every:
+                        cnt_ttl_chg=0
+                        with open("TTL_cache.json",'w', encoding='UTF-8') as f:
+                            json.dump(TTL_cache,f)
+                    lock_DNS_cache.release()
         
         print(domain,'-->',res)
         return res
@@ -870,23 +876,8 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         import tempfile,uuid
         file_path = tempfile.gettempdir()+"\\"+ str(uuid.uuid4()) + ".txt"
         try:
-            # 获取套接字的文件描述符
             sock_file_descriptor = sock.fileno()
-            
-            
-            # hsock=kernel32._get_osfhandle(sock_file_descriptor)
             print("file discriptor:",sock_file_descriptor)
-            # hsock=msvcrt._get_osfhandle(sock_file_descriptor)
-            
-            # if hsock == -1:
-            #     raise Exception("git handle of sock failed, Sock last Error code:", ws2_32.WSAGetLastError())
-            # else:
-            #     print("GETHANDLE success",hsock)
-                
-
-            # 打开文件
-            # 获取TEMP文件夹绝对路径
-            
             # print("file path:",file_path)
             file_handle = kernel32.CreateFileA(
                 bytes(file_path,encoding="utf-8"),
@@ -895,7 +886,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 None,
                 wintypes.DWORD(2),  # CREATE_ALWAYS
                 # 0,
-                0x00000100, # FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE
+                0x00000100, # FILE_FLAG_DELETE_ON_CLOSE
                 None
             )
 
@@ -910,8 +901,9 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                     raise Exception("Create event failed, Error code:", kernel32.GetLastError())
                 else:
                     print("Create event success",ov.hEvent)
+                    
+              
 
-                # print(ov.hEvent)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 kernel32.WriteFile(file_handle, fake_data, data_len, ctypes.byref(wintypes.DWORD(0)), None)
                 kernel32.SetEndOfFile(file_handle)
@@ -923,16 +915,12 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
 
                 # 调用 TransmitFile 函数
                 result = mswsock.TransmitFile(
-                    sock_file_descriptor,
-                    file_handle,
-                    wintypes.DWORD(data_len),
-                    wintypes.DWORD(data_len),
-                    ov,  
-                    None,
+                    sock_file_descriptor,file_handle,
+                    wintypes.DWORD(data_len),wintypes.DWORD(data_len),ov, None,
                     32 | 4 # TF_USE_KERNEL_APC | TF_WRITE_BEHIND
                 )
 
-                print(FAKE_sleep)
+                print("sleep for: ",FAKE_sleep)
                 time.sleep(FAKE_sleep)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 kernel32.WriteFile(file_handle, real_data, data_len, ctypes.byref(wintypes.DWORD(0)) , None)
@@ -941,10 +929,9 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 set_ttl(sock,default_ttl)
 
 
-                val=kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(2000))
-                # print(val)
-
-                if val != 0xFFFFFFFF:
+                val=kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(5000))
+                
+                if val == 0:
                     # if result:
                     #     print("TransmitFile call was successful.")
                     # else:
@@ -952,21 +939,17 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                     print("TransmitFile call was successful.",result)
                 else:
                     raise Exception("TransmitFile call failed (on waiting for event). Error code:", kernel32.GetLastError(),ws2_32.WSAGetLastError())
-                    
+                return True
+            except:
+                raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
+            finally:                
                 kernel32.CloseHandle(file_handle)
                 kernel32.CloseHandle(ov.hEvent)
                 import os
                 os.remove(file_path)
-                return True
-            except:
-                kernel32.CloseHandle(file_handle)
-                kernel32.CloseHandle(ov.hEvent)
-                os.remove(file_path)
-                raise Exception("TransmitFile call failed. Error code:", kernel32.GetLastError())
         except Exception as e:
             raise e
     elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
-
         raise Exception("Fake on linux not implemented yet.")
     else:
         raise Exception("unknown os")
@@ -1000,14 +983,20 @@ def send_data_with_fake(sni, settings, data , sock):
         return
     else:
         T_sleep=settings.get("TCP_sleep")
+        first=True
         def TCP_send_with_sleep(new_frag):
-            nonlocal sock,T_sleep
+            nonlocal sock,T_sleep,first
             # print(new_frag)
             len_new_frag=len(new_frag)
             
-            if len_new_frag==settings.get("TCP_frag"): 
-                sock.sendall(new_frag)
-                # send_fake_data(len_new_frag,data[0:len_new_frag],fake_ttl,new_frag,default_ttl,sock,FAKE_sleep)
+            if (len_new_frag==settings.get("TCP_frag")) & first: 
+                # sock.sendall(new_frag)
+                print(data[0:len_new_frag])
+                try:
+                    send_fake_data(len_new_frag,data[0:len_new_frag],fake_ttl,new_frag,default_ttl,sock,FAKE_sleep)
+                except:
+                    sock.sendall(new_frag)
+                first=False
             else:
                 sock.sendall(new_frag)
             print("TCP send: ",len(new_frag)," bytes. And 'll sleep for ",T_sleep, "seconds. ")
