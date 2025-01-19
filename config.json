@@ -9,7 +9,7 @@
   "TLS_frag": 4,
   "FAKE_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
   "FAKE_ttl": "query",
-  "FAKE_sleep": 0.01,
+  "FAKE_sleep": 0.1,
   "my_socket_timeout": 180,
   "FAKE_ttl_auto_timeout": 2,
   "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
@@ -39,18 +39,15 @@
     },
     "onedrive.live.com": {
       "IP": "150.171.43.11",
-      "method": "FAKEdesync",
-      "TCP_sleep": 0.02
+      "method": "FAKEdesync"
     },
     "skyapi.onedrive.live.com": {
       "IP": "13.107.42.12",
-      "method": "FAKEdesync",
-      "TCP_sleep": 0.02
+      "method": "FAKEdesync"
     },
     "vercel.app": {
-      "IP": "64.29.17.65",
-      "method": "FAKEdesync",
-      "TCP_sleep": 0.01
+      "IP": "64.29.17.193",
+      "method": "FAKEdesync"
     },
     "cloudflare.com": {
       "IP": "104.21.3.226"
