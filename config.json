@@ -222,6 +222,7 @@
       "num_TLS_fragment": 5,
       "TCP_frag": 2
     },
+    "medium":{},
     "cdn-telegram.org": {
       "IPtype": "ipv4"
     },
