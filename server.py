@@ -870,6 +870,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
     import platform
     print(platform.system())
     if platform.system() == "Windows":
+        print("desync on Windows may cause Error! Make sure other programs are not using the TransmitFile. ")
         """
         BOOL TransmitFile(
             SOCKET                  hSocket,
@@ -927,6 +928,10 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                     wintypes.DWORD(data_len),wintypes.DWORD(data_len),ov, None,
                     32 | 4 # TF_USE_KERNEL_APC | TF_WRITE_BEHIND
                 )
+
+                if FAKE_sleep<0.1:
+                    print("Too short sleep time on Windows, set to 0.1")
+                    FAKE_sleep=0.1
 
                 print("sleep for: ",FAKE_sleep)
                 time.sleep(FAKE_sleep)
