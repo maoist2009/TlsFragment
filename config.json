@@ -40,23 +40,16 @@
     "onedrive.live.com": {
       "IP": "150.171.43.11",
       "method": "FAKEdesync",
-      "TLS_frag": 0,
-      "num_TLS_fragment": 0,
       "TCP_sleep": 0.02
     },
     "skyapi.onedrive.live.com": {
       "IP": "13.107.42.12",
       "method": "FAKEdesync",
-      "TLS_frag": 0,
-      "num_TLS_fragment": 0,
       "TCP_sleep": 0.02
     },
     "vercel.app": {
       "IP": "64.29.17.65",
       "method": "FAKEdesync",
-      "FAKE_sleep": 0.01,
-      "TLS_frag": 0,
-      "num_TLS_fragment": 0,
       "TCP_sleep": 0.01
     },
     "cloudflare.com": {
