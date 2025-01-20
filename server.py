@@ -303,7 +303,7 @@ class GET_settings:
                     res["FAKE_ttl"]=val-1
                     print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
 
-                    lock_DNS_cache.acquire()
+                    lock_TTL_cache.acquire()
                     global cnt_ttl_chg
                     cnt_ttl_chg=cnt_ttl_chg+1
                     print(f"cnt_ttl_chg {cnt_ttl_chg}",TTL_log_every)
@@ -311,7 +311,7 @@ class GET_settings:
                         cnt_ttl_chg=0
                         with open("TTL_cache.json",'w', encoding='UTF-8') as f:
                             json.dump(TTL_cache,f)
-                    lock_DNS_cache.release()
+                    lock_TTL_cache.release()
         
         print(domain,'-->',res)
         return res
