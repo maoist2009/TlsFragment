@@ -48,7 +48,7 @@
             "method": "FAKEdesync"
         },
         "skyapi.onedrive.live.com": {
-            "IP": "13.107.42.12",
+				"IP": "13.107.42.12",
             "method": "FAKEdesync"
         },
         "vercel.app": {
@@ -128,7 +128,11 @@
         "pixiv": {
             "TLS_frag": 3
         },
-        "chrome.com": {
+        "chromium.org": {
+            "IP": "35.190.247.152",
+            "port": 1445
+        },
+		"chrome.com": {
             "IP": "35.190.247.148",
             "port": 1445
         },
