@@ -18,6 +18,9 @@
   "method": "TLSfrag",
   "IPtype": "ipv4",
   "domains": {
+	"stackblitz.com": {
+		"IP": "3.164.121.25"
+	},
     "giscus.app": {
         "method": "FAKEdesync"
     },
@@ -97,6 +100,11 @@
       "TLS_frag": 3,
       "TCP_frag": 5
     },
+	"api.github.com": {
+		"IP": "20.27.177.116",
+		"TLS_frag": 3,
+		"TCP_frag": 5
+	},
     "github.io": {
       "IP": "151.101.21.147"
     },
