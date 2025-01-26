@@ -128,7 +128,15 @@
         "pixiv": {
             "TLS_frag": 3
         },
+		"go.dev": {
+            "TCP_frag": 2,
+			"method": "FAKEdesync"
+        },
         "chromium.org": {
+            "IP": "35.190.247.152",
+            "port": 1445
+        },
+		"golang.org": {
             "IP": "35.190.247.152",
             "port": 1445
         },
