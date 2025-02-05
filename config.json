@@ -117,6 +117,9 @@
         "githubusercontent.com": {
             "IP": "151.101.152.133"
         },
+        "objects-origin.githubusercontent.com": {
+            "IP": "140.82.113.22"
+        },
         "wiki": {
             "IP": "185.15.58.224",
             "TLS_frag": 2,
