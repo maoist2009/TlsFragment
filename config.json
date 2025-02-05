@@ -18,6 +18,7 @@
     "method": "TLSfrag",
     "IPtype": "ipv4",
     "domains": {
+		"annas-archive.org": {},
         "stackblitz.com": {
             "IP": "3.164.121.25"
         },
