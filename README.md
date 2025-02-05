@@ -1,8 +1,6 @@
 # About
 
-According to [gfw_knocker](https://github.com/gfw-knocker/) fragment the ClinetHello may bypass the gfw.
-
-But it seems that it doesn't work in Shanghai.
+Two ways to protect your TLS connection with out decryption. 
 
 # Usage
 
