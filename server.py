@@ -223,7 +223,7 @@ class GET_settings:
 
     def query(self,domain, todns=True):
         # print("Query:",domain)
-        res=domain_settings_tree.search(domain)
+        res=domain_settings_tree.search("^"+domain+"$")
         # print(domain,'-->',sorted(res,key=lambda x:len(x),reverse=True)[0])
         try:
             res=copy.deepcopy(domain_settings.get(sorted(res,key=lambda x:len(x),reverse=True)[0]))

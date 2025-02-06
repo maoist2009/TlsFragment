@@ -19,8 +19,11 @@
     "IPtype": "ipv4",
     "domains": {
 		"annas-archive.org": {},
+		"codesandbox.io": {
+			"IP": "104.21.3.227"
+		},
         "stackblitz.com": {
-            "IP": "3.164.121.25"
+            "IP": "13.32.27.56"
         },
         "giscus.app": {
             "method": "FAKEdesync"
