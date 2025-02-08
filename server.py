@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from pathlib import Path
 import socket
 import requests
@@ -64,52 +63,12 @@ TTL_cache = {}      # TTL for each IP
 IP_DL_traffic = {}  # download usage for each ip
 IP_UL_traffic = {}  # upload usage for each ip
 
-with open("config.json",'r', encoding='UTF-8') as f:
-    config = json.load(f)
-    output_data=config.get("output_data")
-
-    my_socket_timeout=config.get("my_socket_timeout")
-    FAKE_ttl_auto_timeout=config.get("FAKE_ttl_auto_timeout")
-    listen_PORT=config.get("listen_PORT")
-    DOH_PORT=config.get("DOH_PORT")
-    
-    num_TCP_fragment=config.get("num_TCP_fragment")
-    num_TLS_fragment=config.get("num_TLS_fragment")
-    TCP_sleep=config.get("TCP_sleep")
-    TCP_frag=config.get("TCP_frag")
-    TLS_frag=config.get("TLS_frag")
-    doh_server=config.get("doh_server")
-    domain_settings=config.get("domains")
-    DNS_log_every=config.get("DNS_log_every")
-    TTL_log_every=config.get("TTL_log_every")
-    IPtype=config.get("IPtype")
-    method=config.get("method")
-    FAKE_packet=config.get("FAKE_packet").encode(encoding='UTF-8')
-    FAKE_ttl=config.get("FAKE_ttl")
-    FAKE_sleep=config.get("FAKE_sleep")
-    if FAKE_ttl=="auto":
-        # temp code for auto fake_ttl
-        FAKE_ttl=random.randint(10,60)
-
-    # print(set(domain_settings.keys()))
-    domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
-
-try:
-    with open("DNS_cache.json",'r+', encoding='UTF-8') as f:
-        DNS_cache=json.load(f)
-except Exception as e:
-    print("ERROR DNS query: ",repr(e))
-
-try:
-    with open("TTL_cache.json",'r+', encoding='UTF-8') as f:
-        TTL_cache=json.load(f)
-except Exception as e:
-    print("ERROR TTL query: ",repr(e))
-
 cnt_dns_chg = 0
 cnt_ttl_chg = 0
 lock_DNS_cache = threading.Lock()
 lock_TTL_cache = threading.Lock()
+pac_domains = []
+pacfile="function genshin(){}"
 
 def set_ttl(sock,ttl):
     if sock.family==socket.AF_INET6:
@@ -136,6 +95,8 @@ def check_ttl(ip,port,ttl):
         # import traceback
         # traceback.print_exc()
         return False
+    finally:
+        sock.close()
     
 def get_ttl(ip,port):
     l=1
@@ -251,7 +212,8 @@ class GET_settings:
                     cnt_dns_chg=cnt_dns_chg+1
                     if cnt_dns_chg>=DNS_log_every:
                         cnt_dns_chg=0
-                        with open("DNS_cache.json",'w', encoding='UTF-8') as f:
+                        
+                        with dataPath.joinpath("DNS_cache.json").open('w', encoding='UTF-8') as f:
                             json.dump(DNS_cache,f)
                     lock_DNS_cache.release()
                 # res["IP"]="127.0.0.1"
@@ -270,9 +232,6 @@ class GET_settings:
         if res.get("num_TCP_fragment")==None:
             res["num_TCP_fragment"]=num_TCP_fragment
             
-
-           
-
         if res.get("method")=="TLSfrag":
             if res.get("TLS_frag")==None:
                 res["TLS_frag"]=TLS_frag
@@ -309,7 +268,7 @@ class GET_settings:
                     print(f"cnt_ttl_chg {cnt_ttl_chg}",TTL_log_every)
                     if cnt_ttl_chg>=TTL_log_every:
                         cnt_ttl_chg=0
-                        with open("TTL_cache.json",'w', encoding='UTF-8') as f:
+                        with dataPath.joinpath("TTL_cache.json").open('w', encoding='UTF-8') as f:
                             json.dump(TTL_cache,f)
                     lock_TTL_cache.release()
         
@@ -317,6 +276,7 @@ class GET_settings:
         return res
     
 
+ThreadtoWork=False
 
 class ThreadedServer(object):
     def __init__(self, host, port):
@@ -330,8 +290,8 @@ class ThreadedServer(object):
 
     def listen(self):
         self.sock.listen(128)  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
-                        
-        while True:
+        global ThreadtoWork
+        while ThreadtoWork:
             client_sock , client_addr = self.sock.accept()                    
             client_sock.settimeout(my_socket_timeout)
                         
@@ -339,16 +299,21 @@ class ThreadedServer(object):
             thread_up = threading.Thread(target = self.my_upstream , args =(client_sock,) )
             thread_up.daemon = True   #avoid memory leak by telling os its belong to main program , its not a separate program , so gc collect it when thread finish
             thread_up.start()
-    
-
+        self.sock.close()
 
     def handle_client_request(self,client_socket):
         # Receive the CONNECT request from the client
-        data = client_socket.recv(16384)
-        
+        data = client_socket.recv(16384)        
 
         if(data[:7]==b'CONNECT'):            
-            server_name , server_port = self.extract_servername_and_port(data)            
+            server_name , server_port = self.extract_servername_and_port(data)      
+        elif (data[:3]==b'GET' and str(data).split('\r\n')[0].split(' ')[1]=="/proxy.pac"):      
+            # return pacfile
+            response_data = 'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: '+str(len(pacfile))+'\r\n\r\n'+pacfile   
+            
+            client_socket.sendall(response_data.encode())
+            client_socket.close()
+            return None, {}
         elif( (data[:3]==b'GET') 
             or (data[:4]==b'POST') 
             or (data[:4]==b'HEAD')
@@ -429,12 +394,6 @@ class ThreadedServer(object):
             server_socket.close()
             return None, {}
 
-
-
-
-
-
-
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock, settings = self.handle_client_request(client_sock)
@@ -457,8 +416,8 @@ class ThreadedServer(object):
             IP_UL_traffic[this_ip] = 0
             IP_DL_traffic[this_ip] = 0
         
-        
-        while True:
+        global ThreadtoWork
+        while ThreadtoWork:
             try:
                 if( first_flag == True ):                        
                     first_flag = False
@@ -521,14 +480,16 @@ class ThreadedServer(object):
                 backend_sock.close()
                 return False
 
-
+        client_sock.close()
+        backend_sock.close()
 
             
     def my_downstream(self, backend_sock , client_sock, settings):
         this_ip = backend_sock.getpeername()[0]        
 
         first_flag = True
-        while True:
+        global ThreadtoWork
+        while ThreadtoWork:
             try:
                 if( first_flag == True ):
                     first_flag = False            
@@ -554,6 +515,8 @@ class ThreadedServer(object):
                 client_sock.close()
                 return False
 
+        client_sock.close()
+        backend_sock.close()
 
 
     def extract_servername_and_port(self,data):        
@@ -1056,18 +1019,212 @@ def send_data_with_fake(sni, settings, data , sock):
         
     print("----------finish------------",sni)
 
-    
+
+serverHandle=None
+
+def generate_PAC():
+    global pac_domains,pacfile
+    pacfile="""class TrieNode {
+    constructor(value){
+        this.value = value;
+        this.num=1;
+        this.deep=0;
+        this.son=[];
+        this.isEnd=false;
+    }
+    findNode(value){
+        for(let i=0;i<this.son.length;i++){
+            const node=this.son[i]
+            if(node.value == value){
+                return node;
+            }
+        }
+        return null;
+    }
+}
+class Trie {
+    constructor(){
+        this.root=new TrieNode(null);
+        this.size=1;
+    }
+    insert(str){
+        let node=this.root;
+        for(let c of str){
+            let snode = node.findNode(c);
+            if(snode==null){
+                snode=new TrieNode(c)
+                snode.deep=node.deep+1;
+                node.son.push(snode);
+            }else{
+                snode.num++;
+            }
+            node=snode;
+ 
+        }
+        
+        if (!node.isEnd) {
+            this.size++;
+            node.isEnd = true;
+        }
+    }
+    has(str){
+        let node=this.root;
+        for(let c of str){
+            const snode=node.findNode(c)
+            if(snode){
+                node=snode;
+            }else{
+                return false;
+            }
+        }
+        return node.isEnd;
+    }
+}
+
+let tr=null;
+function BuildAutomatom(arr) {
+	
+    tr=new Trie()
+    arr.forEach(function (item) {
+        tr.insert(item)
+    })
+	
+    root=tr.root;
+    root.fail=null;
+    const queue=[root]
+    let i=0;
+    while(i<queue.length){
+        const temp=queue[i];
+        for(let j=0;j<temp.son.length;j++){
+            const node=temp.son[j]
+            if(temp===root){
+                node.fail=root;
+            }else{
+                node.fail=temp.fail.findNode(node.value)||root;
+            }
+            queue.push(node);
+        }
+        i++
+    }
+}
+
+function MatchAutomatom(str) {
+	let node=tr.root;
+    const data=[];
+    for(let i=0;i<str.length;i++){
+ 
+        let cnode=node.findNode(str[i])
+        while(!cnode&&node!==tr.root){
+            node=node.fail;
+ 
+            cnode=node.findNode(str[i])
+        }
+        if(cnode){
+            node=cnode;
+        }
+        if(node.isEnd){
+            data.push({
+                start:i+1-node.deep,
+                len:node.deep,
+                str:str.substr(i+1-node.deep,node.deep),
+                num:node.num,
+            })
+        }
+    }
+    return data;
+}
+
+"""
+    pacfile=pacfile+'let domains=[];\n'
+	
+    for line in pac_domains:
+        pacfile=pacfile+'domains.push("'
+        pacfile=pacfile+line
+        pacfile=pacfile+'");\n'
+	
+    pacfile=pacfile+'BuildAutomatom(domains);\n'
+	
+    pacfile=pacfile+"""function FindProxyForURL(url, host) {
+	if(MatchAutomatom("^"+host+"$").length)
+ 		return "PROXY 127.0.0.1:"""
+    pacfile=pacfile+str(listen_PORT)
+    pacfile=pacfile+"""";
+	else
+		return "DIRECT";
+}
+"""
 
 def start_server():
-    print ("Now listening at: 127.0.0.1:"+str(listen_PORT))
-    try:
-        # 检查是否有 --logfile 参数
-        if "--logfile" in sys.argv:
-            # 打开 log.txt 文件，使用 'w' 模式表示写入，如果文件不存在则创建，如果存在则覆盖
-            sys.stdout = open('log.txt', 'w+')
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    ThreadedServer('',listen_PORT).listen()
+    global dataPath
+    with dataPath.joinpath("config.json").open(mode='r', encoding='UTF-8') as f:
+        global output_data,my_socket_timeout,FAKE_ttl_auto_timeout,listen_PORT,DOH_PORT,num_TCP_fragment,num_TLS_fragment,TCP_sleep,TCP_frag,TLS_frag,doh_server,domain_settings,DNS_log_every,TTL_log_every,IPtype,method,FAKE_packet,FAKE_ttl,FAKE_sleep,domain_settings_tree,pac_domains
+        print("Now listening at: 127.0.0.1:"+str(listen_PORT))
+        config = json.load(f)
+        output_data=config.get("output_data")
 
-if (__name__ == "__main__"):
-    start_server()
+        my_socket_timeout=config.get("my_socket_timeout")
+        FAKE_ttl_auto_timeout=config.get("FAKE_ttl_auto_timeout")
+        listen_PORT=config.get("listen_PORT")
+        DOH_PORT=config.get("DOH_PORT")
+        
+        num_TCP_fragment=config.get("num_TCP_fragment")
+        num_TLS_fragment=config.get("num_TLS_fragment")
+        TCP_sleep=config.get("TCP_sleep")
+        TCP_frag=config.get("TCP_frag")
+        TLS_frag=config.get("TLS_frag")
+        doh_server=config.get("doh_server")
+        domain_settings=config.get("domains")
+        DNS_log_every=config.get("DNS_log_every")
+        TTL_log_every=config.get("TTL_log_every")
+        IPtype=config.get("IPtype")
+        method=config.get("method")
+        FAKE_packet=config.get("FAKE_packet").encode(encoding='UTF-8')
+        FAKE_ttl=config.get("FAKE_ttl")
+        FAKE_sleep=config.get("FAKE_sleep")
+        pac_domains=config.get("pac_domains")
+        if FAKE_ttl=="auto":
+            # temp code for auto fake_ttl
+            FAKE_ttl=random.randint(10,60)
+        generate_PAC()
+        # print(set(domain_settings.keys()))
+        domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
+
+    try:
+        global DNS_cache
+        with dataPath.joinpath("DNS_cache.json").open(mode='r+', encoding='UTF-8') as f:
+            DNS_cache=json.load(f)
+    except Exception as e:
+        print("ERROR DNS query: ",repr(e))
+
+    try:
+        global TTL_cache
+        with dataPath.joinpath("TTL_cache.json").open(mode='r+', encoding='UTF-8') as f:
+            TTL_cache=json.load(f)
+    except Exception as e:
+        print("ERROR TTL query: ",repr(e))
+    
+    global serverHandle
+    serverHandle = ThreadedServer('',listen_PORT).listen()
+
+def stop_server():
+    global ThreadtoWork,proxythread
+    ThreadtoWork=False
+    sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(('127.0.0.1',listen_PORT))
+    sock.close()
+    while(proxythread.is_alive()):
+        pass
+
+def Write_DNS_cache():
+    global DNS_cache,dataPath
+    with dataPath.joinpath("DNS_cache.json").open(mode='w', encoding='UTF-8') as f:
+        json.dump(DNS_cache,f)
+
+def Write_TTL_cache():
+    global TTL_cache,dataPath
+    with dataPath.joinpath("TTL_cache.json").open(mode='w', encoding='UTF-8') as f:
+        json.dump(TTL_cache,f)
+
+dataPath=Path.cwd()
+ThreadtoWork=True
+proxythread=start_server()
