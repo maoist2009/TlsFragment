@@ -303,6 +303,12 @@
         "cloudflare-dns.com": {
             "IP": "104.21.3.222",
             "TLS_frag": 6
+        },
+        "tracking.miui.com": {
+            "method": "GFWlike"
+        },
+        "bilibili.com": {
+            "method": "DIRECT"
         }
     },
     "pac_domains": [

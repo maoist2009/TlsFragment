@@ -452,6 +452,12 @@ class ThreadedServer(object):
                             send_data_in_fragment(settings.get("sni"),settings,data,backend_sock)
                         elif settings.get("method")=="FAKEdesync":
                             send_data_with_fake(settings.get("sni"),settings,data,backend_sock)
+                        elif settings.get("method")=="DIRECT":
+                            backend_sock.sendall(data)
+                        elif settings.get("method")=="GFWlike":
+                            client_sock.close()
+                            backend_sock.close()
+                            return False
                         else:
                             print("unknown method")
                             backend_sock.sendall(data)
@@ -1226,5 +1232,6 @@ def Write_TTL_cache():
         json.dump(TTL_cache,f)
 
 dataPath=Path.cwd()
+
 ThreadtoWork=True
 proxythread=start_server()
