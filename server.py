@@ -25,7 +25,7 @@ FAKE_ttl_auto_timeout = 1
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
 accept_time_sleep = 0.01 # avoid server crash on flooding request -> max 100 sockets per second
 output_data=True
-
+datapath=Path()
 
 domain_settings={
     "null": {
@@ -70,11 +70,119 @@ lock_TTL_cache = threading.Lock()
 pac_domains = []
 pacfile="function genshin(){}"
 
+def ip_to_binary_prefix(ip_or_network):
+    try:
+        # 尝试解析输入是否为 IP 网络
+        network = ipaddress.ip_network(ip_or_network, strict=False)
+        # 获取网络地址
+        network_address = network.network_address
+        # 获取前缀长度
+        prefix_length = network.prefixlen
+        if isinstance(network_address, ipaddress.IPv4Address):
+            # IPv4 地址转换为 32 位二进制字符串
+            binary_network = bin(int(network_address))[2:].zfill(32)
+        elif isinstance(network_address, ipaddress.IPv6Address):
+            # IPv6 地址转换为 128 位二进制字符串
+            binary_network = bin(int(network_address))[2:].zfill(128)
+        # 提取前缀部分
+        binary_prefix = binary_network[:prefix_length]
+        return binary_prefix
+    except ValueError:
+        try:
+            # 如果输入不是网络，尝试解析为单个 IP 地址
+            ip = ipaddress.ip_address(ip_or_network)
+            if isinstance(ip, ipaddress.IPv4Address):
+                # IPv4 地址转换为 32 位二进制字符串
+                binary_ip = bin(int(ip))[2:].zfill(32)
+                # 单个 IPv4 地址的前缀长度为 32
+                binary_prefix = binary_ip[:32]
+            elif isinstance(ip, ipaddress.IPv6Address):
+                # IPv6 地址转换为 128 位二进制字符串
+                binary_ip = bin(int(ip))[2:].zfill(128)
+                # 单个 IPv6 地址的前缀长度为 128
+                binary_prefix = binary_ip[:128]
+            return binary_prefix
+        except ValueError:
+            raise ValueError(f"输入 {ip_or_network} 不是有效的 IP 地址或网络")
+
+class TrieNode:
+    def __init__(self):
+        # 初始化两个子节点，分别对应二进制的 0 和 1
+        self.children = [None, None]
+        # 标记该节点是否为一个二进制前缀的结尾
+        self.val = None
+
+
+class Trie:
+    def __init__(self):
+        # 初始化根节点
+        self.root = TrieNode()
+
+    def insert(self, prefix, value):
+        # 从根节点开始插入操作
+        node = self.root
+        for bit in prefix:
+            # 将字符形式的二进制位转换为整数索引
+            index = int(bit)
+            if not node.children[index]:
+                # 如果对应的子节点不存在，则创建新的节点
+                node.children[index] = TrieNode()
+            # 移动到下一层节点
+            node = node.children[index]
+        # 标记当前节点为一个二进制前缀的结尾
+        node.val = value
+
+    def search(self, prefix):
+        # 从根节点开始搜索操作
+        node = self.root
+        ans = None
+        for bit in prefix:
+            # 将字符形式的二进制位转换为整数索引
+            index = int(bit)
+            if node.val!=None:
+                ans=node.val
+            if not node.children[index]:
+                # 如果对应的子节点不存在，说明该前缀不在 Trie 中
+                return ans
+            # 移动到下一层节点
+            node = node.children[index]
+        # 检查最终到达的节点是否为一个前缀的结尾
+        return ans
+
+ipv4trie=Trie()
+ipv6trie=Trie()
+
 def set_ttl(sock,ttl):
     if sock.family==socket.AF_INET6:
         sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_UNICAST_HOPS, ttl)
     else:
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
+
+def tryipredirect(ip):
+    ans=""
+    if ip.find(":")!=-1:
+        ans=ipv6trie.search(ip_to_binary_prefix(ip))
+        if ans==None:
+            return ip
+        else:
+            return ans
+    else:
+        ans=ipv4trie.search(ip_to_binary_prefix(ip))
+        if ans==None:
+            return ip
+        else:
+            return ans
+
+def IPredirect(ip):
+    while True:
+        ans=tryipredirect(ip)
+        if ans==ip:
+            break
+        else:
+            print(f"IPredirect {ip} to {ans}")
+            ip=ans
+
+    return ip
 
 def check_ttl(ip,port,ttl):
     # print(ip,port,ttl)
@@ -208,7 +316,7 @@ class GET_settings:
                             res["IPtype"]="ipv6"
                         res["IP"]=self.query_DNS(domain,res)
                     lock_DNS_cache.acquire()
-                    global cnt_dns_chg
+                    global cnt_dns_chg,dataPath
                     cnt_dns_chg=cnt_dns_chg+1
                     if cnt_dns_chg>=DNS_log_every:
                         cnt_dns_chg=0
@@ -216,6 +324,8 @@ class GET_settings:
                         with dataPath.joinpath("DNS_cache.json").open('w', encoding='UTF-8') as f:
                             json.dump(DNS_cache,f)
                     lock_DNS_cache.release()
+
+                res["IP"]=IPredirect(res.get("IP"))
                 # res["IP"]="127.0.0.1"
         else:
             res["IP"]=todns
@@ -1164,6 +1274,7 @@ def start_server():
     global dataPath
     with dataPath.joinpath("config.json").open(mode='r', encoding='UTF-8') as f:
         global output_data,my_socket_timeout,FAKE_ttl_auto_timeout,listen_PORT,DOH_PORT,num_TCP_fragment,num_TLS_fragment,TCP_sleep,TCP_frag,TLS_frag,doh_server,domain_settings,DNS_log_every,TTL_log_every,IPtype,method,FAKE_packet,FAKE_ttl,FAKE_sleep,domain_settings_tree,pac_domains
+        global ipv4trie,ipv6trie
         print("Now listening at: 127.0.0.1:"+str(listen_PORT))
         config = json.load(f)
         output_data=config.get("output_data")
@@ -1188,12 +1299,18 @@ def start_server():
         FAKE_ttl=config.get("FAKE_ttl")
         FAKE_sleep=config.get("FAKE_sleep")
         pac_domains=config.get("pac_domains")
+        IPredirect=config.get("IPredirect")
         if FAKE_ttl=="auto":
             # temp code for auto fake_ttl
             FAKE_ttl=random.randint(10,60)
         generate_PAC()
         # print(set(domain_settings.keys()))
-        domain_settings_tree=ahocorasick.AhoCorasick(*domain_settings.keys())
+        domain_settings_tree= ahocorasick.AhoCorasick(*domain_settings.keys())
+        for key in IPredirect.keys():
+            if key.find(":")!=-1:
+                ipv6trie.insert(ip_to_binary_prefix(key),IPredirect[key])
+            else:
+                ipv4trie.insert(ip_to_binary_prefix(key),IPredirect[key])
 
     try:
         global DNS_cache
