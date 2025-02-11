@@ -72,34 +72,23 @@ pacfile="function genshin(){}"
 
 def ip_to_binary_prefix(ip_or_network):
     try:
-        # 尝试解析输入是否为 IP 网络
         network = ipaddress.ip_network(ip_or_network, strict=False)
-        # 获取网络地址
         network_address = network.network_address
-        # 获取前缀长度
         prefix_length = network.prefixlen
         if isinstance(network_address, ipaddress.IPv4Address):
-            # IPv4 地址转换为 32 位二进制字符串
             binary_network = bin(int(network_address))[2:].zfill(32)
         elif isinstance(network_address, ipaddress.IPv6Address):
-            # IPv6 地址转换为 128 位二进制字符串
             binary_network = bin(int(network_address))[2:].zfill(128)
-        # 提取前缀部分
         binary_prefix = binary_network[:prefix_length]
         return binary_prefix
     except ValueError:
         try:
-            # 如果输入不是网络，尝试解析为单个 IP 地址
             ip = ipaddress.ip_address(ip_or_network)
             if isinstance(ip, ipaddress.IPv4Address):
-                # IPv4 地址转换为 32 位二进制字符串
                 binary_ip = bin(int(ip))[2:].zfill(32)
-                # 单个 IPv4 地址的前缀长度为 32
                 binary_prefix = binary_ip[:32]
             elif isinstance(ip, ipaddress.IPv6Address):
-                # IPv6 地址转换为 128 位二进制字符串
                 binary_ip = bin(int(ip))[2:].zfill(128)
-                # 单个 IPv6 地址的前缀长度为 128
                 binary_prefix = binary_ip[:128]
             return binary_prefix
         except ValueError:
@@ -107,46 +96,33 @@ def ip_to_binary_prefix(ip_or_network):
 
 class TrieNode:
     def __init__(self):
-        # 初始化两个子节点，分别对应二进制的 0 和 1
         self.children = [None, None]
-        # 标记该节点是否为一个二进制前缀的结尾
         self.val = None
 
 
 class Trie:
     def __init__(self):
-        # 初始化根节点
         self.root = TrieNode()
 
     def insert(self, prefix, value):
-        # 从根节点开始插入操作
         node = self.root
         for bit in prefix:
-            # 将字符形式的二进制位转换为整数索引
             index = int(bit)
             if not node.children[index]:
-                # 如果对应的子节点不存在，则创建新的节点
                 node.children[index] = TrieNode()
-            # 移动到下一层节点
             node = node.children[index]
-        # 标记当前节点为一个二进制前缀的结尾
         node.val = value
 
     def search(self, prefix):
-        # 从根节点开始搜索操作
         node = self.root
         ans = None
         for bit in prefix:
-            # 将字符形式的二进制位转换为整数索引
             index = int(bit)
             if node.val!=None:
                 ans=node.val
             if not node.children[index]:
-                # 如果对应的子节点不存在，说明该前缀不在 Trie 中
                 return ans
-            # 移动到下一层节点
             node = node.children[index]
-        # 检查最终到达的节点是否为一个前缀的结尾
         return ans
 
 ipv4trie=Trie()
@@ -177,6 +153,10 @@ def IPredirect(ip):
     while True:
         ans=tryipredirect(ip)
         if ans==ip:
+            break
+        elif ans[0]=="^":
+            print(f"IPredirect {ip} to {ans[1:]}")
+            ip=ans[1:]
             break
         else:
             print(f"IPredirect {ip} to {ans}")
