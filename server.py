@@ -404,7 +404,7 @@ class ThreadedServer(object):
             server_name , server_port = self.extract_servername_and_port(data)      
         elif (data[:3]==b'GET' and str(data).split('\r\n')[0].split(' ')[1]=="/proxy.pac"):      
             # return pacfile
-            response_data = 'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n'+pacfile   
+            response_data = f'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n'+pacfile   
             
             client_socket.sendall(response_data.encode())
             client_socket.close()
@@ -947,7 +947,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         );
         """
         import tempfile,uuid
-        file_path = 'tempfile.gettempdir()\\{uuid.uuid4()}.txt'
+        file_path = f'tempfile.gettempdir()\\{uuid.uuid4()}.txt'
         try:
             sock_file_descriptor = sock.fileno()
             print("sock file discriptor:",sock_file_descriptor)
