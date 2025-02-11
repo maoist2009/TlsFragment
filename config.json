@@ -121,6 +121,10 @@
             "TLS_frag": 3,
             "TCP_frag": 5
         },
+        "uploads.github.com": {
+            "TLS_frag": 3,
+            "TCP_frag": 5
+        },
         "github.io": {
             "IP": "151.101.153.147"
         },
