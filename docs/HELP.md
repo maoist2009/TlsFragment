@@ -114,4 +114,8 @@ BUILD_WINDOWS
 建议使用[HTTPS_IP_finder](https://github.com/maoist2009/HTTPS_IP_finder)
 我本人也会维护已知的被ip封锁的网站。
 
+## IP重定向
+
+支持IP（段）重定向到ip，默认链式跳转，如果要求配置不链式，在结果ip字符串前添加`^`。
+
 ## 细节看`server.py`
