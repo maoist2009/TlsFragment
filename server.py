@@ -309,7 +309,7 @@ class GET_settings:
                 else:
                     res["IP"]=self.query_DNS(domain,res)
                     if res["IP"]==None:
-                        print("Faild to resolve domain, try again with other IP type")
+                        print("Failed to resolve domain, try again with other IP type")
                         if res["IPtype"]=="ipv6":                        
                             res["IPtype"]="ipv4"
                         elif res["IPtype"]=="ipv4":
@@ -874,7 +874,7 @@ try:
         # kernel32._get_osfhandle.argtypes = [wintypes.INT]
         # kernel32._get_osfhandle.restype = wintypes.HANDLE
         pass
-    elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+    elif platform.system() in ('Linux', 'Darwin', 'Android'):
         import os
         import ctypes
         # 加载 libc 库
@@ -1041,7 +1041,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
                 os.remove(file_path)
         except Exception as e:
             raise e
-    elif platform.system() == "Linux" or platform.system() == "Darwin" or platform.system() == "Android":
+    elif platform.system() in ('Linux', 'Darwin', 'Android'):
         try:
             sock_file_descriptor = sock.fileno()
             print("sock file discriptor:",sock_file_descriptor)
