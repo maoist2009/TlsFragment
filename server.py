@@ -306,13 +306,13 @@ class GET_settings:
                 # res["IP"]="127.0.0.1"
         else:
             res["IP"]=todns
-	res.setdefault('port', 443)
+        res.setdefault('port', 443)
 
-	res.setdefault('method', method)
+        res.setdefault('method', method)
 
-	res.setdefault('TCP_frag', TCP_frag)
-	res.setdefault('TCP_sleep', TCP_sleep)
-	res.setdefault('num_TCP_fragment', num_TCP_fragment)
+        res.setdefault('TCP_frag', TCP_frag)
+        res.setdefault('TCP_sleep', TCP_sleep)
+        res.setdefault('num_TCP_fragment', num_TCP_fragment)
 
         if res.get("method")=="TLSfrag":
             res.setdefault('TLS_frag', TLS_frag)
@@ -1164,12 +1164,12 @@ class Trie {
 
 let tr=null;
 function BuildAutomatom(arr) {
-	
+    
     tr=new Trie()
     arr.forEach(function (item) {
         tr.insert(item)
     })
-	
+    
     root=tr.root;
     root.fail=null;
     const queue=[root]
@@ -1190,7 +1190,7 @@ function BuildAutomatom(arr) {
 }
 
 function MatchAutomatom(str) {
-	let node=tr.root;
+    let node=tr.root;
     const data=[];
     for(let i=0;i<str.length;i++){
  
@@ -1217,21 +1217,21 @@ function MatchAutomatom(str) {
 
 """
     pacfile=pacfile+'let domains=[];\n'
-	
+    
     for line in pac_domains:
         pacfile=pacfile+'domains.push("'
         pacfile=pacfile+line
         pacfile=pacfile+'");\n'
-	
+    
     pacfile=pacfile+'BuildAutomatom(domains);\n'
-	
+    
     pacfile=pacfile+"""function FindProxyForURL(url, host) {
-	if(MatchAutomatom("^"+host+"$").length)
- 		return "PROXY 127.0.0.1:"""
+    if(MatchAutomatom("^"+host+"$").length)
+         return "PROXY 127.0.0.1:"""
     pacfile+=str(listen_PORT)
     pacfile=pacfile+"""";
-	else
-		return "DIRECT";
+    else
+        return "DIRECT";
 }
 """
 
