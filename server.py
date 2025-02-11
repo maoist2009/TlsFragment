@@ -208,9 +208,7 @@ class GET_settings:
     def __init__(self):
         self.url = doh_server
         self.req = requests.session()              
-        self.knocker_proxy = {
-        'https': 'http://127.0.0.1:'+str(DOH_PORT)
-        }
+        self.knocker_proxy = {'https': f'http://127.0.0.1:{DOH_PORT}'}
         
 
 
@@ -280,8 +278,7 @@ class GET_settings:
             res={}
         
         if todns==True:
-            if res.get("IPtype")==None:
-                res["IPtype"]=IPtype
+            res.setdefault('IPtype', IPtype)
 
             if res.get("IP")==None:
                 if DNS_cache.get(domain)!=None:
@@ -309,33 +306,21 @@ class GET_settings:
                 # res["IP"]="127.0.0.1"
         else:
             res["IP"]=todns
-        if res.get("port")==None:
-            res["port"]=443
-            
-        if res.get("method")==None:
-            res["method"]=method
-            
-        if res.get("TCP_frag")==None:
-            res["TCP_frag"]=TCP_frag
-        if res.get("TCP_sleep")==None:
-            res["TCP_sleep"]=TCP_sleep
-        if res.get("num_TCP_fragment")==None:
-            res["num_TCP_fragment"]=num_TCP_fragment
-            
+	res.setdefault('port', 443)
+
+	res.setdefault('method', method)
+
+	res.setdefault('TCP_frag', TCP_frag)
+	res.setdefault('TCP_sleep', TCP_sleep)
+	res.setdefault('num_TCP_fragment', num_TCP_fragment)
+
         if res.get("method")=="TLSfrag":
-            if res.get("TLS_frag")==None:
-                res["TLS_frag"]=TLS_frag
-            if res.get("num_TLS_fragment")==None:
-                res["num_TLS_fragment"]=num_TLS_fragment
+            res.setdefault('TLS_frag', TLS_frag)
+            res.setdefault('num_TLS_fragment', num_TLS_fragment)
         elif res.get("method")=="FAKEdesync":
-            if res.get("FAKE_packet")==None:
-                res["FAKE_packet"]=FAKE_packet
-            else:
-                res["FAKE_packet"]=res["FAKE_packet"].encode(encoding='UTF-8')
-            if res.get("FAKE_ttl")==None:
-                res["FAKE_ttl"]=FAKE_ttl
-            if res.get("FAKE_sleep")==None:
-                res["FAKE_sleep"]=FAKE_sleep
+            res["FAKE_packet"] = FAKE_packet if res.get("FAKE_packet") is None else res["FAKE_packet"].encode(encoding='UTF-8')
+            res.setdefault('FAKE_ttl', FAKE_ttl)
+            res.setdefault('FAKE_sleep', FAKE_sleep)
             if res.get("FAKE_ttl")=="query":
                 print(f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}')
                 # print("Not implemented yet")
@@ -399,7 +384,7 @@ class ThreadedServer(object):
             server_name , server_port = self.extract_servername_and_port(data)      
         elif (data[:3]==b'GET' and str(data).split('\r\n')[0].split(' ')[1]=="/proxy.pac"):      
             # return pacfile
-            response_data = 'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: '+str(len(pacfile))+'\r\n\r\n'+pacfile   
+            response_data = f'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n'+pacfile   
             
             client_socket.sendall(response_data.encode())
             client_socket.close()
@@ -444,7 +429,7 @@ class ThreadedServer(object):
             except ValueError:
                 # print('Not IP , its domain , try to resolve it')
                 settings=self.DoH.query(server_name)
-                if settings==None:                    
+                if settings==None:
                     settings={}
                 settings["sni"]=bytes(server_name,encoding="utf-8")
                 server_IP=settings.get("IP")
@@ -466,7 +451,7 @@ class ThreadedServer(object):
                 client_socket.sendall(response_data)
                 return server_socket, settings
             except socket.error:
-                print("@@@ "+server_IP+":"+str(server_port)+ " ==> filtered @@@")
+                print(f"@@@ {server_IP}:{server_port} ==> filtered @@@")
                 # Send HTTP ERR 502
                 response_data = b'HTTP/1.1 502 Bad Gateway (is IP filtered?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
                 client_socket.sendall(response_data)
@@ -942,7 +927,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         );
         """
         import tempfile,uuid
-        file_path = tempfile.gettempdir()+"\\"+ str(uuid.uuid4()) + ".txt"
+        file_path = f'tempfile.gettempdir()\\{uuid.uuid4()}.txt'
         try:
             sock_file_descriptor = sock.fileno()
             print("sock file discriptor:",sock_file_descriptor)
@@ -1243,7 +1228,7 @@ function MatchAutomatom(str) {
     pacfile=pacfile+"""function FindProxyForURL(url, host) {
 	if(MatchAutomatom("^"+host+"$").length)
  		return "PROXY 127.0.0.1:"""
-    pacfile=pacfile+str(listen_PORT)
+    pacfile+=str(listen_PORT)
     pacfile=pacfile+"""";
 	else
 		return "DIRECT";
@@ -1255,7 +1240,7 @@ def start_server():
     with dataPath.joinpath("config.json").open(mode='r', encoding='UTF-8') as f:
         global output_data,my_socket_timeout,FAKE_ttl_auto_timeout,listen_PORT,DOH_PORT,num_TCP_fragment,num_TLS_fragment,TCP_sleep,TCP_frag,TLS_frag,doh_server,domain_settings,DNS_log_every,TTL_log_every,IPtype,method,FAKE_packet,FAKE_ttl,FAKE_sleep,domain_settings_tree,pac_domains
         global ipv4trie,ipv6trie
-        print("Now listening at: 127.0.0.1:"+str(listen_PORT))
+        print(f"Now listening at: 127.0.0.1:{listen_PORT}")
         config = json.load(f)
         output_data=config.get("output_data")
 
