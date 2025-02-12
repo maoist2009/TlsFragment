@@ -123,6 +123,8 @@ class Trie:
             if not node.children[index]:
                 return ans
             node = node.children[index]
+        if node.val!=None:
+                ans=node.val
         return ans
 
 ipv4trie=Trie()
@@ -138,6 +140,7 @@ def tryipredirect(ip):
     ans=""
     if ip.find(":")!=-1:
         ans=ipv6trie.search(ip_to_binary_prefix(ip))
+        print(ip_to_binary_prefix)
         if ans==None:
             return ip
         else:
