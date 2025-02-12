@@ -247,13 +247,13 @@
         },
         ".dropbox.com": {},
         "telegram.org": {
-            "IP": "2001:67c:4e8:f004::8"
+            "IP": "149.154.161.145"
         },
         "telegram.me": {
-            "IP": "2001:67c:4e8:f004::8"
+            "IP": "149.154.161.145"
         },
         "t.me": {
-            "IP": "2001:67c:4e8:f004::8",
+            "IP": "149.154.161.145",
             "TLS_frag": 1,
             "num_TCP_fragment": 3,
             "num_TLS_fragment": 5,
