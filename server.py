@@ -140,7 +140,6 @@ def tryipredirect(ip):
     ans=""
     if ip.find(":")!=-1:
         ans=ipv6trie.search(ip_to_binary_prefix(ip))
-        print(ip_to_binary_prefix)
         if ans==None:
             return ip
         else:
