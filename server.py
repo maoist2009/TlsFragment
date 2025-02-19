@@ -367,16 +367,35 @@ class ThreadedServer(object):
 
     def listen(self):
         self.sock.listen(128)  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
-        global ThreadtoWork
-        while ThreadtoWork:
-            client_sock , client_addr = self.sock.accept()                    
-            client_sock.settimeout(my_socket_timeout)
-                        
-            time.sleep(accept_time_sleep)   # avoid server crash on flooding request
-            thread_up = threading.Thread(target = self.my_upstream , args =(client_sock,) )
-            thread_up.daemon = True   #avoid memory leak by telling os its belong to main program , its not a separate program , so gc collect it when thread finish
-            thread_up.start()
-        self.sock.close()
+
+        accept_thread = threading.Thread(target=self.accept_connections, args=())
+        accept_thread.start()
+        try:
+            # 主程序逻辑
+            while True:
+                time.sleep(1)  # 主线程的其他操作
+        except KeyboardInterrupt:
+            # 捕获 Ctrl+C
+            print("\nServer shutting down.")
+        finally:
+            #print('-- finally --')
+            ThreadtoWork = False
+            self.sock.close()
+
+    def accept_connections(self):
+        try:
+            global ThreadtoWork
+            while ThreadtoWork:
+                client_sock, client_addr = self.sock.accept()
+                client_sock.settimeout(my_socket_timeout)
+
+                time.sleep(accept_time_sleep)   # avoid server crash on flooding request
+                thread_up = threading.Thread(target = self.my_upstream, args = (client_sock,))
+                thread_up.daemon = True   #avoid memory leak by telling os its belong to main program , its not a separate program , so gc collect it when thread finish
+                thread_up.start()
+            self.sock.close()
+        except Exception as e:
+            print(f'Server error: {e}')
 
     def handle_client_request(self,client_socket):
         # Receive the CONNECT request from the client
