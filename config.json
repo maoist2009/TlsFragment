@@ -27,6 +27,9 @@
     },
     "domains": {
         "annas-archive.org": {},
+        "mastodon.social": {
+            "IP": "146.75.29.91"
+        },
         "codesandbox.io": {
             "IP": "104.21.3.227"
         },
