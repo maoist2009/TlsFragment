@@ -948,7 +948,7 @@ def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_s
         );
         """
         import tempfile,uuid
-        file_path = f'tempfile.gettempdir()\\{uuid.uuid4()}.txt'
+        file_path = f'{tempfile.gettempdir()}\\{uuid.uuid4()}.txt'
         try:
             sock_file_descriptor = sock.fileno()
             print("sock file discriptor:",sock_file_descriptor)
