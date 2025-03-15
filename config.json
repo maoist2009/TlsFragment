@@ -332,6 +332,8 @@
         }
     },
     "pac_domains": [
+        "cloudflare-dns.com$",
+        "adminforge.de$",
         "nadeko.net$",
         "anoxinon.de$",
         "uptodown.com$",
