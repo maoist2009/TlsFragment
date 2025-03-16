@@ -335,8 +335,13 @@
         }
     },
     "pac_domains": [
-        "google$",
+        "cloudflare-dns.com$",
+        "adminforge.de$",
+        "nadeko.net$",
+        "anoxinon.de$",
         "uptodown.com$",
+        "google$",
+        "freeweibo.com$",
         "fosstodon.org$",
         "smsactivate.s3.eu-central-1.amazonaws.com$",
         "android.com$",
@@ -456,7 +461,6 @@
         "xcancel.com$",
         "geph.io$",
         "1lib.sk$",
-        "freeweibo.com$",
         "odycdn.com$",
         "odysee.com$",
         "torproject.org$",
