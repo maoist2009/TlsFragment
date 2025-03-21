@@ -140,19 +140,41 @@
         "objects-origin.githubusercontent.com": {
             "IP": "140.82.113.22"
         },
-        "wiki": {
-            "IP": "185.15.58.224",
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "num_TCP_fragment": 3,
-            "num_TLS_fragment": 3,
-            "TCP_sleep": 0.01
+        "wikipedia.org": {
+            "IP": "185.15.58.224"
         },
         "upload.wikimedia.org": {
             "IP": "185.15.58.240"
         },
         "wiktionary.org": {
             "IP": "185.15.59.224"
+        },
+        "wikiversity.org": {
+            "IP": "185.15.58.224"
+        },
+        "wikivoyage.org": {
+            "IP": "185.15.58.224"
+        },
+        "wikisource.org": {
+            "IP": "185.15.58.224"
+        },
+        "wikinews.org": {
+            "IP": "185.15.58.224"
+        },
+        "wikidata.org": {
+            "IP": "185.15.58.224"
+        },
+        "species.wikimedia.org": {
+            "IP": "185.15.58.224"
+        },
+        "meta.wikimedia.org": {
+            "IP": "185.15.58.224"
+        },
+        "mediawiki.org": {
+            "IP": "185.15.58.224"
+        },
+        "wikifunctions.org": {
+            "IP": "185.15.58.224"
         },
         "pixiv": {
             "TLS_frag": 3
