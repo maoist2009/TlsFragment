@@ -117,6 +117,11 @@
             "TLS_frag": 3,
             "TCP_frag": 5
         },
+        "gist.github.com": {
+            "IP": "20.27.177.113",
+            "TLS_frag": 3,
+            "TCP_frag": 5
+        },
         "api.github.com": {
             "IP": "20.27.177.116",
             "TLS_frag": 3,
