@@ -43,7 +43,7 @@ BUILD_WINDOWS
 
 建议分流
 
-安装`Proxy SwitchOmega`和`Gooreplacer`，分别导入配置文件`OmegaOptions.bak`和`gooreplacer.json`（android请使用kiwi浏览器等）
+安装`Proxy SwitchyOmega`和`Gooreplacer`，分别导入配置文件`OmegaOptions.bak`和`gooreplacer.json`（android请使用kiwi浏览器等）
 
 ## 配置方式
 
