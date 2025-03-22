@@ -200,6 +200,14 @@
             "IP": "35.190.247.145",
             "port": 1445
         },
+        "golang.org": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
+        "blogger.com": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
         "googlevideo.com": {
             "IPtype": "ipv6"
         },
