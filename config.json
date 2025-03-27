@@ -374,6 +374,7 @@
         }
     },
     "pac_domains": [
+        "ncdn.ec$",
         "cloudflare-dns.com$",
         "adminforge.de$",
         "nadeko.net$",
