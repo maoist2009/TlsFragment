@@ -357,6 +357,8 @@
         }
     },
     "pac_domains": [
+        "wikifunctions.org$",
+        "mediawiki.org$",
         "cloudflare-dns.com$",
         "adminforge.de$",
         "nadeko.net$",
@@ -491,6 +493,7 @@
         "z-library.sk$",
         "pages.dev$",
         "greatfire.org$",
-        "gstatic.com$"
+        "gstatic.com$",
+        "githubassets.com$"
     ]
 }
