@@ -117,6 +117,11 @@
             "TLS_frag": 3,
             "TCP_frag": 5
         },
+        "gist.github.com": {
+            "IP": "20.27.177.113",
+            "TLS_frag": 3,
+            "TCP_frag": 5
+        },
         "api.github.com": {
             "IP": "20.27.177.116",
             "TLS_frag": 3,
@@ -132,10 +137,10 @@
             "TCP_frag": 5
         },
         "github.io": {
-            "IP": "151.101.153.147"
+            "IP": "151.101.21.147"
         },
         "githubusercontent.com": {
-            "IP": "151.101.152.133"
+            "IP": "151.101.24.133"
         },
         "objects-origin.githubusercontent.com": {
             "IP": "140.82.113.22"
@@ -196,7 +201,23 @@
             "IP": "35.190.247.148",
             "port": 1445
         },
+        "ai.dev": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
+        "google.dev": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
         "android.com": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
+        "golang.org": {
+            "IP": "35.190.247.145",
+            "port": 1445
+        },
+        "blogger.com": {
             "IP": "35.190.247.145",
             "port": 1445
         },
@@ -224,6 +245,10 @@
             "port": 1445
         },
         "youtube.com": {
+            "IP": "35.190.247.146",
+            "port": 1445
+        },
+        "youtube-nocookie.com": {
             "IP": "35.190.247.146",
             "port": 1445
         },
@@ -359,6 +384,7 @@
     "pac_domains": [
         "wikifunctions.org$",
         "mediawiki.org$",
+        "ncdn.ec$",
         "cloudflare-dns.com$",
         "adminforge.de$",
         "nadeko.net$",
