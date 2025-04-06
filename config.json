@@ -26,6 +26,9 @@
         "2400:cb00::/32": "^104.19.229.21"
     },
     "domains": {
+        "smsactivate.s3.eu-central-1.amazonaws.com": {
+            "IP": "3.5.137.138"
+        },
         "inv.nadeko.net": {
             "IP": "186.105.142.141"
         },
@@ -374,6 +377,7 @@
         }
     },
     "pac_domains": [
+        "eu-central-1.amazonaws.com",
         "ncdn.ec$",
         "cloudflare-dns.com$",
         "adminforge.de$",
