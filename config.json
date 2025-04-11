@@ -26,6 +26,10 @@
         "2400:cb00::/32": "^104.19.229.21"
     },
     "domains": {
+        "mastodon.social": {
+            "IP": "151.101.41.91"
+        },
+        "streaming.mastodon.social": {},
         "smsactivate.s3.eu-central-1.amazonaws.com": {
             "IP": "3.5.137.138"
         },
