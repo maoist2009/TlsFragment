@@ -26,9 +26,6 @@
         "2400:cb00::/32": "^104.19.229.21"
     },
     "domains": {
-        "mastodon.social": {
-            "IP": "151.101.41.91"
-        },
         "streaming.mastodon.social": {},
         "smsactivate.s3.eu-central-1.amazonaws.com": {
             "IP": "3.5.137.138"
@@ -38,7 +35,7 @@
         },
         "annas-archive.org": {},
         "mastodon.social": {
-            "IP": "146.75.29.91"
+            "IP": "199.232.89.91"
         },
         "codesandbox.io": {
             "IP": "104.21.3.227"
