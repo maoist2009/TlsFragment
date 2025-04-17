@@ -6,7 +6,6 @@ import time
 import random
 import copy
 import json
-import sys
 import ahocorasick
 import dns.message   #  --> pip install dnspython
 import dns.rdatatype
@@ -19,7 +18,6 @@ DOH_PORT = 2500
 
 log_every_N_sec = 30   # every 30 second , update log file with latest DNS-cache statistics
 
-allow_insecure = True   # set true to allow certificate domain mismatch in DoH
 my_socket_timeout = 120 # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
 FAKE_ttl_auto_timeout = 1
 first_time_sleep = 0.1 # speed control , avoid server crash if huge number of users flooding
@@ -386,7 +384,7 @@ class ThreadedServer(object):
         try:
             global ThreadtoWork
             while ThreadtoWork:
-                client_sock, client_addr = self.sock.accept()
+                client_sock, _ = self.sock.accept()
                 client_sock.settimeout(my_socket_timeout)
 
                 time.sleep(accept_time_sleep)   # avoid server crash on flooding request
@@ -683,7 +681,7 @@ class ThreadedServer(object):
                 host=host[1:]
             else:
                 idx=0
-                for i in range(0,6):
+                for _ in range(0,6):
                     idx=host_and_port.find(':',idx+1)
                 host=host_and_port[:idx]
                 port=host_and_port[idx+1:]
@@ -693,7 +691,7 @@ def parse_client_hello(data):
     import struct
     # print(struct.calcsize(">BHH"))
     # 解析TLS记录
-    content_type, version_major, version_minor, length = struct.unpack(">BBBH", data[:5])
+    content_type, _, _, length = struct.unpack(">BBBH", data[:5])
     if content_type!= 0x16:  # 0x16表示TLS Handshake
         raise ValueError("Not a TLS Handshake message")
     handshake_data = data[5:5 + length]
@@ -706,13 +704,10 @@ def parse_client_hello(data):
     client_hello_data = handshake_data[4:4 + length]
 
     # 解析Client Hello消息
-    client_version_major, client_version_minor, random_bytes, session_id_length = struct.unpack(">BB32sB", client_hello_data[:35])
-    session_id = client_hello_data[35:35 + session_id_length]
+    _, _, _, session_id_length = struct.unpack(">BB32sB", client_hello_data[:35])
     # print(client_hello_data[35 + session_id_length:35 + session_id_length + 2])
     cipher_suites_length = struct.unpack(">H", client_hello_data[35 + session_id_length:35 + session_id_length + 2])[0]
-    cipher_suites = client_hello_data[35 + session_id_length + 2:35 + session_id_length + 2 + cipher_suites_length]
     compression_methods_length = struct.unpack(">B", client_hello_data[35 + session_id_length + 2 + cipher_suites_length:35 + session_id_length + 2 + cipher_suites_length + 1])[0]
-    compression_methods = client_hello_data[35 + session_id_length + 2 + cipher_suites_length + 1:35 + session_id_length + 2 + cipher_suites_length + 1 + compression_methods_length]
 
     # 定位扩展部分
     extensions_offset = 35 + session_id_length + 2 + cipher_suites_length + 1 + compression_methods_length
@@ -791,8 +786,6 @@ def split_data(data, sni, L_snifrag, num_fragment,split):
         split(fragment_data)
         nst=nst+L_snifrag
 
-    fraged_sni=data[stt:stt+nst]
-
     if split_other_data(data[stt+nst:L_data], num_fragment, split):
           nstt=nstt+num_fragment*5
 
@@ -836,6 +829,7 @@ def send_data_in_fragment(sni, settings, data , sock):
     split_data(TLS_ans, first_sni_frag, settings.get("TCP_frag"), settings.get("num_TCP_fragment"),TCP_send_with_sleep)
     
     print("----------finish------------",sni)
+
 try:
     import platform
     if platform.system() == "Windows":
@@ -912,7 +906,6 @@ try:
         # kernel32._get_osfhandle.restype = wintypes.HANDLE
         pass
     elif platform.system() in ('Linux', 'Darwin', 'Android'):
-        import os
         import ctypes
         # 加载 libc 库
         
@@ -981,7 +974,7 @@ try:
         pass
 except Exception as e:
   print(e)
-
+  
 def send_fake_data(data_len,fake_data,fake_ttl,real_data,default_ttl,sock,FAKE_sleep):
     import platform
     print(platform.system())
