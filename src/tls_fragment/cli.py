@@ -1386,6 +1386,7 @@ def Write_TTL_cache():
         json.dump(TTL_cache,f)
 
 dataPath=Path.cwd()
-
 ThreadtoWork=True
-proxythread=start_server()
+
+if __name__ == '__main__':
+    proxythread=start_server()

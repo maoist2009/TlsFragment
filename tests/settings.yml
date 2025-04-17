@@ -1,0 +1,2 @@
+# You can define test configuration, and it will overwrite the default settings when running tests.
+debug: true
