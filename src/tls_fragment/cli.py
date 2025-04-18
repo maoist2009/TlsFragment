@@ -1,3 +1,4 @@
+import fragment
 from log import logger
 from pathlib import Path
 import socket
@@ -15,10 +16,6 @@ import ipaddress
 
 listen_PORT = 2500  # pyprox listening to 127.0.0.1:listen_PORT
 DOH_PORT = 2500
-
-log_every_N_sec = (
-    30  # every 30 second , update log file with latest DNS-cache statistics
-)
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
 FAKE_ttl_auto_timeout = 1
@@ -873,55 +870,50 @@ def send_data_in_fragment(sni, settings, data, sock):
     logger.debug("sending:    %s", data)
     base_header = data[:3]
     record = data[5:]
-    TLS_ans = b""
 
-    def TLS_add_frag(new_frag):
-        nonlocal TLS_ans, base_header
-        TLS_ans += base_header + int.to_bytes(len(new_frag), byteorder="big", length=2)
-        TLS_ans += new_frag
-        logger.info("adding frag: %d bytes.", len(new_frag))
-
-        logger.debug("adding frag: %s", new_frag)
-
-    stsni, edsni = split_data(
+    fragmented_tls_data = fragment.fragment_pattern(
         record,
         sni,
-        settings.get("TLS_frag"),
         settings.get("num_TLS_fragment"),
-        TLS_add_frag,
     )
-    if edsni > 0:
-        first_sni_frag = TLS_ans[stsni:edsni]
-    else:
-        first_sni_frag = b""
+    tcp_data = b""
+    for i, _ in enumerate(fragmented_tls_data):
+        fragmented_tls_data[i] = (
+            base_header
+            + int.to_bytes(len(fragmented_tls_data[i]), byteorder="big", length=2)
+            + fragmented_tls_data[i]
+        )
+        tcp_data += fragmented_tls_data[i]
+        logger.info("adding frag: %d bytes.", len(fragmented_tls_data[i]))
+        logger.debug("adding frag: %s", fragmented_tls_data[i])
 
-    logger.info("TLS fraged: %d Bytes.", len(TLS_ans))
-    logger.debug("TLS fraged: %s", TLS_ans)
+    logger.info("TLS fraged: %d Bytes.", len(tcp_data))
+    logger.debug("TLS fraged: %s", tcp_data)
 
     T_sleep = settings.get("TCP_sleep")
 
-    def TCP_send_with_sleep(new_frag):
-        nonlocal sock, T_sleep
-        sock.sendall(new_frag)
+    fragmented_tcp_data = fragment.fragment_pattern(
+        tcp_data,
+        tcp_data[
+            len(fragmented_tls_data[0]) : len(tcp_data)
+            - len(fragmented_tls_data[-1])
+            + 1
+        ],
+        settings.get("num_TCP_fragment"),
+    )
+
+    for data in fragmented_tcp_data:
+        sock.sendall(data)
         logger.info(
             "TCP send: %d bytes. And 'll sleep for %d seconds. ",
-            len(new_frag),
+            len(data),
             T_sleep,
         )
-
         logger.debug(
             "TCP send: %s",
-            new_frag,
+            data,
         )
         time.sleep(T_sleep)
-
-    split_data(
-        TLS_ans,
-        first_sni_frag,
-        settings.get("TCP_frag"),
-        settings.get("num_TCP_fragment"),
-        TCP_send_with_sleep,
-    )
 
     logger.info("----------finish------------ %s", sni)
 
