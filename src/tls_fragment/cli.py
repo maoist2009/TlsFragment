@@ -6,13 +6,14 @@ import socket
 import requests
 import threading
 import time
+from tls_fragment.utils import ip_to_binary_prefix, get_ttl
+from tls_fragment import remote
 import random
 import copy
 import json
 import ahocorasick
 import dns.message  #  --> pip install dnspython
 import dns.rdatatype
-import base64
 import ipaddress
 import httpx
 
@@ -74,296 +75,9 @@ lock_TTL_cache = threading.Lock()
 pac_domains = []
 pacfile = "function genshin(){}"
 
-
-def ip_to_binary_prefix(ip_or_network):
-    try:
-        network = ipaddress.ip_network(ip_or_network, strict=False)
-        network_address = network.network_address
-        prefix_length = network.prefixlen
-        if isinstance(network_address, ipaddress.IPv4Address):
-            binary_network = bin(int(network_address))[2:].zfill(32)
-        elif isinstance(network_address, ipaddress.IPv6Address):
-            binary_network = bin(int(network_address))[2:].zfill(128)
-        binary_prefix = binary_network[:prefix_length]
-        return binary_prefix
-    except ValueError:
-        try:
-            ip = ipaddress.ip_address(ip_or_network)
-            if isinstance(ip, ipaddress.IPv4Address):
-                binary_ip = bin(int(ip))[2:].zfill(32)
-                binary_prefix = binary_ip[:32]
-            elif isinstance(ip, ipaddress.IPv6Address):
-                binary_ip = bin(int(ip))[2:].zfill(128)
-                binary_prefix = binary_ip[:128]
-            return binary_prefix
-        except ValueError:
-            raise ValueError(f"输入 {ip_or_network} 不是有效的 IP 地址或网络")
-
-
-class TrieNode:
-    def __init__(self):
-        self.children = [None, None]
-        self.val = None
-
-
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, prefix, value):
-        node = self.root
-        for bit in prefix:
-            index = int(bit)
-            if not node.children[index]:
-                node.children[index] = TrieNode()
-            node = node.children[index]
-        node.val = value
-
-    def search(self, prefix):
-        node = self.root
-        ans = None
-        for bit in prefix:
-            index = int(bit)
-            if node.val != None:
-                ans = node.val
-            if not node.children[index]:
-                return ans
-            node = node.children[index]
-        if node.val != None:
-            ans = node.val
-        return ans
-
-
-ipv4trie = Trie()
-ipv6trie = Trie()
-
-
-def set_ttl(sock, ttl):
-    if sock.family == socket.AF_INET6:
-        sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_UNICAST_HOPS, ttl)
-    else:
-        sock.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
-
-
-def tryipredirect(ip):
-    ans = ""
-    if ip.find(":") != -1:
-        ans = ipv6trie.search(ip_to_binary_prefix(ip))
-        if ans == None:
-            return ip
-        else:
-            return ans
-    else:
-        ans = ipv4trie.search(ip_to_binary_prefix(ip))
-        if ans == None:
-            return ip
-        else:
-            return ans
-
-
-def IPredirect(ip):
-    while True:
-        ans = tryipredirect(ip)
-        if ans == ip:
-            break
-        elif ans[0] == "^":
-            logger.info("IPredirect %s to %s", ip, ans[1:])
-            ip = ans[1:]
-            break
-        else:
-            logger.info("IPredirect %s to %s", ip, ans)
-            ip = ans
-
-    return ip
-
-
-def check_ttl(ip, port, ttl):
-    try:
-        if ip.find(":") != -1:
-            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-        else:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        set_ttl(sock, ttl)
-        sock.settimeout(FAKE_ttl_auto_timeout)
-        sock.connect((ip, port))
-        sock.send(b"0")
-        sock.close()
-        return True
-    except Exception as e:
-        logger.warning(e)
-        return False
-    finally:
-        sock.close()
-
-
-def get_ttl(ip, port):
-    l = 1
-    r = 128
-    ans = -1
-    while l <= r:
-        mid = (l + r) // 2
-        val = check_ttl(ip, port, mid)
-        logger.debug("%d %d %d %d %d", l, r, mid, ans, val)
-        if val:
-            ans = mid
-            r = mid - 1
-        else:
-            l = mid + 1
-
-    logger.info("get_ttl %s %d %d", ip, port, ans)
-    return ans
-
-
-class GET_settings:
-    def __init__(self):
-        self.url = doh_server
-        self.req = requests.session()
-        self.knocker_proxy = {"https": f"http://127.0.0.1:{DOH_PORT}"}
-
-    def query_DNS(self, server_name, settings):
-        quary_params = {
-            # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
-            "type": "A",
-            "ct": "application/dns-message",
-        }
-        if settings["IPtype"] == "ipv6":
-            quary_params["type"] = "AAAA"
-        else:
-            quary_params["type"] = "A"
-        logger.info("online DNS Query %s", server_name)
-        try:
-            if settings["IPtype"] == "ipv6":
-                query_message = dns.message.make_query(server_name, "AAAA")
-            else:
-                query_message = dns.message.make_query(server_name, "A")
-
-            with httpx.Client(proxy=self.knocker_proxy['https']) as proxied_client:
-                reply = dns.query.https(
-                    where=doh_server, q=query_message, session=proxied_client
-                )
-
-            resolved_ip = None
-            for x in reply.answer:
-                if (
-                    settings["IPtype"] == "ipv6" and x.rdtype == dns.rdatatype.AAAA
-                ) or (settings["IPtype"] == "ipv4" and x.rdtype == dns.rdatatype.A):
-                    resolved_ip = x[0].address  # pick first ip in DNS answer
-                try:
-                    if settings.get("IPcache") is False:
-                        pass
-                    else:
-                        DNS_cache[server_name] = resolved_ip
-                except:
-                    DNS_cache[server_name] = resolved_ip
-                    break
-
-            logger.info("online DNS --> Resolved %s to %s", server_name, resolved_ip)
-            return resolved_ip
-        except Exception as e:
-            logger.error("DNS query failed: %s", repr(e))
-        return "ERROR"
-
-    def query(self, domain, todns=True):
-        res = domain_settings_tree.search("^" + domain + "$")
-        try:
-            res = copy.deepcopy(
-                domain_settings.get(sorted(res, key=lambda x: len(x), reverse=True)[0])
-            )
-        except:
-            res = {}
-
-        if todns == True:
-            res.setdefault("IPtype", IPtype)
-
-            if res.get("IP") == None:
-                if DNS_cache.get(domain) != None:
-                    res["IP"] = DNS_cache[domain]
-                else:
-                    res["IP"] = self.query_DNS(domain, res)
-                    if res["IP"] == None:
-                        logger.warning(
-                            "Failed to resolve domain, try again with other IP type"
-                        )
-                        if res["IPtype"] == "ipv6":
-                            res["IPtype"] = "ipv4"
-                        elif res["IPtype"] == "ipv4":
-                            res["IPtype"] = "ipv6"
-                        res["IP"] = self.query_DNS(domain, res)
-                    lock_DNS_cache.acquire()
-                    global cnt_dns_chg, dataPath
-                    cnt_dns_chg = cnt_dns_chg + 1
-                    if cnt_dns_chg >= DNS_log_every:
-                        cnt_dns_chg = 0
-
-                        with dataPath.joinpath("DNS_cache.json").open(
-                            "w", encoding="UTF-8"
-                        ) as f:
-                            json.dump(DNS_cache, f)
-                    lock_DNS_cache.release()
-
-                res["IP"] = IPredirect(res.get("IP"))
-                # res["IP"]="127.0.0.1"
-        else:
-            res["IP"] = todns
-        res.setdefault("port", 443)
-
-        res.setdefault("method", method)
-
-        res.setdefault("TCP_frag", TCP_frag)
-        res.setdefault("TCP_sleep", TCP_sleep)
-        res.setdefault("num_TCP_fragment", num_TCP_fragment)
-
-        if res.get("method") == "TLSfrag":
-            res.setdefault("TLS_frag", TLS_frag)
-            res.setdefault("num_TLS_fragment", num_TLS_fragment)
-        elif res.get("method") == "FAKEdesync":
-            res["FAKE_packet"] = (
-                FAKE_packet
-                if res.get("FAKE_packet") is None
-                else res["FAKE_packet"].encode(encoding="UTF-8")
-            )
-            res.setdefault("FAKE_ttl", FAKE_ttl)
-            res.setdefault("FAKE_sleep", FAKE_sleep)
-            if res.get("FAKE_ttl") == "query":
-                logger.info("FAKE TTL for %s is %s", res.get("IP"), res.get("FAKE_ttl"))
-                if TTL_cache.get(res.get("IP")) != None:
-                    res["FAKE_ttl"] = TTL_cache[res.get("IP")] - 1
-                    logger.info(
-                        f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}'
-                    )
-                else:
-                    logger.info(res.get("IP"), res.get("port"))
-                    val = get_ttl(res.get("IP"), res.get("port"))
-                    if val == -1:
-                        raise Exception("ERROR get ttl")
-                    TTL_cache[res.get("IP")] = val
-                    res["FAKE_ttl"] = val - 1
-                    logger.info(
-                        f'FAKE TTL for {res.get("IP")} is {res.get("FAKE_ttl")}'
-                    )
-
-                    lock_TTL_cache.acquire()
-                    global cnt_ttl_chg
-                    cnt_ttl_chg = cnt_ttl_chg + 1
-                    logger.info(f"cnt_ttl_chg {cnt_ttl_chg}", TTL_log_every)
-                    if cnt_ttl_chg >= TTL_log_every:
-                        cnt_ttl_chg = 0
-                        with dataPath.joinpath("TTL_cache.json").open(
-                            "w", encoding="UTF-8"
-                        ) as f:
-                            json.dump(TTL_cache, f)
-                    lock_TTL_cache.release()
-
-        logger.info("%s --> %s", domain, res)
-        return res
-
-
 ThreadtoWork = False
-
-
 class ThreadedServer(object):
     def __init__(self, host, port):
-        self.DoH = GET_settings()
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -449,13 +163,11 @@ class ThreadedServer(object):
 
             # 建立连接（完全复用原有逻辑）
             try:
-                server_socket, settings = self._create_connection(
-                    server_name, server_port
-                )
+                remote_obj = remote.Remote(server_name, server_port)
                 client_socket.sendall(
                     b"\x05\x00\x00\x01" + socket.inet_aton("0.0.0.0") + b"\x00\x00"
                 )
-                return server_socket, settings
+                return remote_obj
             except Exception as e:
                 logger.info(f"连接失败: {str(e)}")
                 client_socket.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00")
@@ -477,13 +189,11 @@ class ThreadedServer(object):
             logger.info(f"CONNECT {server_name}:{server_port}")
 
             try:
-                server_socket, settings = self._create_connection(
-                    server_name, server_port
-                )
+                remote_obj = remote.Remote(server_name, server_port)
                 client_socket.sendall(
                     b"HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
                 )
-                return server_socket, settings
+                return remote_obj
             except Exception as e:
                 logger.info(f"连接失败: {str(e)}")
                 client_socket.sendall(
@@ -523,41 +233,6 @@ class ThreadedServer(object):
             client_socket.close()
             return None, {}
 
-    def _create_connection(self, server_name, server_port):
-        """复用原有连接创建逻辑"""
-        try:
-            ipaddress.ip_address(server_name)
-            server_ip = server_name
-            settings = {}
-        except ValueError:
-            settings = self.DoH.query(server_name) or {}
-            server_ip = settings.get("IP", server_name)
-            server_port = settings.get("port", server_port)
-            settings.setdefault("sni", server_name.encode())
-
-        # 原有socket创建逻辑
-        if ":" in server_ip:
-            sock = fragment.FragSock(
-                socket.AF_INET6,
-                socket.SOCK_STREAM,
-                num_of_pieccs_tls=num_TLS_fragment,
-                num_of_pieccs_tcp=num_TCP_fragment,
-                send_interval=TCP_sleep,
-            )
-        else:
-            sock = fragment.FragSock(
-                socket.AF_INET,
-                socket.SOCK_STREAM,
-                num_of_pieccs_tls=num_TLS_fragment,
-                num_of_pieccs_tcp=num_TCP_fragment,
-                send_interval=TCP_sleep,
-            )
-
-        sock.settimeout(my_socket_timeout)
-        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        sock.connect((server_ip, server_port))
-        return sock, settings
-
     def _parse_socks5_address(self, sock, atyp):
         """SOCKS5地址解析"""
         if atyp == 0x01:  # IPv4
@@ -576,7 +251,8 @@ class ThreadedServer(object):
 
     def my_upstream(self, client_sock):
         first_flag = True
-        backend_sock, settings = self.handle_client_request(client_sock)
+        backend_sock = self.handle_client_request(client_sock)
+        backend_sock.connect()
 
         if backend_sock == None:
             client_sock.close()
@@ -590,7 +266,7 @@ class ThreadedServer(object):
             client_sock.close()
             return False
 
-        this_ip = backend_sock.getpeername()[0]
+        this_ip = backend_sock.sock.getpeername()[0]
         if this_ip not in IP_UL_traffic:
             IP_UL_traffic[this_ip] = 0
             IP_DL_traffic[this_ip] = 0
@@ -609,45 +285,20 @@ class ThreadedServer(object):
                     if data:
                         thread_down = threading.Thread(
                             target=self.my_downstream,
-                            args=(backend_sock, client_sock, settings),
+                            args=(backend_sock, client_sock),
                         )
                         thread_down.daemon = True
                         thread_down.start()
                         # backend_sock.sendall(data)
-                        try:
-                            if settings.get("sni") == None:
-                                logger.warning(
-                                    "No sni? try to dig it in packet like gfwm "
-                                )
-                                settings["sni"] = parse_client_hello(data)
-                                tmp = settings.get("sni")
-                                if settings["sni"]:
-                                    settings = self.DoH.query(
-                                        str(settings.get("sni")),
-                                        todns=settings.get("IP"),
-                                    )
-                                settings["sni"] = tmp
-                        except Exception as e:
-                            logger.info(e)
-                            import traceback
-
-                            traceback_info = traceback.format_exc()
-                            logger.error("%s", traceback_info)
-                        if settings.get("method") == "TLSfrag":
-                            backend_sock.sendall(data)
-                        elif settings.get("method") == "FAKEdesync":
+                        if backend_sock.policy.get("mode") == "TLSfrag":
+                            backend_sock.send(data)
+                        elif backend_sock.policy.get("mode") == "FAKEdesync":
                             send_data_with_fake(
-                                settings.get("sni"), settings, data, backend_sock
+                                backend_sock.domain,
+                                backend_sock.policy,
+                                data,
+                                backend_sock,
                             )
-                        elif settings.get("method") == "DIRECT":
-                            backend_sock.sendall(data)
-                        elif settings.get("method") == "GFWlike":
-                            client_sock.close()
-                            backend_sock.close()
-                            return False
-                        else:
-                            logger.warning("unknown method")
-                            backend_sock.sendall(data)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
 
                     else:
@@ -656,23 +307,23 @@ class ThreadedServer(object):
                 else:
                     data = client_sock.recv(16384)
                     if data:
-                        backend_sock.sendall(data)
+                        backend_sock.send(data)
                         IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
                     else:
                         raise Exception("cli pipe close")
 
             except Exception as e:
-                logger.info("upstream : %s from %s", repr(e), settings.get("sni"))
+                logger.info("upstream : %s from %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
                 client_sock.close()
-                backend_sock.close()
+                backend_sock.sock.close()
                 return False
 
         client_sock.close()
-        backend_sock.close()
+        backend_sock.sock.close()
 
-    def my_downstream(self, backend_sock, client_sock, settings):
-        this_ip = backend_sock.getpeername()[0]
+    def my_downstream(self, backend_sock: remote.Remote, client_sock: socket.socket):
+        this_ip = backend_sock.sock.getpeername()[0]
 
         first_flag = True
         global ThreadtoWork
@@ -696,9 +347,9 @@ class ThreadedServer(object):
                         raise Exception("backend pipe close")
 
             except Exception as e:
-                logger.info("downstream : %s %s", repr(e), settings.get("sni"))
+                logger.info("downstream : %s %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
-                backend_sock.close()
+                backend_sock.sock.close()
                 client_sock.close()
                 return False
 
@@ -848,6 +499,7 @@ def split_data(data, sni, L_snifrag, num_fragment, split):
         nstt = nstt + num_fragment * 5
 
     return nstt, int(nstt + nst + nst * 5 / L_snifrag)
+
 
 try:
     import platform
@@ -1400,18 +1052,16 @@ def start_server():
     global dataPath
     with dataPath.joinpath("config.json").open(mode="r", encoding="UTF-8") as f:
         global output_data, my_socket_timeout, FAKE_ttl_auto_timeout, listen_PORT, DOH_PORT, num_TCP_fragment, num_TLS_fragment, TCP_sleep, TCP_frag, TLS_frag, doh_server, domain_settings, DNS_log_every, TTL_log_every, IPtype, method, FAKE_packet, FAKE_ttl, FAKE_sleep, domain_settings_tree, pac_domains
-        global ipv4trie, ipv6trie
         config = json.load(f)
         output_data = config.get("output_data")
 
         my_socket_timeout = config.get("my_socket_timeout")
         FAKE_ttl_auto_timeout = config.get("FAKE_ttl_auto_timeout")
-        listen_PORT = config.get("listen_PORT")
-        DOH_PORT = config.get("DOH_PORT")
+        listen_PORT = config.get("port")
 
-        num_TCP_fragment = config.get("num_TCP_fragment")
-        num_TLS_fragment = config.get("num_TLS_fragment")
-        TCP_sleep = config.get("TCP_sleep")
+        num_TCP_fragment = config.get("num_tcp_pieces")
+        num_TLS_fragment = config.get("num_tls_pieces")
+        TCP_sleep = config.get("tcp_sleep")
         TCP_frag = config.get("TCP_frag")
         TLS_frag = config.get("TLS_frag")
         doh_server = config.get("doh_server")
@@ -1419,22 +1069,16 @@ def start_server():
         DNS_log_every = config.get("DNS_log_every")
         TTL_log_every = config.get("TTL_log_every")
         IPtype = config.get("IPtype")
-        method = config.get("method")
-        FAKE_packet = config.get("FAKE_packet").encode(encoding="UTF-8")
-        FAKE_ttl = config.get("FAKE_ttl")
-        FAKE_sleep = config.get("FAKE_sleep")
+        method = config.get("mode")
+        FAKE_packet = config.get("fake_packet").encode(encoding="UTF-8")
+        FAKE_ttl = config.get("fake_ttl")
+        FAKE_sleep = config.get("fake_sleep")
         pac_domains = config.get("pac_domains")
         IPredirect = config.get("IPredirect")
         if FAKE_ttl == "auto":
             # temp code for auto fake_ttl
             FAKE_ttl = random.randint(10, 60)
         generate_PAC()
-        domain_settings_tree = ahocorasick.AhoCorasick(*domain_settings.keys())
-        for key in IPredirect.keys():
-            if key.find(":") != -1:
-                ipv6trie.insert(ip_to_binary_prefix(key), IPredirect[key])
-            else:
-                ipv4trie.insert(ip_to_binary_prefix(key), IPredirect[key])
 
     try:
         global DNS_cache
