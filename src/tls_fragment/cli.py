@@ -849,64 +849,6 @@ def split_data(data, sni, L_snifrag, num_fragment, split):
 
     return nstt, int(nstt + nst + nst * 5 / L_snifrag)
 
-
-def send_data_in_fragment(sni, settings, data, sock):
-    logger.info("To send: %d Bytes.", len(data))
-    if sni == None:
-        sock.sendall(data)
-        return
-
-    logger.debug("sending:    %s", data)
-    base_header = data[:3]
-    record = data[5:]
-
-    fragmented_tls_data = fragment.fragment_pattern(
-        record,
-        sni,
-        settings.get("num_TLS_fragment"),
-    )
-    tcp_data = b""
-    for i, _ in enumerate(fragmented_tls_data):
-        fragmented_tls_data[i] = (
-            base_header
-            + int.to_bytes(len(fragmented_tls_data[i]), byteorder="big", length=2)
-            + fragmented_tls_data[i]
-        )
-        tcp_data += fragmented_tls_data[i]
-        logger.info("adding frag: %d bytes.", len(fragmented_tls_data[i]))
-        logger.debug("adding frag: %s", fragmented_tls_data[i])
-
-    logger.info("TLS fraged: %d Bytes.", len(tcp_data))
-    logger.debug("TLS fraged: %s", tcp_data)
-
-    T_sleep = settings.get("TCP_sleep")
-
-    fragmented_tcp_data = fragment.fragment_pattern(
-        tcp_data,
-        tcp_data[
-            len(fragmented_tls_data[0]) : len(tcp_data)
-            - len(fragmented_tls_data[-1])
-            + 1
-        ],
-        settings.get("num_TCP_fragment"),
-    )
-
-    for data in fragmented_tcp_data:
-        sock.sendall(data)
-        logger.info(
-            "TCP send: %d bytes. And 'll sleep for %d seconds. ",
-            len(data),
-            T_sleep,
-        )
-        logger.debug(
-            "TCP send: %s",
-            data,
-        )
-        time.sleep(T_sleep)
-
-    logger.info("----------finish------------ %s", sni)
-
-
 try:
     import platform
 
