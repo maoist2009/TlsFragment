@@ -83,7 +83,7 @@ class Remote:
         self.port = port
         # res["IP"]="127.0.0.1"
 
-        if self.policy["fake_ttl"] == "query":
+        if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEDesync":
             logger.info(
                 "FAKE TTL for %s is %s", self.address, self.policy.get("fake_ttl")
             )
