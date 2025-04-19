@@ -8,6 +8,7 @@ import random
 import struct
 from tls_fragment.log import logger
 
+logger = logger.getChild("fragment")
 
 def fragment_content(data: str, num: int) -> list:
     """

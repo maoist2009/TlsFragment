@@ -2,8 +2,9 @@ import socket
 from tls_fragment.utils import set_ttl
 from tls_fragment.log import logger
 from tls_fragment import remote
-from tls_fragment import fragment
 import time
+
+logger = logger.getChild("fake_desync")
 
 try:
     import platform
@@ -340,13 +341,13 @@ def send_data_with_fake(remote_obj: remote.Remote, data):
     # if windows, use TransmitFile
     default_ttl = remote_obj.sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
     try:
-        fake_data = remote_obj.policy.get("FAKE_packet")
-        fake_ttl = int(remote_obj.policy.get("FAKE_ttl"))
+        fake_data = remote_obj.policy.get("fake_packet")
+        fake_ttl = int(remote_obj.policy.get("fake_ttl"))
     except:
         raise Exception("FAKE_packet or FAKE_ttl not set in settings.json")
 
     data_len = len(fake_data)
-    FAKE_sleep = remote_obj.policy.get("FAKE_sleep")
+    FAKE_sleep = remote_obj.policy.get("fake_sleep")
     if send_fake_data(
         data_len,
         fake_data,

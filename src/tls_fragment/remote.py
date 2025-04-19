@@ -18,6 +18,8 @@ import socket
 import copy
 import threading
 
+logger = logger.getChild("remote")
+
 resolver = dns.resolver.Resolver()
 resolver.cache = dns.resolver.LRUCache()
 resolver.nameservers = [
@@ -63,16 +65,18 @@ class Remote:
                     sorted(matched_domains, key=lambda x: len(x), reverse=True)[0]
                 )
             )
+        else:
+            self.policy = {}
         self.policy |= default_policy
 
         if self.policy.get("IP") is None:
             if config["enalbe_ipv6"]:
                 try:
-                    self.address = resolver.resolve(domain, "AAAA")
-                except dns.asyncresolver.NoAnswer:
-                    self.address = resolver.resolve(domain, "A")
+                    self.address = resolver.resolve(domain, "AAAA")[0].to_text()
+                except dns.resolver.NoAnswer:
+                    self.address = resolver.resolve(domain, "A")[0].to_text()
             else:
-                self.address = resolver.resolve(domain, "A")
+                self.address = resolver.resolve(domain, "A")[0].to_text()
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
@@ -89,7 +93,7 @@ class Remote:
                     "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
                 )
             else:
-                logger.info("%s %d",self.address, self.policy.get("port"))
+                logger.info("%s %d", self.address, self.policy.get("port"))
                 val = get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")

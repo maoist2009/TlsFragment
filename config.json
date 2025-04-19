@@ -1,4 +1,5 @@
 {
+    "loglevel":"DEBUG",
     "port": 2500,
     "num_tcp_pieces": 3,
     "num_tls_pieces": 2,
@@ -9,7 +10,7 @@
     "my_socket_timeout": 180,
     "FAKE_ttl_auto_timeout": 2,
     "doh_server": "https://cloudflare-dns.com/dns-query",
-    "mode": "TLSfrag",
+    "mode": "FAKEdesync",
     "enalbe_ipv6": false,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
