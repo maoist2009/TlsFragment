@@ -6,7 +6,7 @@
 
 ```shell
 python -m build --wheel --no-isolation
-python -m installer --destdir="$pkgdir" dist/*.whl
+python -m installer dist/*.whl
 ```
 
 ## TLSFragment原理
