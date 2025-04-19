@@ -123,7 +123,7 @@ class GET_settings:
             query_url = self.url + query_base64
 
 
-            ans = await self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'})
+            ans = await self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'},proxy="http://www.baidu.com:1024")
             # print("ans1: ",ans)
             # print(ans.content)
             anscontent=await ans.content.read()
