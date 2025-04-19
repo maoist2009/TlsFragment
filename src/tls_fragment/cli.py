@@ -5,7 +5,6 @@ import threading
 import time
 from tls_fragment import remote, fake_desync
 from tls_fragment.config import config
-import random
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
@@ -210,7 +209,11 @@ class ThreadedServer(object):
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
-        backend_sock.connect()
+        try:
+            backend_sock.connect()
+        except:
+            logger.error("connect failed")
+            return False
 
         if backend_sock == None:
             client_sock.close()

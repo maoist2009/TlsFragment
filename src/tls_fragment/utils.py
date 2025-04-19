@@ -2,6 +2,7 @@ import ipaddress
 from tls_fragment.log import logger
 import socket
 
+logger = logger.getChild("utils")
 
 def ip_to_binary_prefix(ip_or_network):
     try:
@@ -42,7 +43,7 @@ def check_ttl(ip, port, ttl):
         else:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         set_ttl(sock, ttl)
-        sock.settimeout(1)
+        sock.settimeout(0.5)
         sock.connect((ip, port))
         sock.send(b"0")
         sock.close()
