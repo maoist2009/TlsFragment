@@ -2,12 +2,37 @@ from pathlib import Path
 import shutil
 import ahocorasick
 import json
-from tls_fragment.utils import ip_to_binary_prefix
+import ipaddress
 import random
 
 basepath = Path(__file__).parent.parent
 
 config = {}
+
+
+def ip_to_binary_prefix(ip_or_network):
+    try:
+        network = ipaddress.ip_network(ip_or_network, strict=False)
+        network_address = network.network_address
+        prefix_length = network.prefixlen
+        if isinstance(network_address, ipaddress.IPv4Address):
+            binary_network = bin(int(network_address))[2:].zfill(32)
+        elif isinstance(network_address, ipaddress.IPv6Address):
+            binary_network = bin(int(network_address))[2:].zfill(128)
+        binary_prefix = binary_network[:prefix_length]
+        return binary_prefix
+    except ValueError:
+        try:
+            ip = ipaddress.ip_address(ip_or_network)
+            if isinstance(ip, ipaddress.IPv4Address):
+                binary_ip = bin(int(ip))[2:].zfill(32)
+                binary_prefix = binary_ip[:32]
+            elif isinstance(ip, ipaddress.IPv6Address):
+                binary_ip = bin(int(ip))[2:].zfill(128)
+                binary_prefix = binary_ip[:128]
+            return binary_prefix
+        except ValueError:
+            raise ValueError(f"输入 {ip_or_network} 不是有效的 IP 地址或网络")
 
 
 class TrieNode:
