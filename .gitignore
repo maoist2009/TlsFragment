@@ -5,9 +5,3 @@ build
 proxy.exe.spec
 log.txt
 __pycache__
-
-dns.py
-config.py
-utils.py
-test.py
-site.py
