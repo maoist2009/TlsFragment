@@ -1,5 +1,0 @@
-ahocorasick-python==0.0.9
-aiohttp==3.10.11
-aiohttp_socks==0.9.1
-dnspython==2.3.0
-chardet==5.2.0
