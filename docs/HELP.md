@@ -1,5 +1,17 @@
 # TLSFragment使用指南
 
+# 安装
+
+## 手动
+将仓库克隆下来运行 cli.py
+
+## 作为模块安装
+
+```shell
+python -m build --wheel --no-isolation
+python -m installer --destdir="$pkgdir" dist/*.whl
+```
+
 ## TLSFragment原理
 
 ### TLSfrag

@@ -1,5 +1,6 @@
-import fragment
-from log import logger
+import dns.query
+from tls_fragment import fragment
+from tls_fragment.log import logger
 from pathlib import Path
 import socket
 import requests
@@ -13,6 +14,7 @@ import dns.message  #  --> pip install dnspython
 import dns.rdatatype
 import base64
 import ipaddress
+import httpx
 
 listen_PORT = 2500  # pyprox listening to 127.0.0.1:listen_PORT
 DOH_PORT = 2500
@@ -228,58 +230,35 @@ class GET_settings:
             quary_params["type"] = "AAAA"
         else:
             quary_params["type"] = "A"
-
         logger.info("online DNS Query %s", server_name)
         try:
             if settings["IPtype"] == "ipv6":
                 query_message = dns.message.make_query(server_name, "AAAA")
             else:
                 query_message = dns.message.make_query(server_name, "A")
-            query_wire = query_message.to_wire()
-            query_base64 = base64.urlsafe_b64encode(query_wire).decode("utf-8")
-            query_base64 = query_base64.replace(
-                "=", ""
-            )  # remove base64 padding to append in url
 
-            query_url = self.url + query_base64
-
-            ans = self.req.get(
-                query_url,
-                params=quary_params,
-                headers={"accept": "application/dns-message"},
-                proxies=self.knocker_proxy,
-            )
-
-            # Parse the response as a DNS packet
-
-            if (
-                ans.status_code == 200
-                and ans.headers.get("content-type") == "application/dns-message"
-            ):
-                answer_msg = dns.message.from_wire(ans.content)
-
-                resolved_ip = None
-                for x in answer_msg.answer:
-                    if (
-                        settings["IPtype"] == "ipv6" and x.rdtype == dns.rdatatype.AAAA
-                    ) or (settings["IPtype"] == "ipv4" and x.rdtype == dns.rdatatype.A):
-                        resolved_ip = x[0].address  # pick first ip in DNS answer
-                        try:
-                            if settings.get("IPcache") == False:
-                                pass
-                            else:
-                                DNS_cache[server_name] = resolved_ip
-                        except:
-                            DNS_cache[server_name] = resolved_ip
-                        break
-
-                logger.info(
-                    "online DNS --> Resolved %s to %s", server_name, resolved_ip
+            with httpx.Client(proxy=self.knocker_proxy['https']) as proxied_client:
+                reply = dns.query.https(
+                    where=doh_server, q=query_message, session=proxied_client
                 )
-                return resolved_ip
-            else:
-                logger.error("DNS query failed: %d %s", ans.status_code, ans.reason)
-            return "127.0.0.1"
+
+            resolved_ip = None
+            for x in reply.answer:
+                if (
+                    settings["IPtype"] == "ipv6" and x.rdtype == dns.rdatatype.AAAA
+                ) or (settings["IPtype"] == "ipv4" and x.rdtype == dns.rdatatype.A):
+                    resolved_ip = x[0].address  # pick first ip in DNS answer
+                try:
+                    if settings.get("IPcache") is False:
+                        pass
+                    else:
+                        DNS_cache[server_name] = resolved_ip
+                except:
+                    DNS_cache[server_name] = resolved_ip
+                    break
+
+            logger.info("online DNS --> Resolved %s to %s", server_name, resolved_ip)
+            return resolved_ip
         except Exception as e:
             logger.error("DNS query failed: %s", repr(e))
         return "ERROR"
@@ -558,9 +537,21 @@ class ThreadedServer(object):
 
         # 原有socket创建逻辑
         if ":" in server_ip:
-            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            sock = fragment.FragSock(
+                socket.AF_INET6,
+                socket.SOCK_STREAM,
+                num_of_pieccs_tls=num_TLS_fragment,
+                num_of_pieccs_tcp=num_TCP_fragment,
+                send_interval=TCP_sleep,
+            )
         else:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock = fragment.FragSock(
+                socket.AF_INET,
+                socket.SOCK_STREAM,
+                num_of_pieccs_tls=num_TLS_fragment,
+                num_of_pieccs_tcp=num_TCP_fragment,
+                send_interval=TCP_sleep,
+            )
 
         sock.settimeout(my_socket_timeout)
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -643,9 +634,7 @@ class ThreadedServer(object):
                             traceback_info = traceback.format_exc()
                             logger.error("%s", traceback_info)
                         if settings.get("method") == "TLSfrag":
-                            send_data_in_fragment(
-                                settings.get("sni"), settings, data, backend_sock
-                            )
+                            backend_sock.sendall(data)
                         elif settings.get("method") == "FAKEdesync":
                             send_data_with_fake(
                                 settings.get("sni"), settings, data, backend_sock
