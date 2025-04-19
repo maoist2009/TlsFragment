@@ -1,5 +1,5 @@
 {
-    "loglevel":"DEBUG",
+    "loglevel":"WARNING",
     "port": 2500,
     "num_tcp_pieces": 3,
     "num_tls_pieces": 2,
