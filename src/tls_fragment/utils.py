@@ -42,7 +42,7 @@ def check_ttl(ip, port, ttl):
         else:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         set_ttl(sock, ttl)
-        sock.settimeout(2)
+        sock.settimeout(1)
         sock.connect((ip, port))
         sock.send(b"0")
         sock.close()

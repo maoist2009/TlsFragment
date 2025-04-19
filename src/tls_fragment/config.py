@@ -3,6 +3,7 @@ import shutil
 import ahocorasick
 import json
 from tls_fragment.utils import ip_to_binary_prefix
+import random
 
 basepath = Path(__file__).parent.parent
 
@@ -71,3 +72,7 @@ for key in config["IPredirect"].keys():
         ipv6_map.insert(ip_to_binary_prefix(key), config["IPredirect"][key])
     else:
         ipv4_map.insert(ip_to_binary_prefix(key), config["IPredirect"][key])
+
+if config["fake_ttl"] == "auto":
+    # temp code for auto fake_ttl
+    config["fake_ttl"] = random.randint(10, 60)
