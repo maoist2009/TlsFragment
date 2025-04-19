@@ -12,7 +12,7 @@
     "FAKE_sleep": 0.1,
     "my_socket_timeout": 180,
     "FAKE_ttl_auto_timeout": 2,
-    "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
+    "doh_server": "https://cloudflare-dns.com/dns-query",
     "DNS_log_every": 5,
     "TTL_log_every": 1,
     "method": "TLSfrag",
