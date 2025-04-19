@@ -89,7 +89,7 @@ class Remote:
                     "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
                 )
             else:
-                logger.info(self.address, self.policy.get("port"))
+                logger.info("%s %d",self.address, self.policy.get("port"))
                 val = get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")
