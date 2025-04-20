@@ -27,6 +27,8 @@ resolver.nameservers = [
         f'http://127.0.0.1:{config["port"]}', url=config["doh_server"]
     )
 ]
+resolver.timeout = 10
+resolver.lifetime = 10
 TTL_cache = {}  # TTL for each IP
 lock_TTL_cache = threading.Lock()
 
