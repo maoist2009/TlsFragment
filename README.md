@@ -61,19 +61,19 @@ BUILD_WINDOWS
 #### 公共
 
 
-| 项名                | 简单解释                    | 是否可以域名自定义 |
-| ------------------- | --------------------------- | ------------------ |
-| `output_data`       | 是否输出包内容              | 否                 |
-| `listen_PORT`       | 代理运行端口                | 否                 |
-| `DOH_PORT`          | 代理使用DoH代理端口         | 否                 |
-| `my_socket_timeout` | 接/发包超时时间             | 否                 |
-| `doh_server`        | doh服务器                   | 否                 |
-| `DNS_log_every`     | dns缓存频率                 | 否                 |
-| `TTL_log_every`     | ttl缓存频率                 | 否                 |
-| `num_TCP_fragment`  | 无sni段TCP分块数            | 是                 |
-| `TCP_frag`          | sni所在tcp层大致段分块长度  | 是                 |
-| `method`            | 操作方法，见下文模式        | 是                 |
-| `IPtype`            | dns查询ip默认类型（无则换） | 是                 |
+| 项名                | 简单解释                          | 是否可以域名自定义 |
+| ------------------- | ---------------------------     | ------------------ |
+| `output_data`       | 是否输出包内容                    | 否                 |
+| `listen_PORT`       | 代理运行端口                      | 否                 |
+| `DOH_PORT`          | 代理使用DoH代理端口                | 否                 |
+| `my_socket_timeout` | 接/发包超时时间                    | 否                 |
+| `doh_server`        | doh服务器（请在 domains 里指定 ip） | 否                 |
+| `DNS_log_every`     | dns缓存频率                       | 否                 |
+| `TTL_log_every`     | ttl缓存频率                       | 否                 |
+| `num_TCP_fragment`  | 无sni段TCP分块数                  | 是                 |
+| `TCP_frag`          | sni所在tcp层大致段分块长度         | 是                 |
+| `method`            | 操作方法，见下文模式               | 是                 |
+| `IPtype`            | dns查询ip默认类型（无则换）        | 是                 |
 
 #### `TLSfrag`模式
 
