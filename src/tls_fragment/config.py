@@ -5,7 +5,7 @@ import json
 import ipaddress
 import random
 
-basepath = Path(__file__).parent.parent
+basepath = Path(__file__).parent.parent.parent
 
 config = {}
 
