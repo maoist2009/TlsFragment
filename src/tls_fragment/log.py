@@ -1,5 +1,5 @@
 import logging
-from tls_fragment.config import config
+from .config import config
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",

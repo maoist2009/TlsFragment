@@ -6,7 +6,7 @@ import time
 import socket
 import random
 import struct
-from tls_fragment.log import logger
+from .log import logger
 
 logger = logger.getChild("fragment")
 

@@ -1,7 +1,7 @@
 import socket
-from tls_fragment.utils import set_ttl
-from tls_fragment.log import logger
-from tls_fragment import remote
+from .utils import set_ttl
+from .log import logger
+from . import remote
 import time
 
 logger = logger.getChild("fake_desync")
