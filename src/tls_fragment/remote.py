@@ -2,18 +2,18 @@
 site
 """
 
-from tls_fragment.log import logger
-from tls_fragment.config import (
+from .log import logger
+from .config import (
     domain_policies,
     config,
     default_policy,
     ipv4_map,
     ipv6_map,
 )
-from tls_fragment import fragment
-from tls_fragment import dns_extension
+from . import fragment
+from . import dns_extension
 import dns.resolver
-from tls_fragment.utils import ip_to_binary_prefix, get_ttl
+from .utils import ip_to_binary_prefix, get_ttl
 import socket
 import copy
 import threading
