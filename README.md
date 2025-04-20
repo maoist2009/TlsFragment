@@ -1,21 +1,25 @@
 # TLSFragment使用指南
 
-# 安装
+## 安装
 
-## 作为模块安装
-
+可以作为模块安装：
 ```shell
 python -m build --wheel --no-isolation
 python -m installer dist/*.whl
 ```
 
-## TLSFragment原理
+## 运行
+作为模块安装后可以直接运行 `tls_fragment`。
 
-### TLSfrag
+或者将仓库克隆下来之后运行 `run.py`。
+
+### TLSFragment原理
+
+#### TLSfrag
 
 将TCP连接Client的第一个包（这个包一般来说是TLS ClientHello，一般应用层不会分片）在TLS层和TCP层分别进行分片，将sni拆入多个包以绕过gfw。
 
-### FAKEdesync
+#### FAKEdesync
 
 利用ttl发送假包，扰乱gfw的DPI。
 
@@ -26,13 +30,13 @@ python -m installer dist/*.whl
 
 通过重传机制发送。
 
-## 异步方式
+### 异步方式
 
 使用`threading`（多线程），有一个`asyncio`协程版本目前废弃，原因是默认版本无法支持自代理DoH。
 
-## 安装使用
+### 安装使用
 
-### 运行
+#### 运行
 
 ```bash
 git clone git@github.com:maoist2009/TlsFragment.git
@@ -48,17 +52,17 @@ BUILD_WINDOWS
 
 之后请为`/dist/proxy.exe`创建快捷方式，复制到`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
 
-### 浏览器使用
+#### 浏览器使用
 
 建议分流
 
 安装`Proxy SwitchyOmega`和`Gooreplacer`，分别导入配置文件`OmegaOptions.bak`和`gooreplacer.json`（android请使用kiwi浏览器等）
 
-## 配置方式
+### 配置方式
 
-### 全局选项
+#### 全局选项
 
-#### 公共
+##### 公共
 
 
 | 项名                | 简单解释                          | 是否可以域名自定义 |
@@ -75,7 +79,7 @@ BUILD_WINDOWS
 | `method`            | 操作方法，见下文模式               | 是                 |
 | `IPtype`            | dns查询ip默认类型（无则换）        | 是                 |
 
-#### `TLSfrag`模式
+##### `TLSfrag`模式
 
 
 | 项名               | 简单解释           | 是否可以域名自定义 |
@@ -83,7 +87,7 @@ BUILD_WINDOWS
 | `num_TLS_fragment` | 无sni段TLS分块数   | 是                 |
 | `TLS_frag`         | sni在tls层分块长度 | 是                 |
 
-#### `FAKEdesync`模式
+##### `FAKEdesync`模式
 
 
 | 项名                    | 简单解释                                 | 是否可以域名自定义 |
@@ -95,7 +99,7 @@ BUILD_WINDOWS
 
 其中，域名自定义指的是在`domians.xxxx.com`下也有此配置项，且该处配置优先。
 
-### `domains`下有其他项：
+#### `domains`下有其他项：
 
 
 | 项名       | 简单解释            |
@@ -105,16 +109,16 @@ BUILD_WINDOWS
 | `IPcache`  | 是否缓存            |
 | `TTLcache` | 是否缓存IP对应TTL   |
 
-## 域名匹配规则
+### 域名匹配规则
 
 如果特定域名（若有多个取最长的，再有多个问python的sort）为sni的子串，则取。（使用AC自动机实现以应对巨大列表）
 支持首尾匹配，实际上塞入AC自动机的是：`^www.domain.genshin.mihoyo.com$`
 
-## IP查找
+### IP查找
 
 建议使用[HTTPS_IP_finder](https://github.com/maoist2009/HTTPS_IP_finder)
 我本人也会维护已知的被ip封锁的网站。
 
-## IP重定向
+### IP重定向
 
 支持IP（段）重定向到ip，默认链式跳转，如果要求配置不链式，在结果ip字符串前添加`^`。
