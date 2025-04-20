@@ -1,6 +1,6 @@
 from ipaddress import ip_address
 import ipaddress
-from tls_fragment.log import logger
+from .log import logger
 import socket
 
 logger = logger.getChild("utils")

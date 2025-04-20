@@ -1,11 +1,11 @@
-from tls_fragment.log import logger
+from .log import logger
 from pathlib import Path
 import socket
 import threading
 import time
-from tls_fragment import remote, fake_desync
-from tls_fragment.config import config
-from tls_fragment.utils import is_ip_address
+from . import remote, fake_desync
+from .config import config
+from .utils import is_ip_address
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
