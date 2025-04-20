@@ -6,6 +6,7 @@ import time
 from tls_fragment import remote, fake_desync
 from tls_fragment.config import config
 import json
+from ipaddress import ip_address
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
 
@@ -40,6 +41,16 @@ class ThreadedServer(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
+
+    def is_ip_address(self, s):
+        if s.isdigit():
+            return False # Disallow integer-formatted IP addresses
+        else:
+            try:
+                ip_address(s)
+                return True
+            except ValueError:
+                return False
 
     def listen(self):
         self.sock.listen(
@@ -129,7 +140,7 @@ class ThreadedServer(object):
                 logger.info(f"连接失败: {str(e)}")
                 client_socket.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None, {}
+                return server_name if self.is_ip_address(server_name) else None, {}
 
         except Exception as e:
             logger.info(f"SOCKS5处理错误: {str(e)}")
@@ -157,7 +168,7 @@ class ThreadedServer(object):
                     b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
                 )
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None, {}
+                return server_name if self.is_ip_address(server_name) else None, {}
 
         # 原有PAC文件处理
         elif b"/proxy.pac" in data.splitlines()[0]:
