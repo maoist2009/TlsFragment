@@ -1,8 +1,10 @@
+from ipaddress import ip_address
 import ipaddress
 from tls_fragment.log import logger
 import socket
 
 logger = logger.getChild("utils")
+
 
 def ip_to_binary_prefix(ip_or_network):
     try:
@@ -71,3 +73,14 @@ def get_ttl(ip, port):
 
     logger.info("get_ttl %s %d %d", ip, port, ans)
     return ans
+
+
+def is_ip_address(s):
+    if s.isdigit():
+        return False  # Disallow integer-formatted IP addresses
+    else:
+        try:
+            ip_address(s)
+            return True
+        except ValueError:
+            return False
