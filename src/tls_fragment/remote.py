@@ -20,7 +20,7 @@ import threading
 
 logger = logger.getChild("remote")
 
-resolver = dns.resolver.Resolver()
+resolver = dns.resolver.Resolver(configure=False)
 resolver.cache = dns.resolver.LRUCache()
 resolver.nameservers = [
     dns_extension.ProxiedDohServer(
