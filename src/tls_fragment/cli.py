@@ -102,11 +102,14 @@ class ThreadedServer(object):
             # 认证协商阶段
             client_socket.recv(2)  # 已经通过peek确认版本
             nmethods = client_socket.recv(1)[0]
+            if nmethods==0:
+                nmethods=1
             client_socket.recv(nmethods)  # 读取方法列表
             client_socket.sendall(b"\x05\x00")  # 选择无认证
 
             # 请求解析阶段
             header = client_socket.recv(4)
+            print(header)
             if len(header) != 4 or header[0] != 0x05:
                 raise ValueError("Invalid SOCKS5 header")
 
@@ -118,6 +121,8 @@ class ThreadedServer(object):
 
             # 目标地址解析（复用原有DNS逻辑）
             server_name, server_port = self._parse_socks5_address(client_socket, atyp)
+            
+            print(server_name,server_port)
 
             # 建立连接（完全复用原有逻辑）
             try:
