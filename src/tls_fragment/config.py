@@ -84,8 +84,7 @@ default_policy = {
     "mode": config["mode"],
     "fake_packet": config["fake_packet"].encode(encoding="UTF-8"),
     "fake_ttl": config["fake_ttl"],
-    "fake_sleep": config["fake_sleep"],
-    "port": 443,
+    "fake_sleep": config["fake_sleep"]
 }
 
 domain_policies = ahocorasick.AhoCorasick(*config["domains"].keys())

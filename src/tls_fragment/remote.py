@@ -70,6 +70,7 @@ class Remote:
         else:
             self.policy = {}
         self.policy |= default_policy
+        self.policy.setdefault("port",port)
 
         if self.policy.get("IP") is None:
             if config["enalbe_ipv6"]:
@@ -82,7 +83,7 @@ class Remote:
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
-        self.port = port
+        self.port = self.policy["port"]
         # res["IP"]="127.0.0.1"
 
         if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEDesync":
