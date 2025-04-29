@@ -6,6 +6,7 @@ import time
 from . import remote, fake_desync
 from .config import config
 from .utils import is_ip_address
+from .safecheck import detect_tls_version_by_keyshare
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
@@ -297,6 +298,18 @@ class ThreadedServer(object):
                 if first_flag == True:
                     first_flag = False
                     data = backend_sock.recv(16384)
+                    if True:
+                        try:
+                            import struct
+                            content_type, ver_ma, ver_mi, length = struct.unpack(">BBBH", data[:5])
+                            print(detect_tls_version_by_keyshare(data))
+                            if content_type != 0x16:  # 0x16表示TLS Handshake
+                                print("Not a TLS Handshake message")
+                            print("TLS server Hello",ver_ma,ver_mi)
+                        except:
+                            import traceback
+                            traceback.print_exec()
+                            
                     if data:
                         client_sock.sendall(data)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
