@@ -300,16 +300,12 @@ class ThreadedServer(object):
                     data = backend_sock.recv(16384)
                     if True:
                         try:
-                            import struct
-                            content_type, ver_ma, ver_mi, length = struct.unpack(">BBBH", data[:5])
-                            print(detect_tls_version_by_keyshare(data))
-                            if content_type != 0x16:  # 0x16表示TLS Handshake
-                                print("Not a TLS Handshake message")
-                            print("TLS server Hello",ver_ma,ver_mi)
+                            if detect_tls_version_by_keyshare(data)<0:
+                                backend_sock.sock.close()
+                                client_sock.close()
+                                raise ValueError("Not a TLS V1.3 connection")
                         except:
-                            import traceback
-                            traceback.print_exec()
-                            
+                            pass              
                     if data:
                         client_sock.sendall(data)
                         IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
