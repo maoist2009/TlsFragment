@@ -84,6 +84,8 @@ class Remote:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
         self.port = self.policy["port"]
+
+        print(self.address,self.port)
         # res["IP"]="127.0.0.1"
 
         if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEDesync":
