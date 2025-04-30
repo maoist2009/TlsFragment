@@ -242,7 +242,7 @@ class ThreadedServer(object):
         global ThreadtoWork
         while ThreadtoWork:
             try:
-                if first_flag == True:
+                if first_flag is True:
                     first_flag = False
 
                     time.sleep(
@@ -265,7 +265,7 @@ class ThreadedServer(object):
                                 backend_sock,
                                 data,
                             )
-                        IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
+                        IP_UL_traffic[this_ip] += len(data)
 
                     else:
                         raise Exception("cli syn close")
@@ -274,7 +274,7 @@ class ThreadedServer(object):
                     data = client_sock.recv(16384)
                     if data:
                         backend_sock.send(data)
-                        IP_UL_traffic[this_ip] = IP_UL_traffic[this_ip] + len(data)
+                        IP_UL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("cli pipe close")
 
@@ -295,7 +295,7 @@ class ThreadedServer(object):
         global ThreadtoWork
         while ThreadtoWork:
             try:
-                if first_flag == True:
+                if first_flag is True:
                     first_flag = False
                     data = backend_sock.recv(16384)
                     if True:
@@ -303,12 +303,12 @@ class ThreadedServer(object):
                             if detect_tls_version_by_keyshare(data)<0:
                                 backend_sock.sock.close()
                                 client_sock.close()
-                                raise ValueError("Not a TLS V1.3 connection")
+                                raise ValueError("Not a TLS 1.3 connection")
                         except:
                             pass              
                     if data:
                         client_sock.sendall(data)
-                        IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
+                        IP_DL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("backend pipe close at first")
 
@@ -316,7 +316,7 @@ class ThreadedServer(object):
                     data = backend_sock.recv(16384)
                     if data:
                         client_sock.sendall(data)
-                        IP_DL_traffic[this_ip] = IP_DL_traffic[this_ip] + len(data)
+                        IP_DL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("backend pipe close")
 
@@ -467,14 +467,14 @@ function MatchAutomatom(str) {
 }
 
 """
-    pacfile = pacfile + "let domains=[];\n"
+    pacfile += "let domains=[];\n"
 
     for line in pac_domains:
-        pacfile = pacfile + 'domains.push("'
-        pacfile = pacfile + line
-        pacfile = pacfile + '");\n'
+        pacfile += 'domains.push("'
+        pacfile += line
+        pacfile += '");\n'
 
-    pacfile = pacfile + "BuildAutomatom(domains);\n"
+    pacfile += "BuildAutomatom(domains);\n"
 
     pacfile = (
         pacfile
