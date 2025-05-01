@@ -362,4 +362,4 @@ def send_data_with_fake(remote_obj: remote.Remote, data):
         raise Exception("Fake data send failed.")
 
     data = data[data_len:]
-    remote_obj.sock.sendall(data)
+    remote_obj.send_fraggmed_tls_data(data)
