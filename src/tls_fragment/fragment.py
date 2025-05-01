@@ -4,6 +4,9 @@ tls data fragment.
 
 import random
 from .log import logger
+from . import remote
+import time
+
 
 logger = logger.getChild("fragment")
 
@@ -56,3 +59,59 @@ def fragment_pattern(data, pattern, num):
 
     fragmented_data.append(data[position + pattern_lenth : data_lenth])
     return fragmented_data
+
+def send_fraggmed_tls_data(sock: remote.Remote, data):
+    """send fragged tls data"""
+    sni=sock.policy.get("sni")
+
+    logger.info("To send: %d Bytes.", len(data))
+    if sni is None:
+        sock.send(data)
+        return
+
+    logger.debug("sending:    %s", data)
+    base_header = data[:3]
+    record = data[5:]
+
+    fragmented_tls_data = fragment_pattern(
+        record, sni, sock.policy["num_tls_pieces"]
+    )
+    tcp_data = b""
+    for i, _ in enumerate(fragmented_tls_data):
+        fragmented_tls_data[i] = (
+            base_header
+            + int.to_bytes(len(fragmented_tls_data[i]), byteorder="big", length=2)
+            + fragmented_tls_data[i]
+        )
+        tcp_data += fragmented_tls_data[i]
+        logger.info("adding frag: %d bytes.", len(fragmented_tls_data[i]))
+        logger.debug("adding frag: %s", fragmented_tls_data[i])
+
+    logger.info("TLS fraged: %d Bytes.", len(tcp_data))
+    logger.debug("TLS fraged: %s", tcp_data)
+
+    fragmented_tcp_data = fragment_pattern(
+        tcp_data,
+        tcp_data[
+            len(fragmented_tls_data[0]) : len(tcp_data)
+            - len(fragmented_tls_data[-1])
+            + 1
+        ],
+        sock.policy["num_tcp_pieces"],
+    )
+
+    for packet in fragmented_tcp_data:
+        sock.send(packet)
+        logger.info(
+            "TCP send: %d bytes. And 'll sleep for %d seconds. ",
+            len(packet),
+            sock.policy["send_interval"],
+        )
+        logger.debug(
+            "TCP send: %s",
+            packet,
+        )
+
+        time.sleep(sock.policy["send_interval"])
+
+    logger.info("----------finish------------ %s", sni)
