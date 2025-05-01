@@ -39,7 +39,7 @@
             "IP": "13.32.27.56"
         },
         "giscus.app": {
-            "method": "FAKEdesync"
+            "mode": "FAKEdesync"
         },
         "bbc.com": {
             "IP": "146.75.36.81"
@@ -62,15 +62,15 @@
         },
         "onedrive.live.com": {
             "IP": "150.171.43.11",
-            "method": "FAKEdesync"
+            "mode": "FAKEdesync"
         },
         "skyapi.onedrive.live.com": {
             "IP": "13.107.42.12",
-            "method": "FAKEdesync"
+            "mode": "FAKEdesync"
         },
         "vercel.app": {
             "IP": "64.29.17.1",
-            "method": "FAKEdesync"
+            "mode": "FAKEdesync"
         },
         "cloudflare.com": {
             "IP": "104.21.3.226"

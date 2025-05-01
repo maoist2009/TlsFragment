@@ -267,6 +267,7 @@ class ThreadedServer(object):
                         thread_down.daemon = True
                         thread_down.start()
                         # backend_sock.sendall(data)
+                        print(backend_sock.policy)
                         if backend_sock.policy.get("mode") == "TLSfrag":
                             fragment.send_fraggmed_tls_data(backend_sock, data)
                         elif backend_sock.policy.get("mode") == "FAKEdesync":
