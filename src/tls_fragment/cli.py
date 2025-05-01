@@ -3,10 +3,11 @@ from pathlib import Path
 import socket
 import threading
 import time
-from . import remote, fake_desync
+from . import remote, fake_desync, fragment
 from .config import config
 from .utils import is_ip_address
-from .safecheck import detect_tls_version_by_keyshare
+from .utils import detect_tls_version_by_keyshare
+from .utils import extract_sni
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
@@ -251,6 +252,13 @@ class ThreadedServer(object):
                     )  # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
 
+                    try:
+                        backend_sock.policy["sni"] = extract_sni(data)
+                    except ValueError:
+                        backend_sock.send(data)
+                        IP_UL_traffic[this_ip] += len(data)
+                        return
+
                     if data:
                         thread_down = threading.Thread(
                             target=self.my_downstream,
@@ -260,12 +268,15 @@ class ThreadedServer(object):
                         thread_down.start()
                         # backend_sock.sendall(data)
                         if backend_sock.policy.get("mode") == "TLSfrag":
-                            backend_sock.send_fraggmed_tls_data(data)
+                            fragment.send_fraggmed_tls_data(backend_sock, data)
                         elif backend_sock.policy.get("mode") == "FAKEdesync":
-                            fake_desync.send_data_with_fake(
-                                backend_sock,
-                                data,
-                            )
+                            fake_desync.send_data_with_fake(backend_sock,data)
+                        elif backend_sock.policy.get("mode") == "DIRECT":
+                            backend_sock.send(data)
+                        elif backend_sock.policy.get("mode") == "GFWlike":
+                            backend_sock.close()
+                            client_sock.close()
+                            return False
                         IP_UL_traffic[this_ip] += len(data)
 
                     else:
@@ -283,11 +294,11 @@ class ThreadedServer(object):
                 logger.info("upstream : %s from %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
                 client_sock.close()
-                backend_sock.sock.close()
+                backend_sock.close()
                 return False
 
         client_sock.close()
-        backend_sock.sock.close()
+        backend_sock.close()
 
     def my_downstream(self, backend_sock: remote.Remote, client_sock: socket.socket):
         this_ip = backend_sock.sock.getpeername()[0]
@@ -302,7 +313,7 @@ class ThreadedServer(object):
                     if True:
                         try:
                             if detect_tls_version_by_keyshare(data)<0:
-                                backend_sock.sock.close()
+                                backend_sock.close()
                                 client_sock.close()
                                 raise ValueError("Not a TLS 1.3 connection")
                         except:
@@ -324,7 +335,7 @@ class ThreadedServer(object):
             except Exception as e:
                 logger.info("downstream : %s %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
-                backend_sock.sock.close()
+                backend_sock.close()
                 client_sock.close()
                 return False
 

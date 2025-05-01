@@ -4,6 +4,7 @@ import ahocorasick
 import json
 import ipaddress
 import random
+from .l38 import merge_dict   
 
 basepath = Path(__file__).parent.parent.parent
 
@@ -77,7 +78,7 @@ if not Path("config.json").exists():
 with open("config.json", "rb") as f:
     _config = json.load(f)
 
-config |= _config
+config = merge_dict(config, _config)
 default_policy = {
     "num_tls_pieces": config["num_tls_pieces"],
     "num_tcp_pieces": config["num_tcp_pieces"],
