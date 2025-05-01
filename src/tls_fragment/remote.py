@@ -17,7 +17,7 @@ import socket
 import copy
 import time
 import threading
-import utils
+from . import utils
 from .l38 import merge_dict
 
 logger = logger.getChild("remote")
