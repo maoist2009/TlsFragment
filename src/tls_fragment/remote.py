@@ -18,6 +18,7 @@ import copy
 import threading
 from . import utils
 from .l38 import merge_dict
+import ipaddress
 
 logger = logger.getChild("remote")
 
@@ -58,8 +59,10 @@ class Remote:
     address: str
     sock: socket.socket
     port: int
+    protocl: int
+    # 6 tcp 17 udp
 
-    def __init__(self, domain: str, port=443):
+    def __init__(self, domain: str, port=443, protocol=6):
         matched_domains = domain_policies.search("^" + domain + "$")
         self.domain = domain
         if matched_domains:
@@ -70,7 +73,18 @@ class Remote:
             self.policy = {}
         self.policy = merge_dict(self.policy, default_policy)
         self.policy.setdefault("port", port)
-
+        self.protocol=protocol
+        
+        try:
+            ipaddress.IPv4Address(self.domain)
+            self.policy["IP"]=self.domain
+        except:
+            try:
+                ipaddress.IPv6Address(self.domain)
+                self.policy["IP"]=self.domain
+            except:
+                pass
+        
         if self.policy.get("IP") is None:
             if self.policy.get("IPtype") == "ipv6":
                 try:
@@ -111,27 +125,50 @@ class Remote:
                 )
 
         logger.info("%s --> %s", domain, self.policy)
+        
+        
         if ":" in self.address:
-            self.sock = socket.socket(
-                socket.AF_INET6,
-                socket.SOCK_STREAM,
-            )
+            iptype=socket.AF_INET6
         else:
-            self.sock = socket.socket(
-                socket.AF_INET,
-                socket.SOCK_STREAM,
-            )
-        self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            iptype=socket.AF_INET
+            
+        if self.protocol==6:
+            socktype=socket.SOCK_STREAM
+        elif self.protocol==17:
+            socktype=socket.SOCK_DGRAM
+        else:
+            raise ValueError("Unknown sock type",self.protocol)
+            
+        self.sock = socket.socket(iptype,socktype)
+        
+        if self.protocol==6:    
+            self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.sock.settimeout(config["my_socket_timeout"])
 
     def connect(self):
-        self.sock.connect((self.address, self.port))
+        if self.protocol==6:
+            self.sock.connect((self.address, self.port))
+        elif self.protocol==17:
+            pass
 
     def send(self, data):
-        self.sock.sendall(data)
+        if self.protocol==6:
+            self.sock.sendall(data)
+        elif self.protocol==17:
+            self.sock.send_to(data,(self.address,self.port))
 
     def recv(self, size):
-        return self.sock.recv(size)
+        if self.protocol==6:
+            return self.sock.recv(size)
+        elif self.protocol==17:
+            while True:
+                data, address = sock.recvfrom(size)
+                if address == (self.address,self.port):
+                    return data
 
+ 
     def close(self):
-        self.sock.close()
+        if self.protocol==6:
+            self.sock.close()
+        elif self.protocol==17:
+            pass
