@@ -44,6 +44,7 @@ class ThreadedServer(object):
         self.sock.bind((self.host, self.port))
 
     def listen(self):
+        global ThreadtoWork
         self.sock.listen(
             128
         )  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
@@ -110,7 +111,7 @@ class ThreadedServer(object):
 
             # 请求解析阶段
             header = client_socket.recv(4)
-            print(header)
+            logger.info("%s",header)
             if len(header) != 4 or header[0] != 0x05:
                 raise ValueError("Invalid SOCKS5 header")
 
@@ -123,7 +124,7 @@ class ThreadedServer(object):
             # 目标地址解析（复用原有DNS逻辑）
             server_name, server_port = self._parse_socks5_address(client_socket, atyp)
             
-            print(server_name,server_port)
+            logger.info("%s:%d",server_name,server_port)
 
             # 建立连接（完全复用原有逻辑）
             try:
@@ -259,7 +260,7 @@ class ThreadedServer(object):
                         thread_down.start()
                         # backend_sock.sendall(data)
                         if backend_sock.policy.get("mode") == "TLSfrag":
-                            backend_sock.send(data)
+                            backend_sock.send_fraggmed_tls_data(data)
                         elif backend_sock.policy.get("mode") == "FAKEdesync":
                             fake_desync.send_data_with_fake(
                                 backend_sock,

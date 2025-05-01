@@ -5,3 +5,4 @@ build
 proxy.exe.spec
 log.txt
 __pycache__
+.vscode
