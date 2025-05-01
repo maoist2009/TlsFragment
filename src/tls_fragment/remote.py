@@ -15,7 +15,6 @@ from . import dns_extension
 import dns.resolver
 import socket
 import copy
-import time
 import threading
 from . import utils
 from .l38 import merge_dict
@@ -91,7 +90,7 @@ class Remote:
         logger.info("%s %d", self.address, self.port)
         # res["IP"]="127.0.0.1"
 
-        if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEDesync":
+        if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEdesync":
             logger.info(
                 "FAKE TTL for %s is %s", self.address, self.policy.get("fake_ttl")
             )
