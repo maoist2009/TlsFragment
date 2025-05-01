@@ -11,7 +11,7 @@
     "FAKE_ttl_auto_timeout": 2,
     "doh_server": "https://cloudflare-dns.com/dns-query",
     "mode": "TLSfrag",
-    "enalbe_ipv6": false,
+    "enalbe_ipv6": true,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
         "104.24.0.0/14": "^104.19.229.21",

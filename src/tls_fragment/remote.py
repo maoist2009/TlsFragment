@@ -73,13 +73,16 @@ class Remote:
         self.policy.setdefault("port",port)
 
         if self.policy.get("IP") is None:
-            if config["enalbe_ipv6"]:
+            if self.policy.get("IPtype")=="ipv6":
                 try:
                     self.address = resolver.resolve(domain, "AAAA")[0].to_text()
                 except dns.resolver.NoAnswer:
                     self.address = resolver.resolve(domain, "A")[0].to_text()
             else:
-                self.address = resolver.resolve(domain, "A")[0].to_text()
+                try:
+                    self.address = resolver.resolve(domain, "A")[0].to_text()
+                except:
+                    self.address = resolver.resolve(domain, "AAAA")[0].to_text()
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
