@@ -6,17 +6,13 @@ def parse_extensions(data):
     offset = 0
     try:
         while offset < len(data):
-            # print(f"Current offset in parse_extensions: {offset}")
             if offset + 4 > len(data):
-                # print("Data is incomplete for parsing extensions.")
                 break
             # 解析扩展类型
             ext_type = struct.unpack('>H', data[offset:offset + 2])[0]
             # 解析扩展长度
             ext_length = struct.unpack('>H', data[offset + 2:offset + 4])[0]
-            # print(f"Parsed extension type: {ext_type}, length: {ext_length}")
             if offset + 4 + ext_length > len(data):
-                # print("Data is incomplete for parsing extension data.")
                 break
             # 解析扩展数据
             ext_data = data[offset + 4:offset + 4 + ext_length]
@@ -28,24 +24,18 @@ def parse_extensions(data):
 
 
 def detect_tls_version_by_keyshare(server_hello):
-    # print(f"Length of server_hello: {len(server_hello)}")
     # 解析TLS记录层
     if len(server_hello) < 5:
         return 0
     content_type, _, _, record_length = struct.unpack('>BBBH', server_hello[:5])
-    # print(f"Parsed content type: {content_type}, record length: {record_length}")
     if content_type != 0x16:  # 0x16表示TLS Handshake
         return 0
-    # if 5 + record_length > len(server_hello):
-        # raise ValueError("Server hello data is incomplete for TLS record.")
     handshake_data = server_hello[5:5 + record_length]
-    # print(f"Length of handshake data: {len(handshake_data)}")
 
     # 解析握手消息头
     if len(handshake_data) < 4:
         return 0
     handshake_type, _, handshake_length = struct.unpack('>BBH', handshake_data[:4])
-    # print(f"Parsed handshake type: {handshake_type}, handshake length: {handshake_length}")
     if handshake_type != 0x02:  # 0x02表示Server Hello
         return 0
 
@@ -58,21 +48,16 @@ def detect_tls_version_by_keyshare(server_hello):
     offset += 2 + 1
     # 扩展字段起始位置
     extensions_start = offset
-    # print(f"Extensions start position: {extensions_start}")
 
     # 解析扩展字段的总长度
     if extensions_start + 2 > len(handshake_data):
-        # print("Data is incomplete for parsing extensions length.")
         return 0
     extensions_length = struct.unpack('>H', handshake_data[extensions_start:extensions_start + 2])[0]
-    # print(f"Parsed extensions length: {extensions_length}")
     # 检查扩展字段数据是否完整
     if extensions_start + 2 + extensions_length > len(handshake_data):
-        # print("Data is incomplete for parsing extension data.")
         return 0
     # 提取扩展字段的数据
     extensions_data = handshake_data[extensions_start + 2:extensions_start + 2 + extensions_length]
-    # print(f"Length of extensions data: {len(extensions_data)}")
     # 解析扩展字段
     extensions = parse_extensions(extensions_data)
 

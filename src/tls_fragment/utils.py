@@ -2,6 +2,7 @@ from ipaddress import ip_address
 import ipaddress
 from .log import logger
 import socket
+import struct
 
 logger = logger.getChild("utils")
 
@@ -84,3 +85,74 @@ def is_ip_address(s):
             return True
         except ValueError:
             return False
+
+
+def extract_sni(data):
+    """
+    extract sni
+    data: the tls data.
+    """
+    # 解析TLS记录
+    content_type, _, _, length = struct.unpack(">BBBH", data[:5])
+    if content_type != 0x16:  # 0x16表示TLS Handshake
+        raise ValueError("Not a TLS Handshake message")
+    handshake_data = data[5 : 5 + length]
+
+    # 解析握手消息头
+    handshake_type, tmp, length = struct.unpack(">BBH", handshake_data[:4])
+    length = tmp * 64 + length
+    if handshake_type != 0x01:  # 0x01表示Client Hello
+        raise ValueError("Not a Client Hello message")
+    client_hello_data = handshake_data[4 : 4 + length]
+
+    # 解析Client Hello消息
+    _, _, _, session_id_length = struct.unpack(">BB32sB", client_hello_data[:35])
+    cipher_suites_length = struct.unpack(
+        ">H", client_hello_data[35 + session_id_length : 35 + session_id_length + 2]
+    )[0]
+    compression_methods_length = struct.unpack(
+        ">B",
+        client_hello_data[
+            35
+            + session_id_length
+            + 2
+            + cipher_suites_length : 35
+            + session_id_length
+            + 2
+            + cipher_suites_length
+            + 1
+        ],
+    )[0]
+
+    # 定位扩展部分
+    extensions_offset = (
+        35
+        + session_id_length
+        + 2
+        + cipher_suites_length
+        + 1
+        + compression_methods_length
+    )
+    extensions_length = struct.unpack(
+        ">H", client_hello_data[extensions_offset : extensions_offset + 2]
+    )[0]
+    extensions_data = client_hello_data[
+        extensions_offset + 2 : extensions_offset + 2 + extensions_length
+    ]
+
+    offset = 0
+    while offset < extensions_length:
+        extension_type, extension_length = struct.unpack(
+            ">HH", extensions_data[offset : offset + 4]
+        )
+        if extension_type == 0x0000:  # SNI扩展的类型是0x0000
+            sni_extension = extensions_data[offset + 4 : offset + 4 + extension_length]
+            # 解析SNI扩展
+            list_length = struct.unpack(">H", sni_extension[:2])[0]
+            if list_length != 0:
+                name_type, name_length = struct.unpack(">BH", sni_extension[2:5])
+                if name_type == 0:  # 域名类型
+                    sni = sni_extension[5 : 5 + name_length]
+                    return sni
+        offset += 4 + extension_length
+    return None
