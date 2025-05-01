@@ -336,25 +336,25 @@ def send_fake_data(
         raise Exception("unknown os")
 
 
-def send_data_with_fake(remote_obj: remote.Remote, data):
+def send_data_with_fake(sock: remote.Remote, data):
     logger.info("To send: %d Bytes. ", len(data))  # check os
     # if windows, use TransmitFile
-    default_ttl = remote_obj.sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
+    default_ttl = sock.sock.getsockopt(socket.IPPROTO_IP, socket.IP_TTL)
     try:
-        fake_data = remote_obj.policy.get("fake_packet")
-        fake_ttl = int(remote_obj.policy.get("fake_ttl"))
+        fake_data = sock.policy.get("fake_packet")
+        fake_ttl = int(sock.policy.get("fake_ttl"))
     except:
         raise Exception("FAKE_packet or FAKE_ttl not set in settings.json")
 
     data_len = len(fake_data)
-    FAKE_sleep = remote_obj.policy.get("fake_sleep")
+    FAKE_sleep = sock.policy.get("fake_sleep")
     if send_fake_data(
         data_len,
         fake_data,
         fake_ttl,
         data[0:data_len],
         default_ttl,
-        remote_obj.sock,
+        sock.sock,
         FAKE_sleep,
     ):
         logger.info("Fake data sent.")
@@ -362,4 +362,4 @@ def send_data_with_fake(remote_obj: remote.Remote, data):
         raise Exception("Fake data send failed.")
 
     data = data[data_len:]
-    remote_obj.sock.sendall(data)
+    sock.sock.sendall(data)
