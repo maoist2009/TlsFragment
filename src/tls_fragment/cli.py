@@ -117,7 +117,9 @@ class ThreadedServer(object):
                 raise ValueError("Invalid SOCKS5 header")
 
             _, cmd, _, atyp = header
-            if cmd != 0x01:  # 只支持CONNECT命令
+            
+            print(cmd)
+            if cmd != 0x01 & cmd != 0x03:  # 只支持CONNECT和UDP命令
                 client_socket.sendall(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
                 return None, {}
@@ -129,7 +131,11 @@ class ThreadedServer(object):
 
             # 建立连接（完全复用原有逻辑）
             try:
-                remote_obj = remote.Remote(server_name, server_port)
+                if cmd==0x01:
+                    remote_obj = remote.Remote(server_name, server_port, 6)
+                elif cmd==0x03:
+                    remote_obj = remote.Remote(server_name, server_port, 17)
+                    
                 client_socket.sendall(
                     b"\x05\x00\x00\x01" + socket.inet_aton("0.0.0.0") + b"\x00\x00"
                 )
@@ -254,7 +260,7 @@ class ThreadedServer(object):
 
                     try:
                         backend_sock.policy["sni"] = extract_sni(data)
-                    except ValueError:
+                    except:
                         backend_sock.send(data)
                         IP_UL_traffic[this_ip] += len(data)
                         return
@@ -267,7 +273,7 @@ class ThreadedServer(object):
                         thread_down.daemon = True
                         thread_down.start()
                         # backend_sock.sendall(data)
-                        print(backend_sock.policy)
+                        
                         if backend_sock.policy.get("mode") == "TLSfrag":
                             fragment.send_fraggmed_tls_data(backend_sock, data)
                         elif backend_sock.policy.get("mode") == "FAKEdesync":
