@@ -1,5 +1,11 @@
 # TLSFragment使用指南
 
+## 交流群
+
+可用discussions
+
+[matrix反馈群](https://matrix.to/#/!cCTXKjhvtagDMxlyLB:matrix.org?via=matrix.org&via=cutefunny.art)（本来就是公开的，现在多一个tlsp反馈群的功能）
+
 ## 安装
 
 可以作为模块安装：
