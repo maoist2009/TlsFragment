@@ -8,6 +8,8 @@ from .config import config
 from .utils import is_ip_address
 from .utils import detect_tls_version_by_keyshare
 from .utils import extract_sni
+from .remote import match_domain
+from .l38 import merge_dict
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
@@ -259,7 +261,9 @@ class ThreadedServer(object):
                     data = client_sock.recv(16384)
 
                     try:
-                        backend_sock.policy["sni"] = extract_sni(data)
+                        backend_sock.sni = extract_sni(data)
+                        if backend_sock.sni!=backend_sock.domain:
+                            backend_sock.policy=merge_dict(match_domain(backend_sock.sni),backend_sock.policy)
                     except:
                         backend_sock.send(data)
                         IP_UL_traffic[this_ip] += len(data)
