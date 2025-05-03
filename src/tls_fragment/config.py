@@ -90,7 +90,8 @@ default_policy = {
     "fake_sleep": config["fake_sleep"],
     "send_interval": config["send_interval"],
     "DNS_cache": config["DNS_cache"],
-    "TTL_cache": config["TTL_cache"]
+    "TTL_cache": config["TTL_cache"],
+    "safety_check": config["safety_check"],
 }
 
 domain_policies = ahocorasick.AhoCorasick(*config["domains"].keys())
