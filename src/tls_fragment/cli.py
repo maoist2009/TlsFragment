@@ -262,8 +262,8 @@ class ThreadedServer(object):
 
                     try:
                         backend_sock.sni = extract_sni(data)
-                        if backend_sock.sni!=backend_sock.domain:
-                            backend_sock.policy=merge_dict(match_domain(backend_sock.sni),backend_sock.policy)
+                        if str(backend_sock.sni)!=str(backend_sock.domain):
+                            backend_sock.policy=merge_dict(match_domain(str(backend_sock.sni)),backend_sock.policy)
                     except:
                         backend_sock.send(data)
                         IP_UL_traffic[this_ip] += len(data)
@@ -288,6 +288,7 @@ class ThreadedServer(object):
                             backend_sock.close()
                             client_sock.close()
                             return False
+
                         IP_UL_traffic[this_ip] += len(data)
 
                     else:
@@ -324,6 +325,7 @@ class ThreadedServer(object):
                     if True:
                         try:
                             if detect_tls_version_by_keyshare(data)<0:
+                                logger.warning("Not a TLS 1.3 connection and will close")
                                 backend_sock.close()
                                 client_sock.close()
                                 raise ValueError("Not a TLS 1.3 connection")
