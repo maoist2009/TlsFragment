@@ -11,8 +11,7 @@ from .config import (
     ipv6_map,
 )
 
-from . import dns_extension
-import dns.resolver
+from .dns_extension import MyDoh
 import socket
 import copy
 import threading
@@ -22,17 +21,13 @@ import ipaddress
 
 logger = logger.getChild("remote")
 
-resolver = dns.resolver.Resolver(configure=False)
-resolver.cache = dns.resolver.LRUCache()
-resolver.nameservers = [
-    dns_extension.ProxiedDohServer(
-        f'http://127.0.0.1:{config["port"]}', url=config["doh_server"]
-    )
-]
-resolver.timeout = 10
-resolver.lifetime = 10
-TTL_cache = {}  # TTL for each IP
+resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh_server"])
+
+from .config import DNS_cache, TTL_cache, write_DNS_cache, write_TTL_cache
+cnt_upd_TTL_cache = 0
 lock_TTL_cache = threading.Lock()
+cnt_upd_DNS_cache = 0
+lock_DNS_cache = threading.Lock()
 
 
 def redirect(ip):
@@ -89,21 +84,29 @@ class Remote:
                 pass
         
         if self.policy.get("IP") is None:
-            if self.policy.get("IPtype") == "ipv6":
-                try:
-                    self.address = resolver.resolve(self.domain, "AAAA")[0].to_text()
-                except dns.resolver.NoAnswer:
-                    self.address = resolver.resolve(self.domain, "A")[0].to_text()
+            if DNS_cache.get(self.domain) != None:
+                self.address = DNS_cache[self.domain]
+                logger.info("DNS cache for %s is %s", self.domain, self.address)
             else:
-                try:
-                    self.address = resolver.resolve(self.domain, "A")[0].to_text()
-                except:
-                    self.address = resolver.resolve(self.domain, "AAAA")[0].to_text()
-            if self.address:
-                logger.info("resolve %s to %s",self.domain,self.address)
-            else:
-                logger.error("resolve %s failed",self.domain)
-                raise Exception("resolve failed")
+                if self.policy.get("IPtype") == "ipv6":
+                    try:
+                        self.address = resolver.resolve(self.domain, "AAAA")
+                    except:
+                        self.address = resolver.resolve(self.domain, "A")
+                else:
+                    try:
+                        self.address = resolver.resolve(self.domain, "A")
+                    except:
+                        self.address = resolver.resolve(self.domain, "AAAA")
+                if self.address:
+                    lock_DNS_cache.acquire()
+                    DNS_cache[self.domain] = self.address
+                    cnt_upd_DNS_cache += 1
+                    if cnt_upd_DNS_cache >= config["TTL_cache_update_interval"]:
+                        cnt_upd_DNS_cache = 0
+                        write_DNS_cache()
+                    lock_DNS_cache.release()
+                    logger.info("DNS cache for %s to %s", self.domain, self.address)
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
@@ -126,7 +129,13 @@ class Remote:
                 val = utils.get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")
+                lock_TTL_cache.acquire()
                 TTL_cache[self.address] = val
+                cnt_upd_TTL_cache += 1
+                if cnt_upd_TTL_cache >= config["TTL_cache_update_interval"]:
+                    cnt_upd_TTL_cache = 0
+                    write_TTL_cache()
+                lock_TTL_cache.release()
                 self.policy["fake_ttl"] = val - 1
                 logger.info(
                     "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
