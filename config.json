@@ -1,9 +1,9 @@
 {
-    "loglevel": "INFO",
+    "loglevel": "DEBUG",
     "port": 2500,
     "DOH_port": 2500,
-    "num_tcp_pieces": 4,
-    "num_tls_pieces": 4,
+    "num_tcp_pieces": 8,
+    "num_tls_pieces": 8,
     "len_tcp_sni": 4,
     "len_tls_sni": 4,
     "send_interval": 0.01,
