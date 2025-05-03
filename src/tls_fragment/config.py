@@ -89,6 +89,8 @@ default_policy = {
     "fake_ttl": config["fake_ttl"],
     "fake_sleep": config["fake_sleep"],
     "send_interval": config["send_interval"],
+    "DNS_cache": config["DNS_cache"],
+    "TTL_cache": config["TTL_cache"]
 }
 
 domain_policies = ahocorasick.AhoCorasick(*config["domains"].keys())
@@ -104,3 +106,26 @@ for key in config["IPredirect"].keys():
 if config["fake_ttl"] == "auto":
     # temp code for auto fake_ttl
     config["fake_ttl"] = random.randint(10, 60)
+
+TTL_cache = {}  # TTL for each IP
+DNS_cache = {}  # DNS cache for each domain
+
+try:
+    with open("DNS_cache.json", "rb") as f:
+        DNS_cache = json.load(f)
+except FileNotFoundError:
+    pass
+
+try:
+    with open("TTL_cache.json", "rb") as f:
+        TTL_cache = json.load(f)
+except FileNotFoundError:
+    pass
+
+def write_DNS_cache():
+    with open("DNS_cache.json", "w") as f:
+        json.dump(DNS_cache, f)
+
+def write_TTL_cache():
+    with open("TTL_cache.json", "w") as f:
+        json.dump(TTL_cache, f)

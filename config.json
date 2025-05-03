@@ -1,6 +1,7 @@
 {
     "loglevel": "INFO",
     "port": 2500,
+    "DOH_port": 2500,
     "num_tcp_pieces": 8,
     "num_tls_pieces": 8,
     "len_tcp_sni": 5,
@@ -13,7 +14,10 @@
     "FAKE_ttl_auto_timeout": 2,
     "doh_server": "https://cloudflare-dns.com/dns-query",
     "mode": "TLSfrag",
-    "enalbe_ipv6": true,
+    "DNS_cache": true,
+    "DNS_cache_update_interval": 2,
+    "TTL_cache": true,
+    "TTL_cache_update_interval": 2,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
         "104.24.0.0/14": "^104.21.3.224",
