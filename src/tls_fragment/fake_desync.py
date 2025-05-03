@@ -385,7 +385,7 @@ def send_data_with_fake(sock: remote.Remote, data):
         sock.policy.get("len_tcp_sni"),
         fake_data,
         fake_ttl,
-        sni[0,sock.policy.get("len_tcp_sni")],
+        sni[0:sock.policy.get("len_tcp_sni")],
         default_ttl,
         sock.sock,
         FAKE_sleep,

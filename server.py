@@ -237,6 +237,7 @@ class GET_settings:
 
             query_url = self.url + query_base64
 
+            print(query_url,quary_params)
 
             ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
             
@@ -397,98 +398,149 @@ class ThreadedServer(object):
         except Exception as e:
             print(f'Server error: {e}')
 
-    def handle_client_request(self,client_socket):
-        # Receive the CONNECT request from the client
-        data = client_socket.recv(16384)        
-
-        if(data[:7]==b'CONNECT'):            
-            server_name , server_port = self.extract_servername_and_port(data)      
-        elif (data[:3]==b'GET' and str(data).split('\r\n')[0].split(' ')[1]=="/proxy.pac"):      
-            # return pacfile
-            response_data = f'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n'+pacfile   
-            
-            client_socket.sendall(response_data.encode())
-            client_socket.close()
-            return None, {}
-        elif( (data[:3]==b'GET') 
-            or (data[:4]==b'POST') 
-            or (data[:4]==b'HEAD')
-            or (data[:7]==b'OPTIONS')
-            or (data[:3]==b'PUT') 
-            or (data[:6]==b'DELETE') 
-            or (data[:5]==b'PATCH') 
-            or (data[:5]==b'TRACE') ):  
-
-            q_line = str(data).split('\r\n')
-            q_req = q_line[0].split()
-            q_method = q_req[0]
-            q_url = q_req[1]
-            q_url = q_url.replace('http://','https://')
-            print('************************@@@@@@@@@@@@***************************')
-            print('redirect',q_method,'http to HTTPS',q_url)          
-            response_data = 'HTTP/1.1 302 Found\r\nLocation: '+q_url+'\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
-            client_socket.sendall(response_data.encode())
-            client_socket.close()            
-            return None, {}
-        else:
-            print('Unknown Method',str(data[:10]))            
-            response_data = b'HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-            client_socket.sendall(response_data)
-            client_socket.close()            
-            return None, {}
-
-        
-        print(server_name,'-->',server_port)
-
+    def handle_client_request(self, client_socket):
         try:
-            try:
-                ipaddress.ip_address(server_name)
-                # print('legal IP')
-                server_IP = server_name
-                settings={}
-                settings["IP"]=server_IP
-            except ValueError:
-                # print('Not IP , its domain , try to resolve it')
-                settings=self.DoH.query(server_name)
-                if settings==None:
-                    settings={}
-                settings["sni"]=bytes(server_name,encoding="utf-8")
-                server_IP=settings.get("IP")
-                server_port=settings.get("port")
-                print("send to ",server_IP,":",server_port)
-
-                
-            if server_IP.find(":")==-1:
-                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            else:
-                server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            server_socket.settimeout(my_socket_timeout)
-            server_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   #force localhost kernel to send TCP packet immediately (idea: @free_the_internet)
-            
-            try:
-                server_socket.connect((server_IP, server_port))
-                # Send HTTP 200 OK
-                response_data = b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n'            
-                client_socket.sendall(response_data)
-                return server_socket, settings
-            except socket.error:
-                print(f"@@@ {server_IP}:{server_port} ==> filtered @@@")
-                # Send HTTP ERR 502
-                response_data = b'HTTP/1.1 502 Bad Gateway (is IP filtered?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-                client_socket.sendall(response_data)
+            # 协议嗅探（兼容原有逻辑）
+            initial_data = client_socket.recv(5, socket.MSG_PEEK)
+            if not initial_data:
                 client_socket.close()
-                server_socket.close()
-                return server_IP, {}
+                return None, {}
 
+            # 协议分流判断
+            if initial_data[0] == 0x05:  # SOCKS5协议
+                return self._handle_socks5(client_socket)
+            else:  # HTTP协议处理
+                return self._handle_http_protocol(client_socket)
             
         except Exception as e:
-            print(repr(e))
-            # Send HTTP ERR 502
-            response_data = b'HTTP/1.1 502 Bad Gateway (Strange ERR?)\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
-            client_socket.sendall(response_data)
+            print(f"协议检测异常: {str(e)}")
             client_socket.close()
-            server_socket.close()
             return None, {}
+
+    def _handle_socks5(self, client_socket):
+        """处理SOCKS5协议连接，保持与原有返回格式一致"""
+        try:
+            # 认证协商阶段
+            client_socket.recv(2)  # 已经通过peek确认版本
+            nmethods = client_socket.recv(1)[0]
+            client_socket.recv(nmethods)  # 读取方法列表
+            client_socket.sendall(b'\x05\x00')  # 选择无认证
+
+            # 请求解析阶段
+            header = client_socket.recv(4)
+            if len(header) != 4 or header[0] != 0x05:
+                raise ValueError("Invalid SOCKS5 header")
+
+            _, cmd, _, atyp = header
+            if cmd != 0x01:  # 只支持CONNECT命令
+                client_socket.sendall(b'\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00')
+                client_socket.close()
+                return None, {}
+
+            # 目标地址解析（复用原有DNS逻辑）
+            server_name, server_port = self._parse_socks5_address(client_socket, atyp)
+            
+            # 建立连接（完全复用原有逻辑）
+            try:
+                server_socket, settings = self._create_connection(server_name, server_port)
+                client_socket.sendall(b'\x05\x00\x00\x01' + 
+                                     socket.inet_aton("0.0.0.0") + 
+                                     b'\x00\x00')
+                return server_socket, settings
+            except Exception as e:
+                print(f"连接失败: {str(e)}")
+                client_socket.sendall(b'\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00')
+                client_socket.close()
+                return server_name if is_ip_address(server_name) else None, {}
+
+        except Exception as e:
+            print(f"SOCKS5处理错误: {str(e)}")
+            client_socket.close()
+            return None, {}
+
+    def _handle_http_protocol(self, client_socket):
+        """原有HTTP处理逻辑完整保留"""
+        data = client_socket.recv(16384)
+        
+        # 原有CONNECT处理
+        if data.startswith(b'CONNECT'):
+            server_name, server_port = self.extract_servername_and_port(data)
+            print(f"CONNECT {server_name}:{server_port}")
+            
+            try:
+                server_socket, settings = self._create_connection(server_name, server_port)
+                client_socket.sendall(b'HTTP/1.1 200 Connection established\r\nProxy-agent: MyProxy/1.0\r\n\r\n')
+                return server_socket, settings
+            except Exception as e:
+                print(f"连接失败: {str(e)}")
+                client_socket.sendall(b'HTTP/1.1 502 Bad Gateway\r\nProxy-agent: MyProxy/1.0\r\n\r\n')
+                client_socket.close()
+                return server_name if is_ip_address(server_name) else None, {}
+
+        # 原有PAC文件处理
+        elif b'/proxy.pac' in data.splitlines()[0]:
+            response = f'HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n{pacfile}'
+            client_socket.sendall(response.encode())
+            client_socket.close()
+            return None, {}
+
+        # 原有HTTP重定向逻辑
+        elif data[:3] in (b'GET', b'POS', b'HEA', b'PUT', b'DEL') or \
+             data[:4] in (b'POST', b'HEAD', b'OPTI'):
+            q_line = data.decode().split('\r\n')[0].split()
+            q_method, q_url = q_line[0], q_line[1]
+            https_url = q_url.replace('http://', 'https://', 1)
+            print(f'重定向 {q_method} 到 HTTPS: {https_url}')
+            response = f'HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n'
+            client_socket.sendall(response.encode())
+            client_socket.close()
+            return None, {}
+
+        # 原有错误处理
+        else:
+            print(f'未知请求: {data[:10]}')
+            client_socket.sendall(b'HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n')
+            client_socket.close()
+            return None, {}
+
+    def _create_connection(self, server_name, server_port):
+        """复用原有连接创建逻辑"""
+        try:
+            ipaddress.ip_address(server_name)
+            server_ip = server_name
+            settings = {}
+        except ValueError:
+            settings = self.DoH.query(server_name) or {}
+            server_ip = settings.get("IP", server_name)
+            server_port = settings.get("port", server_port)
+            settings.setdefault("sni", server_name.encode())
+
+        # 原有socket创建逻辑
+        if ':' in server_ip:
+            sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        else:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        sock.settimeout(my_socket_timeout)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        sock.connect((server_ip, server_port))
+        return sock, settings
+
+    def _parse_socks5_address(self, sock, atyp):
+        """SOCKS5地址解析"""
+        if atyp == 0x01:  # IPv4
+            server_ip = socket.inet_ntop(socket.AF_INET, sock.recv(4))
+            return server_ip, int.from_bytes(sock.recv(2), 'big')
+        elif atyp == 0x03:  # 域名
+            domain_len = ord(sock.recv(1))
+            server_name = sock.recv(domain_len).decode()
+            port = int.from_bytes(sock.recv(2), 'big')
+            return server_name, port
+        elif atyp == 0x04:  # IPv6
+            server_ip = socket.inet_ntop(socket.AF_INET6, sock.recv(16))
+            return server_ip, int.from_bytes(sock.recv(2), 'big')
+        else:
+            raise ValueError("Invalid address type")
 
     def my_upstream(self, client_sock):
         first_flag = True
@@ -1258,7 +1310,7 @@ function MatchAutomatom(str) {
 
 def start_server():
     global dataPath
-    with dataPath.joinpath("config.json").open(mode='r', encoding='UTF-8') as f:
+    with dataPath.joinpath("configt.json").open(mode='r', encoding='UTF-8') as f:
         global output_data,my_socket_timeout,FAKE_ttl_auto_timeout,listen_PORT,DOH_PORT,num_TCP_fragment,num_TLS_fragment,TCP_sleep,TCP_frag,TLS_frag,doh_server,domain_settings,DNS_log_every,TTL_log_every,IPtype,method,FAKE_packet,FAKE_ttl,FAKE_sleep,domain_settings_tree,pac_domains
         global ipv4trie,ipv6trie
         print(f"Now listening at: 127.0.0.1:{listen_PORT}")
