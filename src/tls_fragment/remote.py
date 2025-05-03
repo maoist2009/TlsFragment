@@ -99,6 +99,7 @@ class Remote:
                     except:
                         self.address = resolver.resolve(self.domain, "AAAA")
                 if self.address:
+                    global cnt_upd_DNS_cache, lock_DNS_cache
                     lock_DNS_cache.acquire()
                     DNS_cache[self.domain] = self.address
                     cnt_upd_DNS_cache += 1
@@ -129,6 +130,7 @@ class Remote:
                 val = utils.get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")
+                global cnt_upd_TTL_cache, lock_TTL_cache
                 lock_TTL_cache.acquire()
                 TTL_cache[self.address] = val
                 cnt_upd_TTL_cache += 1

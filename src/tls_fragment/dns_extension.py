@@ -18,27 +18,25 @@ class MyDoh:
 
 
     def resolve(self,server_name,dns_type):     
-        quary_params = {
+        query_params = {
             # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
-            'type': 'A',
+            'type': dns_type,
             'ct': 'application/dns-message',
             }
-        logger.info("online DNS Query %s",server_name)        
-    
 
-        
+        logger.info("online DNS Query %s",server_name)       
         try:
-            if dns_type=="ipv6":
-                query_message = dns.message.make_query(server_name,'AAAA')
-            else:
-                query_message = dns.message.make_query(server_name,'A')
+            query_message = dns.message.make_query(server_name,dns_type)
             query_wire = query_message.to_wire()
             query_base64 = base64.urlsafe_b64encode(query_wire).decode('utf-8')
             query_base64 = query_base64.replace('=','')    # remove base64 padding to append in url            
 
             query_url = self.url + query_base64
 
-            ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
+            print(query_url,query_params)
+
+            ans = self.req.get( query_url , params=query_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
+            print(ans)
             
             # Parse the response as a DNS packet
 
