@@ -260,6 +260,21 @@ class ThreadedServer(object):
                     )  # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
 
+                    if backend_sock.policy.get("safety_check") == True:
+                        # 如果是http协议
+                        if data.startswith(b"GET") or data.startswith(b"POST") or data.startswith(b"HEAD") or data.startswith(b"PUT") or data.startswith(b"DEL") or data.startswith(b"OPTI"):
+                            logger.warning("HTTP protocol detected, will redirect to https")
+                            # 重定向到https，要从data中提取url
+                            q_line = data.decode().split("\r\n")[0].split()
+                            q_method, q_url = q_line[0], q_line[1]
+                            https_url = q_url.replace("http://", "https://", 1)
+                            logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
+                            response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
+                            client_sock.sendall(response.encode())
+                            client_sock.close()
+                            backend_sock.close()
+
+
                     try:
                         backend_sock.sni = extract_sni(data)
                         if str(backend_sock.sni)!=str(backend_sock.domain):
@@ -322,7 +337,7 @@ class ThreadedServer(object):
                 if first_flag is True:
                     first_flag = False
                     data = backend_sock.recv(16384)
-                    if True:
+                    if backend_sock.policy.get("safety_check")==True:
                         try:
                             if detect_tls_version_by_keyshare(data)<0:
                                 logger.warning("Not a TLS 1.3 connection and will close")

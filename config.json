@@ -2,10 +2,10 @@
     "loglevel": "INFO",
     "port": 2500,
     "DOH_port": 2500,
-    "num_tcp_pieces": 8,
-    "num_tls_pieces": 8,
-    "len_tcp_sni": 13,
-    "len_tls_sni": 5,
+    "num_tcp_pieces": 4,
+    "num_tls_pieces": 4,
+    "len_tcp_sni": 4,
+    "len_tls_sni": 4,
     "send_interval": 0.01,
     "fake_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
     "fake_ttl": "query",
@@ -18,6 +18,7 @@
     "DNS_cache_update_interval": 2,
     "TTL_cache": true,
     "TTL_cache_update_interval": 2,
+    "safety_check": false,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
         "104.24.0.0/14": "^104.21.3.224",
@@ -189,7 +190,92 @@
         "pixiv": {
             "len_tls_sni": 3
         },
-    
+        "chrome.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "chromium.org": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        ".google$": {
+            "IP": "35.190.247.150",
+            "port": 1445,
+            "safety_check": true
+        },
+        "deepmind.google": {},
+        "google.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "ai.dev": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
+        "google.dev": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
+        "android.com": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
+        "golang.org": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
+        "blogger.com": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
+        "googlevideo.com": {
+            "IPtype": "ipv6"
+        },
+        "googleusercontent.com": {
+            "IP": "4.193.121.119",
+            "port": 41620
+        },
+        ".translate.goog": {
+            "IP": "4.193.121.119",
+            "port": 41620
+        },
+        "ggpht.com": {
+            "IP": "4.193.121.119",
+            "port": 41620
+        },
+        "gstatic.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "googleapis.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "youtube.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "youtube-nocookie.com": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "youtu.be": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
         "facebook.com": {
             "IP": "157.240.229.35",
             "TLSfrag": 3,
