@@ -184,11 +184,7 @@ class ThreadedServer(object):
             return None, {}
 
         # 原有HTTP重定向逻辑
-        elif data[:3] in (b"GET", b"POS", b"HEA", b"PUT", b"DEL") or data[:4] in (
-            b"POST",
-            b"HEAD",
-            b"OPTI",
-        ):
+        elif data[:3] in {b"GET", b"PUT", b"DEL"} or data[:4] in {b"POST", b"HEAD", b"OPTI"}:
             q_line = data.decode().split("\r\n")[0].split()
             q_method, q_url = q_line[0], q_line[1]
             https_url = q_url.replace("http://", "https://", 1)
@@ -260,19 +256,17 @@ class ThreadedServer(object):
                     )  # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
 
-                    if backend_sock.policy.get("safety_check") == True:
-                        # 如果是http协议
-                        if data.startswith(b"GET") or data.startswith(b"POST") or data.startswith(b"HEAD") or data.startswith(b"PUT") or data.startswith(b"DEL") or data.startswith(b"OPTI"):
-                            logger.warning("HTTP protocol detected, will redirect to https")
-                            # 重定向到https，要从data中提取url
-                            q_line = data.decode().split("\r\n")[0].split()
-                            q_method, q_url = q_line[0], q_line[1]
-                            https_url = q_url.replace("http://", "https://", 1)
-                            logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
-                            response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
-                            client_sock.sendall(response.encode())
-                            client_sock.close()
-                            backend_sock.close()
+                    if backend_sock.policy.get("safety_check") is True and (data[:3] in {b'GET', b'PUT', b'DEL'} or data[:4] in {b'POST', b'HEAD', b'OPTI'}):
+                        logger.warning("HTTP protocol detected, will redirect to https")
+                        # 如果是http协议，重定向到https，要从data中提取url
+                        q_line = data.decode().split("\r\n")[0].split()
+                        q_method, q_url = q_line[0], q_line[1]
+                        https_url = q_url.replace("http://", "https://", 1)
+                        logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
+                        response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
+                        client_sock.sendall(response.encode())
+                        client_sock.close()
+                        backend_sock.close()
 
 
                     try:
