@@ -362,4 +362,38 @@ def send_data_with_fake(sock: remote.Remote, data):
         raise Exception("Fake data send failed.")
 
     data = data[data_len:]
-    sock.sock.sendall(data)
+    sni=sock.sni
+    if sni==None:
+        sock.send(data)
+        return
+    
+    position = data.find(sni)
+    logger.debug("%s %s", sni, position)
+    if position == -1:
+        sock.send(data)
+        return
+    sni_len = len(sni)
+
+    sock.send(data[0:position])
+    data=data[position:]
+
+    if not (sock.policy.get("len_tcp_sni")<sni_len):
+        sock.policy["len_tcp_sni"]=sni_len/2
+        logger.info("len_tcp_sni too big, set to %d",sock.policy.get("len_tcp_sni"))
+
+    if send_fake_data(
+        sock.policy.get("len_tcp_sni"),
+        fake_data,
+        fake_ttl,
+        sni[0,sock.policy.get("len_tcp_sni")],
+        default_ttl,
+        sock.sock,
+        FAKE_sleep,
+    ):
+        logger.info("Fake sni sent.")
+    else:
+        raise Exception("Fake sni send failed.")
+
+    data=data[sock.policy.get("len_tcp_sni"):]
+    
+    sock.send(data)

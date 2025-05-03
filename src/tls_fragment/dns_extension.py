@@ -38,7 +38,6 @@ class MyDoh:
 
             query_url = self.url + query_base64
 
-
             ans = self.req.get( query_url , params=quary_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
             
             # Parse the response as a DNS packet
