@@ -52,6 +52,15 @@ def redirect(ip):
             logger.info("IPredirect %s to %s", ip, ans)
             return ans
 
+def match_domain(domain):
+    matched_domains = domain_policies.search("^" + domain + "$")
+    if matched_domains:
+        return copy.deepcopy(
+                config["domains"].get(sorted(matched_domains, key=len, reverse=True)[0])
+            )
+    else:
+        return {}
+
 
 class Remote:
     policy: dict
@@ -63,14 +72,8 @@ class Remote:
     # 6 tcp 17 udp
 
     def __init__(self, domain: str, port=443, protocol=6):
-        matched_domains = domain_policies.search("^" + domain + "$")
         self.domain = domain
-        if matched_domains:
-            self.policy = copy.deepcopy(
-                config["domains"].get(sorted(matched_domains, key=len, reverse=True)[0])
-            )
-        else:
-            self.policy = {}
+        self.policy = match_domain(domain)
         self.policy = merge_dict(self.policy, default_policy)
         self.policy.setdefault("port", port)
         self.protocol=protocol
@@ -88,14 +91,19 @@ class Remote:
         if self.policy.get("IP") is None:
             if self.policy.get("IPtype") == "ipv6":
                 try:
-                    self.address = resolver.resolve(domain, "AAAA")[0].to_text()
+                    self.address = resolver.resolve(self.domain, "AAAA")[0].to_text()
                 except dns.resolver.NoAnswer:
-                    self.address = resolver.resolve(domain, "A")[0].to_text()
+                    self.address = resolver.resolve(self.domain, "A")[0].to_text()
             else:
                 try:
-                    self.address = resolver.resolve(domain, "A")[0].to_text()
+                    self.address = resolver.resolve(self.domain, "A")[0].to_text()
                 except:
-                    self.address = resolver.resolve(domain, "AAAA")[0].to_text()
+                    self.address = resolver.resolve(self.domain, "AAAA")[0].to_text()
+            if self.address:
+                logger.info("resolve %s to %s",self.domain,self.address)
+            else:
+                logger.error("resolve %s failed",self.domain)
+                raise Exception("resolve failed")
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
@@ -162,7 +170,7 @@ class Remote:
             return self.sock.recv(size)
         elif self.protocol==17:
             while True:
-                data, address = sock.recvfrom(size)
+                data, address = self.sock.recvfrom(size)
                 if address == (self.address,self.port):
                     return data
 

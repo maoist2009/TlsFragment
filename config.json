@@ -1,9 +1,11 @@
 {
     "loglevel": "INFO",
     "port": 2500,
-    "num_tcp_pieces": 3,
-    "num_tls_pieces": 2,
-    "tcp_sleep": 0.01,
+    "num_tcp_pieces": 8,
+    "num_tls_pieces": 8,
+    "len_tcp_sni": 5,
+    "len_tls_sni": 3,
+    "send_interval": 0.01,
     "fake_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
     "fake_ttl": "query",
     "fake_sleep": 0.1,
@@ -55,7 +57,7 @@
         },
         "quora": {
             "IP": "104.21.3.225",
-            "TLS_frag": 3
+            "len_tls_sni": 3
         },
         "copilot.microsoft.com": {
             "IP": "2.17.22.191"
@@ -103,37 +105,37 @@
         },
         "reddit": {
             "IP": "146.75.37.140",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "redd.it": {
             "IP": "146.75.37.140",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "github.com": {
             "IP": "20.27.177.113",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "gist.github.com": {
             "IP": "20.27.177.113",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "api.github.com": {
             "IP": "20.27.177.116",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "alive.github.com": {
             "IP": "140.82.112.26",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "uploads.github.com": {
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "github.io": {
             "IP": "151.101.21.147"
@@ -181,7 +183,7 @@
             "IP": "185.15.58.224"
         },
         "pixiv": {
-            "TLS_frag": 3
+            "len_tls_sni": 3
         },
     
         "facebook.com": {
@@ -193,25 +195,25 @@
             "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
         },
         "meta": {
-            "TLS_frag": 2,
-            "TCP_frag": 3,
-            "TCP_sleep": 0.01
+            "len_tls_sni": 2,
+            "len_tcp_sni": 3,
+            "send_interval": 0.01
         },
         "static.cdninstagram.com": {
             "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
         },
         "static.xx.fbcdn.net": {
             "IP": "157.240.229.35",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "fbcdn.net": {
             "IPtype": "ipv6"
         },
         "fbsbx.com": {
             "IP": "2a03:2880:f115:83:face:b00c:0:25de",
-            "TLS_frag": 3,
-            "TCP_frag": 5
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
         },
         "dropbox.com": {
             "IP": "162.125.2.18"
@@ -228,10 +230,10 @@
         },
         "t.me": {
             "IP": "149.154.161.145",
-            "TLS_frag": 1,
+            "len_tls_sni": 1,
             "num_tcp_pieces": 3,
             "num_tls_pieces": 5,
-            "TCP_frag": 2
+            "len_tcp_sni": 2
         },
         "medium": {},
         "cdn-telegram.org": {
@@ -257,43 +259,43 @@
         },
         "video.twimg.com": {
             "CDN": "Fastly: 2024/11/13: 151.101.40.158",
-            "TCP_frag": 8,
+            "len_tcp_sni": 8,
             "IPcache": false
         },
         "twimg.com": {
             "IP": "146.75.72.157",
-            "TLS_frag": 4
+            "len_tls_sni": 4
         },
         "x.com": {
             "IP": "104.18.38.25",
-            "TCP_frag": 5,
-            "TCP_sleep": 0.02,
-            "TLS_frag": 2
+            "len_tcp_sni": 5,
+            "send_interval": 0.02,
+            "len_tls_sni": 2
         },
         "platform.twitter.com": {
             "IP": "146.75.120.157",
-            "TLS_frag": 4
+            "len_tls_sni": 4
         },
         "twitter.com": {
             "IP": "104.18.38.25",
-            "TLS_frag": 4
+            "len_tls_sni": 4
         },
         "video.pscp.tv": {
             "IP": "146.75.34.164",
-            "TLS_frag": 9,
+            "len_tls_sni": 9,
             "IPcache": false
         },
         "one.one.one.one": {
             "IP": "104.21.3.221",
-            "TLS_frag": 4
+            "len_tls_sni": 4
         },
         "nav-edge.smartscreen.microsoft.com": {
             "IP": "0.0.0.0",
-            "TLS_frag": 4
+            "len_tls_sni": 4
         },
         "cloudflare-dns.com": {
             "IP": "104.21.3.222",
-            "TLS_frag": 6
+            "len_tls_sni": 6
         },
         "tracking.miui.com": {
             "method": "GFWlike"
