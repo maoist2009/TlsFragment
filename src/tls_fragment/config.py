@@ -82,6 +82,8 @@ config = merge_dict(config, _config)
 default_policy = {
     "num_tls_pieces": config["num_tls_pieces"],
     "num_tcp_pieces": config["num_tcp_pieces"],
+    "len_tcp_sni": config["len_tcp_sni"],
+    "len_tls_sni": config["len_tls_sni"],
     "mode": config["mode"],
     "fake_packet": config["fake_packet"].encode(encoding="UTF-8"),
     "fake_ttl": config["fake_ttl"],

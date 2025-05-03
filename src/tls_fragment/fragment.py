@@ -31,7 +31,7 @@ def fragment_content(data: str, num: int) -> list:
     return fragmented_content
 
 
-def fragment_pattern(data, pattern, num):
+def fragment_pattern(data, pattern, len_sni: int, num_pieces: int):
     """
     fragment pattern into at least num parts.
     the first part of the pattern contains in
@@ -46,23 +46,28 @@ def fragment_pattern(data, pattern, num):
     pattern_lenth = len(pattern)
     data_lenth = len(data)
 
-    fragmented_data.append(data[0:position])
+    fragmented_data.extend(fragment_content(data[0:position],num_pieces))
 
-    lenth = pattern_lenth // num
+    if len_sni<len(pattern)/2:
+        len_sni=len(pattern)/2
+        logger.info("len_sni is too small, set to %d", len_sni)
+
+    lenth = len_sni
+    num = pattern_lenth // lenth
     if pattern_lenth % num != 0:
-        lenth += 1
+        num += 1
 
     for i in range(0, num):
         fragmented_data.append(
             data[position + i * lenth : position + min((i + 1) * lenth, pattern_lenth)]
         )
 
-    fragmented_data.append(data[position + pattern_lenth : data_lenth])
+    fragmented_data.extend(fragment_content(data[position + pattern_lenth : data_lenth],num_pieces))
     return fragmented_data
 
 def send_fraggmed_tls_data(sock: remote.Remote, data):
     """send fragged tls data"""
-    sni=sock.policy.get("sni")
+    sni=sock.sni
 
     logger.info("To send: %d Bytes.", len(data))
     if sni is None:
@@ -74,7 +79,7 @@ def send_fraggmed_tls_data(sock: remote.Remote, data):
     record = data[5:]
 
     fragmented_tls_data = fragment_pattern(
-        record, sni, sock.policy["num_tls_pieces"]
+        record, sni, sock.policy["len_tls_sni"], sock.policy["num_tls_pieces"]
     )
     tcp_data = b""
     for i, _ in enumerate(fragmented_tls_data):
@@ -97,6 +102,7 @@ def send_fraggmed_tls_data(sock: remote.Remote, data):
             - len(fragmented_tls_data[-1])
             + 1
         ],
+        sock.policy["len_tcp_sni"],
         sock.policy["num_tcp_pieces"],
     )
 
