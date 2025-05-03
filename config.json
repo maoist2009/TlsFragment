@@ -1,5 +1,5 @@
 {
-    "loglevel": "DEBUG",
+    "loglevel": "INFO",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
