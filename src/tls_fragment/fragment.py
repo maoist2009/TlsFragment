@@ -68,7 +68,7 @@ def fragment_pattern(data, pattern, len_sni: int, num_pieces: int):
     r = len(fragmented_data)
 
     fragmented_data.extend(
-        fragment_content(data[position + num * len_sni], num_pieces)
+        fragment_content(data[position + num * len_sni:], num_pieces)
     )
     return fragmented_data, l, r
 
