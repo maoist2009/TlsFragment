@@ -39,7 +39,12 @@ def redirect(ip):
         return ip
     else:
         logger.info("IP redirect %s to %s", ip, mapped_ip)
-        return mapped_ip
+        if mapped_ip[0]=="^":
+            return mapped_ip[1:]
+        if ip==mapped_ip:
+            return mapped_ip
+        else:
+            return redirect(mapped_ip)
 
 def match_domain(domain):
     matched_domains = domain_policies.search("^" + domain + "$")
