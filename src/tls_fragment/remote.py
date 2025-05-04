@@ -13,8 +13,8 @@ from .config import (
 
 from .dns_extension import MyDoh
 import socket
-import copy
-import threading
+from copy import deepcopy
+from threading import Lock
 from . import utils
 from .l38 import merge_dict
 import ipaddress
@@ -25,32 +25,26 @@ resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh
 
 from .config import DNS_cache, TTL_cache, write_DNS_cache, write_TTL_cache
 cnt_upd_TTL_cache = 0
-lock_TTL_cache = threading.Lock()
+lock_TTL_cache = Lock()
 cnt_upd_DNS_cache = 0
-lock_DNS_cache = threading.Lock()
+lock_DNS_cache = Lock()
 
 
 def redirect(ip):
-    ans = ""
-    if ip.find(":") != -1:
-        ans = ipv4_map.search(utils.ip_to_binary_prefix(ip))
-        if ans is None:
-            return ip
-        else:
-            logger.info("IPredirect %s to %s", ip, ans)
-            return ans
+    if ':' in ip:
+        mapped_ip = ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
-        ans = ipv6_map.search(utils.ip_to_binary_prefix(ip))
-        if ans is None:
-            return ip
-        else:
-            logger.info("IPredirect %s to %s", ip, ans)
-            return ans
+        mapped_ip = ipv4_map.search(utils.ip_to_binary_prefix(ip))
+    if mapped_ip is None:
+        return ip
+    else:
+        logger.info("IP redirect %s to %s", ip, mapped_ip)
+        return mapped_ip
 
 def match_domain(domain):
     matched_domains = domain_policies.search("^" + domain + "$")
     if matched_domains:
-        return copy.deepcopy(
+        return deepcopy(
                 config["domains"].get(sorted(matched_domains, key=len, reverse=True)[0])
             )
     else:
@@ -71,20 +65,20 @@ class Remote:
         self.policy = match_domain(domain)
         self.policy = merge_dict(self.policy, default_policy)
         self.policy.setdefault("port", port)
-        self.protocol=protocol
+        self.protocol = protocol
         
         try:
             ipaddress.IPv4Address(self.domain)
-            self.policy["IP"]=self.domain
+            self.policy["IP"] = self.domain
         except:
             try:
                 ipaddress.IPv6Address(self.domain)
-                self.policy["IP"]=self.domain
+                self.policy["IP"] = self.domain
             except:
                 pass
         
         if self.policy.get("IP") is None:
-            if DNS_cache.get(self.domain) != None:
+            if DNS_cache.get(self.domain) is not None:
                 self.address = DNS_cache[self.domain]
                 logger.info("DNS cache for %s is %s", self.domain, self.address)
             else:
@@ -144,50 +138,46 @@ class Remote:
                 )
 
         logger.info("%s --> %s", domain, self.policy)
-        
-        
-        if ":" in self.address:
-            iptype=socket.AF_INET6
+
+        iptype = socket.AF_INET6 if ":" in self.address else socket.AF_INET
+
+        if self.protocol == 6:
+            socktype = socket.SOCK_STREAM
+        elif self.protocol == 17:
+            socktype = socket.SOCK_DGRAM
         else:
-            iptype=socket.AF_INET
+            raise ValueError("Unknown sock type", self.protocol)
             
-        if self.protocol==6:
-            socktype=socket.SOCK_STREAM
-        elif self.protocol==17:
-            socktype=socket.SOCK_DGRAM
-        else:
-            raise ValueError("Unknown sock type",self.protocol)
-            
-        self.sock = socket.socket(iptype,socktype)
+        self.sock = socket.socket(iptype, socktype)
         
-        if self.protocol==6:    
+        if self.protocol == 6:    
             self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.sock.settimeout(config["my_socket_timeout"])
 
     def connect(self):
-        if self.protocol==6:
+        if self.protocol == 6:
             self.sock.connect((self.address, self.port))
-        elif self.protocol==17:
+        elif self.protocol == 17:
             pass
 
     def send(self, data):
-        if self.protocol==6:
+        if self.protocol == 6:
             self.sock.sendall(data)
-        elif self.protocol==17:
-            self.sock.send_to(data,(self.address,self.port))
+        elif self.protocol == 17:
+            self.sock.send_to(data,(self.address, self.port))
 
     def recv(self, size):
-        if self.protocol==6:
+        if self.protocol == 6:
             return self.sock.recv(size)
-        elif self.protocol==17:
+        elif self.protocol == 17:
             while True:
                 data, address = self.sock.recvfrom(size)
-                if address == (self.address,self.port):
+                if address == (self.address, self.port):
                     return data
 
  
     def close(self):
-        if self.protocol==6:
+        if self.protocol == 6:
             self.sock.close()
-        elif self.protocol==17:
+        elif self.protocol == 17:
             pass
