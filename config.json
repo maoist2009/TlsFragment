@@ -133,6 +133,11 @@
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
+        "uploads.github.com": {
+            "IP": "4.237.22.36",
+            "len_tls_sni": 3,
+            "len_tcp_sni": 5
+        },
         "alive.github.com": {
             "IP": "140.82.112.26",
             "len_tls_sni": 3,
