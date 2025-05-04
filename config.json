@@ -119,17 +119,17 @@
             "len_tcp_sni": 5
         },
         "github.com": {
-            "IP": "20.27.177.113",
+            "IP": "4.237.22.38",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
         "gist.github.com": {
-            "IP": "20.27.177.113",
+            "IP": "4.237.22.38",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
         "api.github.com": {
-            "IP": "20.27.177.116",
+            "IP": "4.237.22.34",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
