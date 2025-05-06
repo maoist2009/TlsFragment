@@ -241,6 +241,11 @@
             "port": 1445,
             "safety_check": true
         },
+        "gvt1.com": {
+            "IP": "35.190.247.145",
+            "port": 1445,
+            "safety_check": true
+        },
         "googlevideo.com": {
             "IPtype": "ipv6"
         },
