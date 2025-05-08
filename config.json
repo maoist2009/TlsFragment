@@ -143,10 +143,6 @@
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
-        "uploads.github.com": {
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
-        },
         "github.io": {
             "IP": "151.101.21.147"
         },
@@ -282,6 +278,11 @@
             "safety_check": true
         },
         "youtu.be": {
+            "IP": "35.190.247.146",
+            "port": 1445,
+            "safety_check": true
+        },
+        "ytimg.com": {
             "IP": "35.190.247.146",
             "port": 1445,
             "safety_check": true
