@@ -1,0 +1,24 @@
+name: Android Buildozer
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: setup docker
+        id: buildozer
+        run: docker build . -t local -f tools/build/build_android.dockerfile
+      - name: build with buildozer
+        run: docker run -i -v $PWD:/srv -w/srv local /bin/bash ./tools/build/build_android.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: package
+          path: build/android/bin/*.apk

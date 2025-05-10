@@ -1,4 +1,4 @@
 cd ..
 taskkill /f /t /im python.exe
-python server.py
+python run.py
 cd tools
