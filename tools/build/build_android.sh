@@ -17,6 +17,7 @@ chown -R root build/android
   source venv/bin/activate
 
   python3 -m pip install --upgrade pip
+  python3 -m pip install --force-reinstall -r "$ROOT"/tools/build/requirements.txt
   python3 -m pip install --force-reinstall -r "$ROOT"/tools/build/requirements_build_android.txt
 
   # Remove APK if exists
