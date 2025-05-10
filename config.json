@@ -10,7 +10,7 @@
     "fake_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
     "fake_ttl": "query",
     "fake_sleep": 0.1,
-    "my_socket_timeout": 180,
+    "my_socket_timeout": 120,
     "FAKE_ttl_auto_timeout": 2,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "mode": "TLSfrag",

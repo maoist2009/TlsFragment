@@ -37,6 +37,7 @@ pac_domains = []
 pacfile = "function genshin(){}"
 
 ThreadtoWork = False
+proxy_thread=None
 
 class ThreadedServer(object):
     def __init__(self, host, port):
@@ -46,24 +47,27 @@ class ThreadedServer(object):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
 
-    def listen(self):
-        global ThreadtoWork
+    def listen(self,block=True):
+        global ThreadtoWork, proxy_thread
         self.sock.listen(
             128
         )  # up to 128 concurrent unaccepted socket queued , the more is refused untill accepting those.
 
-        accept_thread = threading.Thread(target=self.accept_connections, args=())
-        accept_thread.start()
-        try:
-            # 主程序逻辑
-            while True:
-                time.sleep(1)  # 主线程的其他操作
-        except KeyboardInterrupt:
-            # 捕获 Ctrl+C
-            logger.warning("\nServer shutting down.")
-        finally:
-            ThreadtoWork = False
-            self.sock.close()
+        proxy_thread = threading.Thread(target=self.accept_connections, args=())
+        proxy_thread.start()
+        if block:
+            try:
+                # 主程序逻辑
+                while True:
+                    time.sleep(1)  # 主线程的其他操作
+            except KeyboardInterrupt:
+                # 捕获 Ctrl+C
+                logger.warning("\nServer shutting down.")
+            finally:
+                ThreadtoWork = False
+                self.sock.close()
+        else:
+            return self
 
     def accept_connections(self):
         try:
@@ -527,7 +531,7 @@ function MatchAutomatom(str) {
     )
 
 
-def start_server():
+def start_server(block=True):
     global dataPath
     with dataPath.joinpath("config.json").open(mode="r", encoding="UTF-8") as f:
         generate_PAC()
@@ -541,27 +545,23 @@ def start_server():
 
     global serverHandle
     logger.info(f"Now listening at: 127.0.0.1:{config['port']}")
-    serverHandle = ThreadedServer("", config["port"]).listen()
+    serverHandle = ThreadedServer("", config["port"]).listen(block)
 
 
-def stop_server():
-    global ThreadtoWork, proxythread
+def stop_server(wait_for_stop=True):
+    global ThreadtoWork, proxy_thread
     ThreadtoWork = False
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect(("127.0.0.1", config["port"]))
     sock.close()
-    while proxythread.is_alive():
-        pass
-
-
-def Write_TTL_cache():
-    global TTL_cache, dataPath
-    with dataPath.joinpath("TTL_cache.json").open(mode="w", encoding="UTF-8") as f:
-        json.dump(TTL_cache, f)
+    if wait_for_stop:
+        while proxy_thread.is_alive():
+            pass
+        logger.info("Server stopped")
 
 
 dataPath = Path.cwd()
 ThreadtoWork = True
 
 if __name__ == "__main__":
-    proxythread = start_server()
+    start_server()
