@@ -1,0 +1,2 @@
+PyInstaller==5.13.1
+#cython==0.29.33

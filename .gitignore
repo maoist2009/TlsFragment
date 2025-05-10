@@ -1,7 +1,7 @@
 DNS_cache.json
 TTL_cache.json
 dist
-build
+/build
 proxy.exe.spec
 log.txt
 __pycache__
