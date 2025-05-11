@@ -9,27 +9,25 @@ from src.tls_fragment.cli import start_server,stop_server
 
 class ProxyApp(App):
     def build(self):
+        print("buildimg")
         layout = BoxLayout(orientation='vertical')
-        
-        self.config_input = TextInput(hint_text='Edit config.json', multiline=True)
-        layout.add_widget(self.config_input)
 
-        global start_proxy, stop_proxy
-        
-        start_button = Button(text='Start Proxy')
-        start_button.bind(on_press=self.start_proxy)
-        layout.add_widget(start_button)
+        self.start_button = Button(text='Start Proxy')
+        self.start_button.bind(on_press=self.start_proxy)
+        layout.add_widget(self.start_button)
 
-        stop_button = Button(text='Stop Proxy')
+        self.stop_button = Button(text='Stop Proxy')
         stop_button.bind(on_press=self.stop_proxy)
-        layout.add_widget(stop_button)
+        layout.add_widget(self.stop_button)
 
-        save_button = Button(text='Save Config')
-        save_button.bind(on_press=self.save_config)
-        layout.add_widget(save_button)
+        self.save_button = Button(text='Save Config')
+        self.save_button.bind(on_press=self.save_config)
+        layout.add_widget(self.save_button)
 
         self.config_input = TextInput(hint_text='Edit config.json', multiline=True)
         layout.add_widget(self.config_input)
+
+        print("built")
 
         # 读取默认配置文件并加载到文本框
         self.load_config()
