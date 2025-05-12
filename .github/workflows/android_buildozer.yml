@@ -1,19 +1,46 @@
-name: Android Buildozer
+name: Android Build
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: setup docker
-        id: buildozer
-        run: docker build . -t local -f tools/build/build_android.dockerfile
-      - name: build with buildozer
-        run: docker run -i -v $PWD:/srv -w/srv local /bin/bash ./tools/build/build_android.sh
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8.12'
+          cache: 'pip'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: autoconf automake build-essential ccache cmake gettext git libffi-dev libltdl-dev libssl-dev libtool patch pkg-config unzip zip zlib1g-dev
+
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./build/android/.buildozer
+            /home/runner/.buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('tools/build/buildozer.spec') }}
+
+      - name: Buildozer Build
+        run: bash tools/build/build_android.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2

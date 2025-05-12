@@ -5,13 +5,13 @@ ROOT=$(realpath $(dirname "$0")/../..)
 
 [[ -d "$ROOT"/build/android ]] || mkdir -p "$ROOT"/build/android
 
-chown -R root build/android
+# chown -R root build/android
 
 (
   cd "$ROOT"/build/android
-  export HOME="$PWD"
-  export GRADLE_USER_HOME="$PWD"/.gradle
-  export ANDROID_USER_HOME="$PWD"/.android
+  # export HOME="$PWD"
+  # export GRADLE_USER_HOME="$PWD"/.gradle
+  # export ANDROID_USER_HOME="$PWD"/.android
 
   python3 -m venv venv
   source venv/bin/activate
