@@ -53,7 +53,7 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython
 orientation = portrait
 
 # (list) List of service to declare
-#services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
+services = Myservice:service.py:sticky:foreground
 
 #
 # OSX Specific
