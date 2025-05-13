@@ -64,16 +64,20 @@ class ProxyApp(App):
         """启动Android服务来运行代理"""
         try:
             
-            # 启动服务
-            PythonService = autoclass('org.kivy.android.PythonService')
-            service = PythonService.mService
+            SERVICE_NAME = u'{packagename}.Service{servicename}'.format(
+                packagename=u'org.maoist2009.tlsfragment',
+                servicename=u'Myservice'
+            )
+            service = autoclass(SERVICE_NAME)
+            mActivity = autoclass(u'org.kivy.android.PythonActivity').mActivity
+            argument = ''
             
             # 创建通知
             notification = self.create_notification()
             service.startForeground(1, notification)
             
             # 启动服务主函数
-            service.startService()
+            service.start(mActivity, argument)
             
             print("Proxy service started")
             self.start_button.disabled = True

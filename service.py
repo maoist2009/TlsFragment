@@ -3,9 +3,6 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 import os
 import threading
-# 修正导入路径，src 在父目录
-from sys import path
-path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from src.tls_fragment.cli import start_server, stop_server
 
 # 导入Android Java类
