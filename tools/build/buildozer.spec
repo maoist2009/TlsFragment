@@ -53,7 +53,7 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython
 orientation = portrait
 
 # (list) List of service to declare
-services = Myservice:service.py:sticky:foreground
+services = ProxyService:service.py:sticky:foreground
 
 #
 # OSX Specific
@@ -94,7 +94,7 @@ android.presplash_color = #39C5BB
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = android.permission.INTERNET,android.permission.FOREGROUND_SERVICE
+android.permissions = INTERNET,FOREGROUND_SERVICE
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
