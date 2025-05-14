@@ -102,7 +102,7 @@ class Remote:
                     lock_DNS_cache.acquire()
                     DNS_cache[self.domain] = self.address
                     cnt_upd_DNS_cache += 1
-                    if cnt_upd_DNS_cache >= config["TTL_cache_update_interval"]:
+                    if cnt_upd_DNS_cache >= config["DNS_cache_update_interval"]:
                         cnt_upd_DNS_cache = 0
                         write_DNS_cache()
                     lock_DNS_cache.release()
