@@ -33,7 +33,6 @@ IP_DL_traffic = {}  # download usage for each ip
 IP_UL_traffic = {}  # upload usage for each ip
 
 lock_TTL_cache = threading.Lock()
-pac_domains = []
 pacfile = "function genshin(){}"
 
 ThreadtoWork = False
@@ -393,7 +392,7 @@ serverHandle = None
 
 
 def generate_PAC():
-    global pac_domains, pacfile
+    global pacfile
     pacfile = """class TrieNode {
     constructor(value){
         this.value = value;
@@ -507,7 +506,7 @@ function MatchAutomatom(str) {
 """
     pacfile += "let domains=[];\n"
 
-    for line in pac_domains:
+    for line in config["pac_domains"]:
         pacfile += 'domains.push("'
         pacfile += line
         pacfile += '");\n'
