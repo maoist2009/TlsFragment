@@ -74,7 +74,14 @@ class ProxyApp(App):
             package_name = 'org.maoist2009.tlsfragment'
             # service = jnius.autoclass('org.kivy.android.PythonService').mService
             # Previous version of Kivy had a reference to the service like below.
-            service = jnius.autoclass('{}.Service{}'.format(package_name, service_name)).mService
+            # service = jnius.autoclass('{}.Service{}'.format(package_name, service_name)).mService
+
+            SERVICE_NAME = u'{packagename}.Service{servicename}'.format(
+                packagename=u'org.maoist2009.tlsfragment',
+                servicename=u'ProxyService'
+            )
+            service = jnius.autoclass(SERVICE_NAME)
+
             PythonActivity = jnius.autoclass('org.kivy.android' + '.PythonActivity')
             notification_service = service.getSystemService(
                 Context.NOTIFICATION_SERVICE)
