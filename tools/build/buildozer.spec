@@ -53,7 +53,7 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython
 orientation = portrait
 
 # (list) List of service to declare
-services = ProxyService:service.py:sticky:foreground
+services = ProxyService:service.py
 
 #
 # OSX Specific
