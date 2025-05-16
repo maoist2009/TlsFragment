@@ -9,7 +9,6 @@ import plyer
 def start():
     """启动代理服务器并保持服务运行"""
     Logger.info("Service: Starting proxy server")
-    self.server_running = True
     
     try:
         # 启动代理服务器（非阻塞模式）
@@ -22,8 +21,6 @@ def start():
         
     except Exception as e:
         Logger.error(f"Service: Error starting server: {str(e)}")
-        self.server_running = False
 
-if __name__ == '__main__':
-    plyer.notification.notify(title='BackgroundService Test', message="Notification from android service")
-    start()
+
+start()
