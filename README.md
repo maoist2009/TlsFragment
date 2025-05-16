@@ -15,7 +15,7 @@ python -m installer dist/*.whl
 ```
 
 ## 运行
-作为模块安装后可以直接运行 `tls_fragment`。
+作为模块安装后可以直接运行 `tls_fragment`。（暂不支持）
 
 或者将仓库克隆下来之后运行 `run.py`。
 
