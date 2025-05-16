@@ -42,6 +42,8 @@ class ProxyApp(App):
             size_hint_y=1
         )
         layout.add_widget(self.config_input)
+
+        self.get_permit()
         
         return layout
 
@@ -63,13 +65,17 @@ class ProxyApp(App):
     def start_proxy_service(self, instance):
         """启动Android服务来运行代理"""
         try:
-            from jnius import autoclass
-            service = autoclass('org.maoist2009.tlsfragment.ServiceProxyService')
-            mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
-            argument = ''
-            service.start(mActivity, argument)
-            label = self.root.ids.mylabel
-            label.text += "\nservice started"
+            from android import mActivity
+            #print('Service started____ ', nm)
+            context =  mActivity.getApplicationContext()
+
+            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'ProxyService'
+
+            self.service_target = autoclass(SERVICE_NAME)
+
+            self.service_target.start(mActivity,'icon', 'logger', 'Connecting', '')
+
+            return self.service_target
             
         except Exception as e:
             print(f"Failed to start service: {e}")
@@ -79,15 +85,19 @@ class ProxyApp(App):
     def stop_proxy_service(self, instance):
         """停止代理服务"""
         try:
-            PythonService = autoclass('org.kivy.android.PythonService')
-            service = PythonService.mService
-            
-            # 发送停止命令到服务
-            service.stopService()
-            
-            print("Proxy service stopped")
-            self.start_button.disabled = False
-            self.stop_button.disabled = True
+            from android import mActivity
+            context = mActivity.getApplicationContext()
+
+
+            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'ProxyService'
+
+            Service = autoclass(SERVICE_NAME)
+
+            Intent = autoclass('android.content.Intent')
+            service_intent = Intent(mActivity, Service)
+
+
+            mActivity.stopService(service_intent)
             
         except Exception as e:
             print(f"Failed to stop service: {e}")
@@ -107,51 +117,29 @@ class ProxyApp(App):
         except Exception as e:
             print(f"Failed to check service status: {e}")
 
-    def create_notification(self):
-        """创建通知（与之前相同）"""
-        try:
-            Notification = autoclass('android.app.Notification')
-            NotificationChannel = autoclass('android.app.NotificationChannel')
-            NotificationManager = autoclass('android.app.NotificationManager')
-            Context = autoclass('android.content.Context')
-            Intent = autoclass('android.content.Intent')
-            PendingIntent = autoclass('android.app.PendingIntent')
-            PythonActivity = autoclass('org.kivy.android.PythonActivity')
-            
-            service = autoclass('org.kivy.android.PythonService').mService
-            context = service.getApplicationContext()
-            
-            channel_id = "tls_fragment_channel"
-            channel_name = "TlsFragment Service"
-            channel_importance = NotificationManager.IMPORTANCE_LOW
-            
-            if service.getApplicationInfo().targetSdkVersion >= 26:
-                channel = NotificationChannel(channel_id, channel_name, channel_importance)
-                manager = context.getSystemService(Context.NOTIFICATION_SERVICE)
-                manager.createNotificationChannel(channel)
-            
-            intent = Intent(context, PythonActivity)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            pending_intent = PendingIntent.getActivity(
-                context, 0, intent, PendingIntent.FLAG_IMMUTABLE
-            )
-            
-            builder = Notification.Builder(context, channel_id)
-            builder.setContentTitle("TlsFragment")
-            builder.setContentText("Proxy server running...")
-            builder.setSmallIcon(context.getApplicationInfo().icon)
-            builder.setContentIntent(pending_intent)
-            builder.setOngoing(True)
-            
-            if service.getApplicationInfo().targetSdkVersion >= 16:
-                return builder.build()
-            else:
-                return builder.getNotification()
-                
-        except Exception as e:
-            print(f"Error creating notification: {e}")
-            return None
+    def get_permit(self):
+        if platform == 'android':
+            from android.permissions import Permission, request_permissions 
 
+            def callback(permissions, results):
+                granted_permissions = [perm for perm, res in zip(permissions, results) if res]
+                denied_permissions = [perm for perm, res in zip(permissions, results) if not res]
+
+                if denied_permissions:
+                    print('Denied permissions:', denied_permissions)
+
+                elif granted_permissions:
+                    print('Got all permissions')
+                else:
+                    print('No permissions were granted or denied')
+
+            requested_permissions = [
+                Permission.INTERNET,
+                Permission.FOREGROUND_SERVICE,
+                Permission.READ_EXTERNAL_STORAGE,
+                Permission.SYSTEM_ALERT_WINDOW
+            ]
+            request_permissions(requested_permissions, callback)
     def save_config(self, instance):
         try:
             config_data = json.loads(self.config_input.text)
