@@ -3,7 +3,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.metrics import dp
-from jnius import autoclass
+from kivy.utils import platform
+from jnius import autoclass, cast
 import os
 import json
 
