@@ -79,6 +79,7 @@ class ProxyApp(App):
             self.config_box.add_widget(self.config_input)
             layout.add_widget(self.config_box)
             self.built=True
+            print("build success")
         except:
             pass
 
