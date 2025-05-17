@@ -31,8 +31,6 @@ class ProxyApp(App):
             self.vpn_check_box_hint=Label(text='全局vpn模式')
             self.box_start.add_widget(self.vpn_check_box_hint)
             self.vpn_checkbox = CheckBox()
-            self.vpn_mode=False
-            self.vpn_checkbox.bind(self.vpn_mode)
             self.box_start.add_widget(self.vpn_checkbox)
             self.layout.add_widget(self.box_start)
     
@@ -83,7 +81,7 @@ class ProxyApp(App):
             self.built=True
         except:
             pass
-    
+
         return layout
 
     def on_start(self):
