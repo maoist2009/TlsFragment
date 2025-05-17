@@ -21,14 +21,14 @@ class ProxyApp(App):
         try:
             self.box_start= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
             self.start_button = Button(
-                text='启动代理',
+                text='start proxy',
                 size_hint_y=None,
                 height=button_height
             )
             self.start_button.bind(on_press=self.run_proxy_service)
             self.box_start.add_widget(self.start_button)
             self.proxy_running = False
-            self.vpn_check_box_hint=Label(text='全局vpn模式')
+            self.vpn_check_box_hint=Label(text='Global VPN')
             self.box_start.add_widget(self.vpn_check_box_hint)
             self.vpn_checkbox = CheckBox()
             self.box_start.add_widget(self.vpn_checkbox)
@@ -36,14 +36,14 @@ class ProxyApp(App):
     
             self.delete_cache_box= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
             self.delete_DNS_cache_button = Button(
-                text='删除DNS缓存',
+                text='delete DNS cache',
                 size_hint_y=None,
                 height=button_height
             )
             self.delete_DNS_cache_button.bind(on_press=self.delete_DNS_cache)
             self.delete_cache_box.add_widget(self.delete_DNS_cache_button)
             self.delete_TTL_cache_button = Button(
-                text='删除TTL缓存',
+                text='delete TTL cache',
                 size_hint_y=None,
                 height=button_height
             )
@@ -54,7 +54,7 @@ class ProxyApp(App):
             self.config_box = BoxLayout(orientation='vertical', size_hint_y=None, height=button_height)
             self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
             self.edit_config_button = Button(
-                text='编辑配置',
+                text='Edit config',
                 size_hint_y=None,
                 height=button_height
             )
@@ -62,7 +62,7 @@ class ProxyApp(App):
             self.config_editable=False
             self.config_button_box.add_widget(self.edit_config_button)
             self.save_config_button = Button(
-                text='保存配置',
+                text='Save config',
                 size_hint_y=None,
                 height=button_height
             )
@@ -71,7 +71,7 @@ class ProxyApp(App):
             self.config_button_box.add_widget(self.save_config_button)
             self.config_box.add_widget(self.config_button_box)
             self.config_input = TextInput(
-                hint_text='请输入配置',
+                hint_text='Please input',
                 multiline=True,
                 size_hint_y=1
             )
@@ -92,12 +92,12 @@ class ProxyApp(App):
     def edit_config(self):
         if self.config_editable:
             self.config_input.readonly = False
-            self.edit_config_button.text = '锁定配置'
+            self.edit_config_button.text = 'Lock config'
             self.config_editable = False
             self.save_config_button.disabled = False
         else:
             self.config_input.readonly = True
-            self.edit_config_button.text = '编辑配置'
+            self.edit_config_button.text = 'Edit config'
             self.config_editable = True
             self.save_config_button.disabled = True
 
@@ -109,7 +109,7 @@ class ProxyApp(App):
                     self.config_input.text = json.dumps(json.load(f), indent=4)
             except Exception as e:
                 print(f"Failed to load config: {e}")
-                failded_popup = Popup(title='加载配置失败', content=Label(text=f"Failed to load config: {e}"), size_hint=(None, None), size=(400, 200))
+                failded_popup = Popup(title='Load config failed', content=Label(text=f"Failed to load config: {e}"), size_hint=(None, None), size=(400, 200))
                 failded_popup.open()
         else:
             self.config_input.text = json.dumps(
@@ -127,9 +127,9 @@ class ProxyApp(App):
         self.service_target = autoclass(SERVICE_NAME)
 
         self.service_target.start(
-            mActivity, 'icon', 'TlsFragment', '正在运行代理 ProxyRunning', '')
+            mActivity, 'icon', 'TlsFragment', 'ProxyRunning', '')
         
-        success_popup = Popup(title='启动代理成功', content=Label(text='Proxy started successfully'), size_hint=(None, None), size=(400, 200))
+        success_popup = Popup(title='Start successfully', content=Label(text='Proxy started successfully'), size_hint=(None, None), size=(400, 200))
         success_popup.open()
 
         return self.service_target
@@ -165,7 +165,7 @@ class ProxyApp(App):
             elif granted_permissions:
                 print('Got all permissions')
             else:
-                lack_permissions_popup = Popup(title='缺乏一些权限，可能无法正常运行', content=Label(text='Please grant all permissions to use this app'), size_hint=(None, None), size=(400, 200))
+                lack_permissions_popup = Popup(title='Lack of permissions', content=Label(text='Please grant all permissions to use this app'), size_hint=(None, None), size=(400, 200))
                 lack_permissions_popup.open()
 
         requested_permissions = [
@@ -179,9 +179,9 @@ class ProxyApp(App):
     def run_proxy_service(self):
         if self.proxy_running:
             try:
-                self.start_button.text= '正在停止'
+                self.start_button.text= 'Stopping'
                 self.stop_proxy_service()
-                self.start_button.text = '启动代理'
+                self.start_button.text = 'start proxy'
                 self.start_button.disabled = False
                 # 启用其余组件
                 self.vpn_checkbox.disabled = False
@@ -189,23 +189,23 @@ class ProxyApp(App):
                 self.delete_cache_box.disabled = False
                 self.proxy_running = False
             except:
-                faild_popup=Popup(title='停止代理失败', content=Label(text='Failed to stop proxy'), size_hint=(None, None), size=(400, 200))
+                faild_popup=Popup(title='Stop failed', content=Label(text='Failed to stop proxy'), size_hint=(None, None), size=(400, 200))
                 faild_popup.open()
-                self.start_button.text = '停止代理'
+                self.start_button.text = 'stop proxy'
         else:
             try:
-                self.start_button.text = '正在启动'
+                self.start_button.text = 'starting'
                 self.start_proxy_service()
-                self.start_button.text = '停止代理'
+                self.start_button.text = 'stop proxy'
                 self.start_button.disabled = False
                 self.vpn_checkbox=True
                 self.config_box.disabled = True
                 self.delete_cache_box.disabled = True
                 self.proxy_running = True
             except:
-                faild_popup= Popup(title='启动失败', content=Label(text='Failed to start proxy service'), size_hint=(None, None), size=(400, 200))
+                faild_popup= Popup(title='Start failed', content=Label(text='Failed to start proxy service'), size_hint=(None, None), size=(400, 200))
                 faild_popup.open()
-                self.start_button.text = '启动代理'
+                self.start_button.text = 'Start proxy'
 
 
     def save_config(self):
@@ -224,10 +224,10 @@ class ProxyApp(App):
             # 删除DNS_cache.json
             if os.path.exists('DNS_cache.json'):
                 os.remove('DNS_cache.json')
-                success_popup = Popup(title='删除DNS缓存成功', content=Label(text='DNS_cache.json has been deleted successfully'), size_hint=(None, None), size=(400, 200))
+                success_popup = Popup(title='Delete DNS cache success', content=Label(text='DNS_cache.json has been deleted successfully'), size_hint=(None, None), size=(400, 200))
                 success_popup.open()
         except:
-            failded_popup = Popup(title='删除DNS缓存失败', content=Label(text='Failed to delete DNS_cache.json'), size_hint=(None, None), size=(400, 200))
+            failded_popup = Popup(title='delete DNS cache failed', content=Label(text='Failed to delete DNS_cache.json'), size_hint=(None, None), size=(400, 200))
             failded_popup.open()
 
     def delete_TTL_cache(self):
@@ -235,10 +235,10 @@ class ProxyApp(App):
             # 删除TTL_cache.json
             if os.path.exists('TTL_cache.json'):
                 os.remove('TTL_cache.json')
-                success_popup = Popup(title='删除TTL缓存成功', content=Label(text='TTL_cache.json has been deleted successfully'), size_hint=(None, None), size=(400, 200))
+                success_popup = Popup(title='Delete TTL cache success', content=Label(text='TTL_cache.json has been deleted successfully'), size_hint=(None, None), size=(400, 200))
                 success_popup.open()
         except:
-            failded_popup = Popup(title='删除TTL缓存失败', content=Label(text='Failed to delete TTL_cache.json'), size_hint=(None, None), size=(400, 200))
+            failded_popup = Popup(title='Delete TTL cache failed', content=Label(text='Failed to delete TTL_cache.json'), size_hint=(None, None), size=(400, 200))
             failded_popup.open()
 
 if __name__ == '__main__':
