@@ -83,8 +83,8 @@ class ProxyApp(App):
         return layout
 
     def on_start(self):
-        self.load_config()
         self.get_permit()
+        self.load_config()
 
     def edit_config(self):
         if self.config_editable:
