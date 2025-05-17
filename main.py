@@ -70,7 +70,7 @@ class ProxyApp(App):
             #print('Service started____ ', nm)
             context =  mActivity.getApplicationContext()
 
-            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'ProxyService'
+            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'Proxyservice'
 
             self.service_target = autoclass(SERVICE_NAME)
 
@@ -90,7 +90,7 @@ class ProxyApp(App):
             context = mActivity.getApplicationContext()
 
 
-            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'ProxyService'
+            SERVICE_NAME = str(context.getPackageName()) + '.Service' + 'Proxyservice'
 
             Service = autoclass(SERVICE_NAME)
 
