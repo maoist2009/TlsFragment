@@ -80,13 +80,15 @@ class ProxyApp(App):
             layout.add_widget(self.config_box)
             self.built=True
         except:
-            pass
+            print(Exception)
+        
+        self.get_permit()
 
         return layout
 
     def on_start(self):
         if self.built:
-            self.get_permit()
+            
             self.load_config()
             
 
