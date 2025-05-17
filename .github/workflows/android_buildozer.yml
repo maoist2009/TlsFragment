@@ -20,8 +20,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8.12'
-          cache: 'pip'
+          python-version: '3.11'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -36,7 +35,6 @@ jobs:
         with:
           path: |
             ./build/android/.buildozer
-            /home/runner/.buildozer
           key: ${{ runner.os }}-buildozer-${{ hashFiles('tools/build/buildozer.spec') }}
 
       - name: Buildozer Build
