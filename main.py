@@ -27,7 +27,7 @@ class ProxyApp(App):
         self.start_button.bind(on_press=self.run_proxy_service)
         self.box_start.add_widget(self.start_button)
         self.proxy_running = False
-        self.vpn_check_box_hint=Label(texy='全局vpn模式')
+        self.vpn_check_box_hint=Label(text='全局vpn模式')
         self.box_start.add_widget(self.vpn_check_box_hint)
         self.vpn_checkbox = CheckBox()
         self.vpn_mode=False
@@ -83,8 +83,8 @@ class ProxyApp(App):
         return layout
 
     def on_start(self):
-        self.get_permit()
         self.load_config()
+        self.get_permit()
 
     def edit_config(self):
         if self.config_editable:
