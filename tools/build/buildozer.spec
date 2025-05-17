@@ -53,7 +53,7 @@ icon.filename = %(source.dir)s/small_icon.png
 orientation = portrait
 
 # (list) List of service to declare
-services = Proxyservice:%(source.dir)s/service.py:foreground
+services = Proxyservice:service.py:foreground
 
 #
 # OSX Specific
