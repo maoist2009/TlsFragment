@@ -46,14 +46,14 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython,pyjnius,https:
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = %(source.dir)s/small_icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
 orientation = portrait
 
 # (list) List of service to declare
-services = Proxyservice:service.py:foreground
+services = Proxyservice:%(source.dir)s/service.py:foreground
 
 #
 # OSX Specific
@@ -401,7 +401,7 @@ ios.codesign.allowed = false
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1
