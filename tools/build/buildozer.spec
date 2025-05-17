@@ -53,7 +53,7 @@ icon.filename = %(source.dir)s/small_icon.png
 orientation = portrait
 
 # (list) List of service to declare
-services = Proxyservice:service.py:foreground
+services = Proxyservice:service.py:foreground:sticky
 
 #
 # OSX Specific
@@ -94,7 +94,7 @@ android.presplash_color = #39C5BB
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, FOREGROUND_SERVICE, SYSTEM_ALERT_WINDOW
+android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, FOREGROUND_SERVICE, SYSTEM_ALERT_WINDOW, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
