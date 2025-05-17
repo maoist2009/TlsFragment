@@ -18,73 +18,78 @@ class ProxyApp(App):
                            padding=dp(10), spacing=dp(5))
         button_height = '32dp'
 
-        self.box_start= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
-        self.start_button = Button(
-            text='启动代理',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.start_button.bind(on_press=self.run_proxy_service)
-        self.box_start.add_widget(self.start_button)
-        self.proxy_running = False
-        self.vpn_check_box_hint=Label(text='全局vpn模式')
-        self.box_start.add_widget(self.vpn_check_box_hint)
-        self.vpn_checkbox = CheckBox()
-        self.vpn_mode=False
-        self.vpn_checkbox.bind(self.vpn_mode)
-        self.box_start.add_widget(self.vpn_checkbox)
-        self.layout.add_widget(self.box_start)
-
-        self.delete_cache_box= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
-        self.delete_DNS_cache_button = Button(
-            text='删除DNS缓存',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.delete_DNS_cache_button.bind(on_press=self.delete_DNS_cache)
-        self.delete_cache_box.add_widget(self.delete_DNS_cache_button)
-        self.delete_TTL_cache_button = Button(
-            text='删除TTL缓存',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.delete_TTL_cache_button.bind(on_press=self.delete_TTL_cache)
-        self.delete_cache_box.add_widget(self.delete_TTL_cache_button)
-        layout.add_widget(self.delete_cache_box)
-        
-        self.config_box = BoxLayout(orientation='vertical', size_hint_y=None, height=button_height)
-        self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
-        self.edit_config_button = Button(
-            text='编辑配置',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.edit_config_button.bind(on_press=self.edit_config)
-        self.config_editable=False
-        self.config_button_box.add_widget(self.edit_config_button)
-        self.save_config_button = Button(
-            text='保存配置',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.save_config_button.bind(on_press=self.save_config)
-        self.save_config_button.disabled = True
-        self.config_button_box.add_widget(self.save_config_button)
-        self.config_box.add_widget(self.config_button_box)
-        self.config_input = TextInput(
-            hint_text='请输入配置',
-            multiline=True,
-            size_hint_y=1
-        )
-        self.config_input.readonly = True
-        self.config_box.add_widget(self.config_input)
-        layout.add_widget(self.config_box)
+        try:
+            self.box_start= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+            self.start_button = Button(
+                text='启动代理',
+                size_hint_y=None,
+                height=button_height
+            )
+            self.start_button.bind(on_press=self.run_proxy_service)
+            self.box_start.add_widget(self.start_button)
+            self.proxy_running = False
+            self.vpn_check_box_hint=Label(text='全局vpn模式')
+            self.box_start.add_widget(self.vpn_check_box_hint)
+            self.vpn_checkbox = CheckBox()
+            self.vpn_mode=False
+            self.vpn_checkbox.bind(self.vpn_mode)
+            self.box_start.add_widget(self.vpn_checkbox)
+            self.layout.add_widget(self.box_start)
+    
+            self.delete_cache_box= BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+            self.delete_DNS_cache_button = Button(
+                text='删除DNS缓存',
+                size_hint_y=None,
+                height=button_height
+            )
+            self.delete_DNS_cache_button.bind(on_press=self.delete_DNS_cache)
+            self.delete_cache_box.add_widget(self.delete_DNS_cache_button)
+            self.delete_TTL_cache_button = Button(
+                text='删除TTL缓存',
+                size_hint_y=None,
+                height=button_height
+            )
+            self.delete_TTL_cache_button.bind(on_press=self.delete_TTL_cache)
+            self.delete_cache_box.add_widget(self.delete_TTL_cache_button)
+            layout.add_widget(self.delete_cache_box)
+            
+            self.config_box = BoxLayout(orientation='vertical', size_hint_y=None, height=button_height)
+            self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+            self.edit_config_button = Button(
+                text='编辑配置',
+                size_hint_y=None,
+                height=button_height
+            )
+            self.edit_config_button.bind(on_press=self.edit_config)
+            self.config_editable=False
+            self.config_button_box.add_widget(self.edit_config_button)
+            self.save_config_button = Button(
+                text='保存配置',
+                size_hint_y=None,
+                height=button_height
+            )
+            self.save_config_button.bind(on_press=self.save_config)
+            self.save_config_button.disabled = True
+            self.config_button_box.add_widget(self.save_config_button)
+            self.config_box.add_widget(self.config_button_box)
+            self.config_input = TextInput(
+                hint_text='请输入配置',
+                multiline=True,
+                size_hint_y=1
+            )
+            self.config_input.readonly = True
+            self.config_box.add_widget(self.config_input)
+            layout.add_widget(self.config_box)
+            self.built=True
+        except:
+            pass
     
         return layout
 
     def on_start(self):
-        self.load_config()
-        self.get_permit()
+        if self.built:
+            self.load_config()
+            self.get_permit()
 
     def edit_config(self):
         if self.config_editable:
