@@ -79,7 +79,6 @@ class ProxyApp(App):
             self.config_box.add_widget(self.config_input)
             layout.add_widget(self.config_box)
             self.built=True
-            print("build success")
         except:
             pass
 
@@ -87,8 +86,9 @@ class ProxyApp(App):
 
     def on_start(self):
         if self.built:
-            self.load_config()
             self.get_permit()
+            self.load_config()
+            
 
     def edit_config(self):
         if self.config_editable:
