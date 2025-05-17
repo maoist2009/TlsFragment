@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: autoconf automake build-essential ccache cmake gettext git libffi-dev libltdl-dev libssl-dev libtool patch pkg-config unzip zip zlib1g-dev
+          packages: autoconf automake build-essential ccache clang cmake gettext git libffi-dev libltdl-dev libssl-dev libtool openssl patch pkg-config unzip zip zlib1g-dev
 
       - name: Cache Buildozer
         uses: actions/cache@v4
