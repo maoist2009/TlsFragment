@@ -74,7 +74,7 @@ class ProxyApp(App):
 
             self.service_target = autoclass(SERVICE_NAME)
 
-            self.service_target.start(mActivity,'icon', 'logger', 'Connecting', '')
+            self.service_target.start(mActivity,'icon', 'TlsFragment', 'Starting proxy service', '')
 
             return self.service_target
             
