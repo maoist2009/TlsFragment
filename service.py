@@ -13,8 +13,8 @@ def start():
     try:
         # 启动代理服务器（非阻塞模式）
         # 不再传递config参数
-        start_server(block=False)
         Logger.info("Service: Proxy server started successfully")
+        start_server(block=True)
         
         # 保持主线程运行，防止服务被系统终止
         Clock.schedule_interval(lambda dt: None, 1)
