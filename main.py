@@ -67,7 +67,7 @@ class ProxyApp(App):
         self.config_button_box.add_widget(self.save_config_button)
         self.layout.add_widget(self.config_button_box)
         self.config_input = TextInput(
-            hint_text='Please input',
+            hint_text='Edit config.json',
             multiline=True,
             readonly=True,
             size_hint_y=1
@@ -77,8 +77,8 @@ class ProxyApp(App):
         return self.layout
 
     def on_start(self):
-            self.get_permit()
-            self.load_config()
+        self.get_permit()
+        self.load_config()
             
 
     def edit_config(self,instance):
