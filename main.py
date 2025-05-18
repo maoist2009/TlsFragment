@@ -115,7 +115,7 @@ class ProxyApp(App):
         """Start the Android service to run the proxy."""
         from android import mActivity
         context = mActivity.getApplicationContext()
-        SERVICE_NAME = str(context.getPackageName()) + '.Service.Proxyservice'
+        SERVICE_NAME = str(context.getPackageName()) + '.ServiceProxyservice'
 
         self.service_target = autoclass(SERVICE_NAME)
         self.service_target.start(mActivity, 'icon', 'TlsFragment', 'ProxyRunning', '')
@@ -126,7 +126,7 @@ class ProxyApp(App):
     def stop_proxy_service(self):
         from android import mActivity
         context = mActivity.getApplicationContext()
-        SERVICE_NAME = str(context.getPackageName()) + '.Service.Proxyservice'
+        SERVICE_NAME = str(context.getPackageName()) + '.ServiceProxyservice'
         Service = autoclass(SERVICE_NAME)
         Intent = autoclass('android.content.Intent')
         service_intent = Intent(mActivity, Service)
@@ -170,6 +170,7 @@ class ProxyApp(App):
             except Exception as e:
                 self.show_popup('Stop failed', 'Failed to stop proxy')
                 self.start_button.text = 'stop proxy'
+                self.start_button.disabled=False
         else:
             try:
                 self.start_button.disabled = True
@@ -185,6 +186,7 @@ class ProxyApp(App):
             except Exception as e:
                 self.show_popup('Start failed', 'Failed to start proxy service')
                 self.start_button.text = 'Start proxy'
+                self.start_button.disabled=False
 
     def save_config(self, instance):
         try:
