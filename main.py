@@ -83,7 +83,7 @@ class ProxyApp(App):
 
     def on_start(self):
         self.get_permit()
-        # self.load_config()
+        self.load_config()
 
     def show_popup(self, title, message):
         """Utility function to show popups."""
