@@ -1,5 +1,5 @@
 {
-    "loglevel": "INFO",
+    "loglevel": "DEBUG",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
@@ -19,6 +19,8 @@
     "TTL_cache": true,
     "TTL_cache_update_interval": 2,
     "safety_check": false,
+    "UDPfakeDNS": true,
+    "BySNIfirst": true,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
         "104.24.0.0/14": "^104.21.3.224",

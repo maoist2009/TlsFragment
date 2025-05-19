@@ -5,9 +5,7 @@ import threading
 import time
 from . import remote, fake_desync, fragment
 from .config import config
-from .utils import is_ip_address
-from .utils import detect_tls_version_by_keyshare
-from .utils import extract_sni
+from .utils import is_ip_address, detect_tls_version_by_keyshare, extract_sni, is_udp_dns_query, fake_udp_dns_query
 from .remote import match_domain
 from .l38 import merge_dict
 import json
@@ -123,7 +121,6 @@ class ThreadedServer(object):
 
             _, cmd, _, atyp = header
             
-            print(cmd)
             if cmd != 0x01 & cmd != 0x03:  # 只支持CONNECT和UDP命令
                 client_socket.sendall(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
@@ -225,28 +222,9 @@ class ThreadedServer(object):
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
-        try:
-            backend_sock.connect()
-        except:
-            logger.error("connect failed")
-            return False
-
         if backend_sock == None:
             client_sock.close()
-            return False
-
-        if isinstance(backend_sock, str):
-            this_ip = backend_sock
-            if this_ip not in IP_UL_traffic:
-                IP_UL_traffic[this_ip] = 0
-                IP_DL_traffic[this_ip] = 0
-            client_sock.close()
-            return False
-
-        this_ip = backend_sock.sock.getpeername()[0]
-        if this_ip not in IP_UL_traffic:
-            IP_UL_traffic[this_ip] = 0
-            IP_DL_traffic[this_ip] = 0
+            raise Exception("backend not found")
 
         global ThreadtoWork
         while ThreadtoWork:
@@ -258,6 +236,42 @@ class ThreadedServer(object):
                         0.1
                     )  # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
+
+                    if config["UDPfakeDNS"]:
+                        try:
+                            if backend_sock.protocol == 17 and is_udp_dns_query(data):
+                                client_sock.send(fake_udp_dns_query(data))
+                        except:
+                            pass
+
+                    try:
+                        extractedsni=extract_sni(data)
+                        if config["BySNIfirst"]:
+                            if backend_sock.sni!=backend_sock.domain:
+                                port, protocol=backend_sock.port,backend_sock.protocol
+                                logger.info("replace backendsock: ",extract_sni,port,protocol)
+                                backend_sock=remote.Remote(str(extractedsni),port,protocol)
+                    except:
+                        pass
+
+                    try:
+                        backend_sock.connect()
+                    except:
+                        raise Exception("backend connect fail")
+                    
+
+                    if isinstance(backend_sock, str):
+                        this_ip = backend_sock
+                        if this_ip not in IP_UL_traffic:
+                            IP_UL_traffic[this_ip] = 0
+                            IP_DL_traffic[this_ip] = 0
+                        client_sock.close()
+                        return False
+
+                    this_ip = backend_sock.sock.getpeername()[0]
+                    if this_ip not in IP_UL_traffic:
+                        IP_UL_traffic[this_ip] = 0
+                        IP_DL_traffic[this_ip] = 0
 
                     if backend_sock.policy.get("safety_check") is True and (data[:3] in {b'GET', b'PUT', b'DEL'} or data[:4] in {b'POST', b'HEAD', b'OPTI'}):
                         logger.warning("HTTP protocol detected, will redirect to https")
@@ -273,7 +287,7 @@ class ThreadedServer(object):
 
 
                     try:
-                        backend_sock.sni = extract_sni(data)
+                        backend_sock.sni = extractedsni
                         if str(backend_sock.sni)!=str(backend_sock.domain):
                             backend_sock.policy=merge_dict(match_domain(str(backend_sock.sni)),backend_sock.policy)
                     except:
