@@ -230,3 +230,42 @@ def detect_tls_version_by_keyshare(server_hello):
     except:
         return 0
 
+def is_udp_dns_query(data):
+    if len(data) < 12:
+        return False
+    flags = data[2:4]  # 取出第3和第4字节
+    qr = flags[0] >> 7  # 取出QR位
+    return qr == 0  # QR位为0表示查询
+
+def fake_udp_dns_query(data):
+    import dns.message
+    import dns.rrset
+    import dns.rdatatype
+
+    try:
+        # 解析DNS查询
+        dns_query = dns.message.from_wire(query)
+    except Exception as e:
+        print(f"Failed to parse DNS query: {e}")
+        return None  # 返回None表示解析失败
+
+    # 创建DNS响应
+    response = dns.message.make_response(dns_query)
+
+    # 检查查询类型
+    for question in dns_query.question:
+        if question.rdtype == dns.rdatatype.A:
+            # A记录返回127.0.0.1
+            a_record = dns.rrset.from_text(question.name, 3600, dns.rdatatype.A, "127.0.0.1")
+            response.answer.append(a_record)
+        elif question.rdtype == dns.rdatatype.AAAA:
+            # AAAA记录返回::1
+            aaaa_record = dns.rrset.from_text(question.name, 3600, dns.rdatatype.AAAA, "::1")
+            response.answer.append(aaaa_record)
+        else:
+            # 其他记录返回未找到
+            response.set_rcode(dns.rcode.NXDOMAIN)
+            return response
+
+    return response.to_wire()
+    

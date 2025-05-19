@@ -92,6 +92,8 @@ default_policy = {
     "DNS_cache": config["DNS_cache"],
     "TTL_cache": config["TTL_cache"],
     "safety_check": config["safety_check"],
+    "UDPfakeDNS": config["UDPfakeDNS"],
+    "BySNIfirst": config["BySNIfirst"],
 }
 
 domain_policies = ahocorasick.AhoCorasick(*config["domains"].keys())
