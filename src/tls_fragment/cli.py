@@ -250,7 +250,8 @@ class ThreadedServer(object):
                             if backend_sock.sni!=backend_sock.domain:
                                 port, protocol=backend_sock.port,backend_sock.protocol
                                 logger.info("replace backendsock: ",extract_sni,port,protocol)
-                                backend_sock=remote.Remote(str(extractedsni),port,protocol)
+                                new_backend_sock=remote.Remote(str(extractedsni),port,protocol)
+                        backend_sock=new_backend_sock
                     except:
                         pass
 
