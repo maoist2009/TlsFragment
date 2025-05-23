@@ -89,7 +89,7 @@ class ThreadedServer(object):
             initial_data = client_socket.recv(5, socket.MSG_PEEK)
             if not initial_data:
                 client_socket.close()
-                return None, {}
+                return None
 
             # 协议分流判断
             if initial_data[0] == 0x05:  # SOCKS5协议
@@ -100,7 +100,7 @@ class ThreadedServer(object):
         except Exception as e:
             logger.error("协议检测异常: %s", e)
             client_socket.close()
-            return None, {}
+            return None
 
     def _handle_socks5(self, client_socket):
         """处理SOCKS5协议连接，保持与原有返回格式一致"""
@@ -114,17 +114,18 @@ class ThreadedServer(object):
             # 请求解析阶段
             header = client_socket.recv(4)
             while header[0]!=0x05:
+                logger.debug("right 1, %s",str(header))
                 header=header[1:]+client_sock.recv(1)
-            logger.info("%s",header)
+            logger.debug("socks5 header: %s",header)
             if len(header) != 4 or header[0] != 0x05:
                 raise ValueError("Invalid SOCKS5 header")
 
             _, cmd, _, atyp = header
             
-            if cmd != 0x01 & cmd != 0x03:  # 只支持CONNECT和UDP命令
+            if ( cmd != 0x01 ) and ( cmd != 0x03 ):  # 只支持CONNECT和UDP命令
                 client_socket.sendall(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
-                return None, {}
+                raise ValueError("Not supported socks commanf, %s", str(cmd))
 
             # 目标地址解析（复用原有DNS逻辑）
             server_name, server_port = self._parse_socks5_address(client_socket, atyp)
@@ -146,12 +147,12 @@ class ThreadedServer(object):
                 logger.info(f"连接失败: {str(e)}")
                 client_socket.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None, {}
+                return server_name if is_ip_address(server_name) else None
 
         except Exception as e:
             logger.info(f"SOCKS5处理错误: {str(e)}")
             client_socket.close()
-            return None, {}
+            return None
 
     def _handle_http_protocol(self, client_socket):
         """原有HTTP处理逻辑完整保留"""
@@ -174,14 +175,14 @@ class ThreadedServer(object):
                     b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
                 )
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None, {}
+                return server_name if is_ip_address(server_name) else None
 
         # 原有PAC文件处理
         elif b"/proxy.pac" in data.splitlines()[0]:
             response = f"HTTP/1.1 200 OK\r\nContent-Type: application/x-ns-proxy-autoconfig\r\nContent-Length: {len(pacfile)}\r\n\r\n{pacfile}"
             client_socket.sendall(response.encode())
             client_socket.close()
-            return None, {}
+            return None
 
         # 原有HTTP重定向逻辑
         elif data[:3] in {b"GET", b"PUT", b"DEL"} or data[:4] in {b"POST", b"HEAD", b"OPTI"}:
@@ -192,7 +193,7 @@ class ThreadedServer(object):
             response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
             client_socket.sendall(response.encode())
             client_socket.close()
-            return None, {}
+            return None
 
         # 原有错误处理
         else:
@@ -201,7 +202,7 @@ class ThreadedServer(object):
                 b"HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
             )
             client_socket.close()
-            return None, {}
+            return None
 
     def _parse_socks5_address(self, sock, atyp):
         """SOCKS5地址解析"""
@@ -225,7 +226,7 @@ class ThreadedServer(object):
         if backend_sock == None:
             client_sock.close()
             raise Exception("backend not found")
-
+            
         global ThreadtoWork
         while ThreadtoWork:
             try:
@@ -247,13 +248,17 @@ class ThreadedServer(object):
                     try:
                         extractedsni=extract_sni(data)
                         if config["BySNIfirst"]:
-                            if backend_sock.sni!=backend_sock.domain:
+                            if extractedsni!=backend_sock.domain:
                                 port, protocol=backend_sock.port,backend_sock.protocol
-                                logger.info("replace backendsock: ",extract_sni,port,protocol)
-                                new_backend_sock=remote.Remote(str(extractedsni),port,protocol)
-                        backend_sock=new_backend_sock
+                                logger.info("replace backendsock:  %s %s %s",extractedsni,port,protocol)
+                                new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
+                                backend_sock=new_backend_sock
                     except:
+                        import traceback
+                        traceback.print_exc()
                         pass
+                    
+                    print(extractedsni,backend_sock.policy)
 
                     try:
                         backend_sock.connect()
