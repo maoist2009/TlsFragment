@@ -48,6 +48,7 @@ def check_ttl(ip, port, ttl):
         sock.close()
         return True
     except Exception as e:
+        from .log import logger
         logger = logger.getChild("utils")
         logger.warning(f'check_ttl error: {repr(e)}')
         return False
@@ -56,6 +57,7 @@ def check_ttl(ip, port, ttl):
 
 
 def get_ttl(ip, port):
+    from .log import logger
     logger = logger.getChild("utils")
     l = 1
     r = 128
