@@ -155,7 +155,7 @@ class ThreadedServer(object):
         data = client_socket.recv(16384)
 
         # 原有CONNECT处理
-        if data.startswith(b"CONNECT"):
+        if data.startswith(b"CONNECT "):
             server_name, server_port = self.extract_servername_and_port(data)
             logger.info(f"CONNECT {server_name}:{server_port}")
 
@@ -181,7 +181,7 @@ class ThreadedServer(object):
             return None
 
         # 原有HTTP重定向逻辑
-        elif data[:3] in {b"GET", b"PUT", b"DEL"} or data[:4] in {b"POST", b"HEAD", b"OPTI"}:
+        elif data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
             q_line = data.decode().split("\r\n")[0].split()
             q_method, q_url = q_line[0], q_line[1]
             https_url = q_url.replace("http://", "https://", 1)
@@ -220,12 +220,11 @@ class ThreadedServer(object):
 
                     try:
                         extractedsni = utils.extract_sni(data)
-                        if config["BySNIfirst"]:
-                            if str(extractedsni,encoding="ASCII")!=backend_sock.domain:
-                                port, protocol=backend_sock.port,backend_sock.protocol
-                                logger.info("replace backendsock:  %s %s %s",extractedsni,port,protocol)
-                                new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
-                                backend_sock=new_backend_sock
+                        if config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain:
+                            port, protocol=backend_sock.port,backend_sock.protocol
+                            logger.info("replace backendsock:  %s %s %s",extractedsni,port,protocol)
+                            new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
+                            backend_sock=new_backend_sock
                     except: 
                         pass
 
@@ -235,7 +234,7 @@ class ThreadedServer(object):
                         raise Exception("backend connect fail")
                     
 
-                    if backend_sock.policy.get("safety_check") is True and (data[:3] in {b'GET', b'PUT', b'DEL'} or data[:4] in {b'POST', b'HEAD', b'OPTI'}):
+                    if backend_sock.policy.get("safety_check") is True and data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
                         logger.warning("HTTP protocol detected, will redirect to https")
                         # 如果是http协议，重定向到https，要从data中提取url
                         q_line = data.decode().split("\r\n")[0].split()
@@ -263,14 +262,15 @@ class ThreadedServer(object):
                         thread_down.daemon = True
                         thread_down.start()
                         # backend_sock.sendall(data)
-                        
-                        if backend_sock.policy.get("mode") == "TLSfrag":
+
+                        mode = backend_sock.policy.get('mode')
+                        if mode == "TLSfrag":
                             fragment.send_fraggmed_tls_data(backend_sock, data)
-                        elif backend_sock.policy.get("mode") == "FAKEdesync":
+                        elif mode == "FAKEdesync":
                             fake_desync.send_data_with_fake(backend_sock,data)
-                        elif backend_sock.policy.get("mode") == "DIRECT":
+                        elif mode == "DIRECT":
                             backend_sock.send(data)
-                        elif backend_sock.policy.get("mode") == "GFWlike":
+                        elif mode == "GFWlike":
                             backend_sock.close()
                             client_sock.close()
                             return False
@@ -347,7 +347,7 @@ class ThreadedServer(object):
                 host = host[1:]
             else:
                 idx = 0
-                for _ in range(0, 6):
+                for _ in range(6):
                     idx = host_and_port.find(":", idx + 1)
                 host = host_and_port[:idx]
                 port = host_and_port[idx + 1 :]
