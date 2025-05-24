@@ -9,25 +9,24 @@ from .config import (
     default_policy,
     ipv4_map,
     ipv6_map,
+    DNS_cache,
+    TTL_cache,
+    write_DNS_cache,
+    write_TTL_cache
 )
 
 from .dns_extension import MyDoh
 import socket
-from copy import deepcopy
-from threading import Lock
+import threading
 from . import utils
-from .l38 import merge_dict
-import ipaddress
 
 logger = logger.getChild("remote")
 
 resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh_server"])
-
-from .config import DNS_cache, TTL_cache, write_DNS_cache, write_TTL_cache
 cnt_upd_TTL_cache = 0
-lock_TTL_cache = Lock()
+lock_TTL_cache = threading.Lock()
 cnt_upd_DNS_cache = 0
-lock_DNS_cache = Lock()
+lock_DNS_cache = threading.Lock()
 
 
 def redirect(ip):
@@ -37,19 +36,18 @@ def redirect(ip):
         mapped_ip = ipv4_map.search(utils.ip_to_binary_prefix(ip))
     if mapped_ip is None:
         return ip
-    else:
-        logger.info("IP redirect %s to %s", ip, mapped_ip)
-        if mapped_ip[0]=="^":
-            return mapped_ip[1:]
-        if ip==mapped_ip:
-            return mapped_ip
-        else:
-            return redirect(mapped_ip)
+    logger.info(f"IP redirect {ip} to {mapped_ip}")
+    if mapped_ip[0] == "^":
+        return mapped_ip[1:]
+    if ip == mapped_ip:
+        return mapped_ip
+    return redirect(mapped_ip)
 
 def match_domain(domain):
     matched_domains = domain_policies.search("^" + domain + "$")
     if matched_domains:
-        return deepcopy(
+        import copy
+        return copy.deepcopy(
                 config["domains"].get(sorted(matched_domains, key=len, reverse=True)[0])
             )
     else:
@@ -68,10 +66,11 @@ class Remote:
     def __init__(self, domain: str, port=443, protocol=6):
         self.domain = domain
         self.policy = match_domain(domain)
-        self.policy = merge_dict(self.policy, default_policy)
+        self.policy = {**default_policy, **self.policy}
         self.policy.setdefault("port", port)
         self.protocol = protocol
-        
+        import ipaddress
+
         try:
             ipaddress.IPv4Address(self.domain)
             self.policy["IP"] = self.domain
@@ -106,7 +105,7 @@ class Remote:
                         cnt_upd_DNS_cache = 0
                         write_DNS_cache()
                     lock_DNS_cache.release()
-                    logger.info("DNS cache for %s to %s", self.domain, self.address)
+                    logger.info(f"DNS cache for {self.domain} to {self.address}")
         else:
             self.address = self.policy["IP"]
         self.address = redirect(self.address)
@@ -116,9 +115,7 @@ class Remote:
         # res["IP"]="127.0.0.1"
 
         if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEdesync":
-            logger.info(
-                "FAKE TTL for %s is %s", self.address, self.policy.get("fake_ttl")
-            )
+            logger.info(f'FAKE TTL for {self.address} is {self.policy.get("fake_ttl")}')
             if TTL_cache.get(self.address) != None:
                 self.policy["fake_ttl"] = TTL_cache[self.address] - 1
                 logger.info(
@@ -142,7 +139,7 @@ class Remote:
                     "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
                 )
 
-        logger.info("%s --> %s", domain, self.policy)
+        logger.info(f"{domain} --> {self.policy}")
 
         iptype = socket.AF_INET6 if ":" in self.address else socket.AF_INET
 
@@ -169,10 +166,10 @@ class Remote:
         if self.protocol == 6:
             self.sock.sendall(data)
         elif self.protocol == 17:
-            data=data[3:]
-            address,port,offset=utils.parse_socks5_address_from_data(data)
-            data=data[offset:]
-            logger.info("send to %s:%s",address,port)
+            data = data[3:]
+            address, port, offset = utils.parse_socks5_address_from_data(data)
+            data = data[offset:]
+            logger.info(f"send to {address}:{port}")
             logger.debug(data)
             self.sock.sendto(data,(address, port))
 
@@ -181,7 +178,7 @@ class Remote:
             return self.sock.recv(size)
         elif self.protocol == 17:
             data, address = self.sock.recvfrom(size)
-            logger.info("receive from %s:%s",address[0],address[1])
+            logger.info(f"receive from {address[0]}:{address[1]}")
             logger.debug(b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data)
             return b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data
 

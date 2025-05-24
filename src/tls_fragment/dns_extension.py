@@ -24,7 +24,7 @@ class MyDoh:
             'ct': 'application/dns-message',
             }
 
-        logger.info("online DNS Query %s",server_name)       
+        logger.info(f"online DNS Query {server_name}")       
         try:
             query_message = dns.message.make_query(server_name,dns_type)
             query_wire = query_message.to_wire()
@@ -45,15 +45,14 @@ class MyDoh:
   
                 resolved_ip = None
                 for x in answer_msg.answer:
-                    if ((dns_type=="AAAA" and x.rdtype == dns.rdatatype.AAAA) or (dns_type=="A" and x.rdtype == dns.rdatatype.A)):
+                    if (dns_type=="AAAA" and x.rdtype == dns.rdatatype.AAAA) or (dns_type=="A" and x.rdtype == dns.rdatatype.A):
                         resolved_ip = x[0].address    # pick first ip in DNS answer
                         break
-                
-                logger.info("online DNS --> Resolved %s to %s",server_name,resolved_ip)                
+
+                logger.info(f"online DNS --> Resolved {server_name} to {resolved_ip}")
                 return resolved_ip
-            else:
-                logger.error("online DNS --> Error DNS query: %s %s",ans.status_code,ans.reason)
+            logger.error(f"online DNS --> Error DNS query: {ans.status_code} {ans.reason}")
         except Exception as e:
-            logger.error("online DNS --> Error DNS query: %s",repr(e))
+            logger.error(f"online DNS --> Error DNS query: {repr(e)}")
         raise Exception("online DNS --> Error DNS query")
 
