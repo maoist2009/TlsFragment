@@ -20,7 +20,7 @@
     "TTL_cache_update_interval": 2,
     "safety_check": false,
     "UDPfakeDNS": true,
-    "BySNIfirst": true,
+    "BySNIfirst": false,
     "IPredirect": {
         "104.16.0.0/13": "104.21.57.162",
         "104.24.0.0/14": "^104.21.3.224",
@@ -194,12 +194,12 @@
             "len_tls_sni": 3
         },
         "chrome.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "chromium.org": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
@@ -210,7 +210,7 @@
         },
         "deepmind.google": {},
         "google.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
@@ -260,32 +260,32 @@
             "port": 41620
         },
         "gstatic.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "googleapis.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "youtube.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "youtube-nocookie.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "youtu.be": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },
         "ytimg.com": {
-            "IP": "35.190.247.146",
+            "IP": "35.190.247.145",
             "port": 1445,
             "safety_check": true
         },

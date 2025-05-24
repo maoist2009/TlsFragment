@@ -269,3 +269,76 @@ def fake_udp_dns_query(data):
 
     return response.to_wire()
     
+def parse_socks5_address(sock):
+        """SOCKS5地址解析"""
+        atyp=sock.recv(1)[0]
+        if atyp == 0x01:  # IPv4
+            server_ip = socket.inet_ntop(socket.AF_INET, sock.recv(4))
+            return server_ip, int.from_bytes(sock.recv(2), "big")
+        elif atyp == 0x03:  # 域名
+            domain_len = ord(sock.recv(1))
+            server_name = sock.recv(domain_len).decode()
+            port = int.from_bytes(sock.recv(2), "big")
+            return server_name, port
+        elif atyp == 0x04:  # IPv6
+            server_ip = socket.inet_ntop(socket.AF_INET6, sock.recv(16))
+            return server_ip, int.from_bytes(sock.recv(2), "big")
+        else:
+            raise ValueError("Invalid address type")
+
+def parse_socks5_address_from_data(data):
+    """SOCKS5 address parsing with error handling"""
+    offset = 0
+    atyp = data[offset:offset+1][0]
+    offset += 1
+    
+    if atyp == 0x01:  # IPv4
+        if len(data) < offset + 6:  # 4 bytes for IP + 2 bytes for port
+            raise ValueError("Data too short for IPv4 address")
+        server_ip = socket.inet_ntop(socket.AF_INET, data[offset:offset + 4])
+        offset += 4
+        port = int.from_bytes(data[offset:offset + 2], "big")
+        offset += 2
+        return server_ip, port, offset
+    elif atyp == 0x03:  # Domain name
+        if len(data) < offset + 1:  # At least 1 byte for domain length
+            raise ValueError("Data too short for domain length")
+        domain_len = data[offset]
+        offset += 1
+        if len(data) < offset + domain_len + 2:  # domain + 2 bytes for port
+            raise ValueError("Data too short for domain address")
+        server_name = data[offset:offset + domain_len].decode()
+        offset += domain_len
+        port = int.from_bytes(data[offset:offset + 2], "big")
+        offset += 2
+        return server_name, port, offset
+    elif atyp == 0x04:  # IPv6
+        if len(data) < offset + 18:  # 16 bytes for IP + 2 bytes for port
+            raise ValueError("Data too short for IPv6 address")
+        server_ip = socket.inet_ntop(socket.AF_INET6, data[offset:offset + 16])
+        offset += 16
+        port = int.from_bytes(data[offset:offset + 2], "big")
+        offset += 2
+        return server_ip, port, offset
+    else:
+        raise ValueError("Invalid address type")
+
+def build_socks5_address(ip, port):
+    """根据 IP 和端口构造 SOCKS5 地址"""
+    # 解析 IP 地址
+    try:
+        packed_ip = socket.inet_pton(socket.AF_INET, ip)  # IPv4
+        atyp = 0x01  # 地址类型为 IPv4
+    except socket.error:
+        try:
+            packed_ip = socket.inet_pton(socket.AF_INET6, ip)  # IPv6
+            atyp = 0x04  # 地址类型为 IPv6
+        except socket.error:
+            # 如果都无法解析，抛出异常
+            raise ValueError("Invalid IP address format")
+
+    # 构造 SOCKS5 地址
+    if atyp == 0x01:  # IPv4
+        return bytes([atyp]) + packed_ip + port.to_bytes(2, 'big')
+    elif atyp == 0x04:  # IPv6
+        return bytes([atyp]) + packed_ip + port.to_bytes(2, 'big')
