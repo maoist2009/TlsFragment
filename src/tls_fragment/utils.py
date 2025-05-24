@@ -1,10 +1,6 @@
-from ipaddress import ip_address
 import ipaddress
-from .log import logger
 import socket
 import struct
-
-logger = logger.getChild("utils")
 
 
 def ip_to_binary_prefix(ip_or_network):
@@ -29,7 +25,7 @@ def ip_to_binary_prefix(ip_or_network):
                 binary_prefix = binary_ip[:128]
             return binary_prefix
         except ValueError:
-            raise ValueError(f"输入 {ip_or_network} 不是有效的 IP 地址或网络")
+            raise ValueError(f"输入的 {ip_or_network} 不是有效的 IP 地址或网络")
 
 
 def set_ttl(sock, ttl):
@@ -41,7 +37,7 @@ def set_ttl(sock, ttl):
 
 def check_ttl(ip, port, ttl):
     try:
-        if ip.find(":") != -1:
+        if ':' in ip:
             sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
         else:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -52,13 +48,17 @@ def check_ttl(ip, port, ttl):
         sock.close()
         return True
     except Exception as e:
-        logger.warning(e)
+        from .log import logger
+        logger = logger.getChild("utils")
+        logger.warning(f'check_ttl error: {repr(e)}')
         return False
     finally:
         sock.close()
 
 
 def get_ttl(ip, port):
+    from .log import logger
+    logger = logger.getChild("utils")
     l = 1
     r = 128
     ans = -1
@@ -77,14 +77,11 @@ def get_ttl(ip, port):
 
 
 def is_ip_address(s):
-    if s.isdigit():
-        return False  # Disallow integer-formatted IP addresses
-    else:
-        try:
-            ip_address(s)
-            return True
-        except ValueError:
-            return False
+    try:
+        ipaddress.ip_address(s)
+        return True
+    except ValueError:
+        return False
 
 
 def extract_sni(data):
@@ -225,8 +222,7 @@ def detect_tls_version_by_keyshare(server_hello):
 
         if has_key_share_ext:
             return 1
-        else:
-            return -1
+        return -1
     except:
         return 0
 
@@ -283,8 +279,7 @@ def parse_socks5_address(sock):
         elif atyp == 0x04:  # IPv6
             server_ip = socket.inet_ntop(socket.AF_INET6, sock.recv(16))
             return server_ip, int.from_bytes(sock.recv(2), "big")
-        else:
-            raise ValueError("Invalid address type")
+        raise ValueError("Invalid address type")
 
 def parse_socks5_address_from_data(data):
     """SOCKS5 address parsing with error handling"""
@@ -320,8 +315,7 @@ def parse_socks5_address_from_data(data):
         port = int.from_bytes(data[offset:offset + 2], "big")
         offset += 2
         return server_ip, port, offset
-    else:
-        raise ValueError("Invalid address type")
+    raise ValueError("Invalid address type")
 
 def build_socks5_address(ip, port):
     """根据 IP 和端口构造 SOCKS5 地址"""
