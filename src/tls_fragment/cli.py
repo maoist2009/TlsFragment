@@ -5,7 +5,7 @@ import threading
 import time
 from . import remote, fake_desync, fragment
 from .config import config
-from .utils import is_ip_address, detect_tls_version_by_keyshare, extract_sni, is_udp_dns_query, fake_udp_dns_query
+from .utils import is_ip_address, detect_tls_version_by_keyshare, extract_sni, is_udp_dns_query, fake_udp_dns_query, parse_socks5_address
 from .remote import match_domain
 from .l38 import merge_dict
 import json
@@ -27,8 +27,6 @@ domain_settings = {
 
 
 TTL_cache = {}  # TTL for each IP
-IP_DL_traffic = {}  # download usage for each ip
-IP_UL_traffic = {}  # upload usage for each ip
 
 lock_TTL_cache = threading.Lock()
 pacfile = "function genshin(){}"
@@ -112,23 +110,23 @@ class ThreadedServer(object):
             client_socket.sendall(b"\x05\x00")  # 选择无认证
 
             # 请求解析阶段
-            header = client_socket.recv(4)
+            header = client_socket.recv(3)
             while header[0]!=0x05:
                 logger.debug("right 1, %s",str(header))
                 header=header[1:]+client_sock.recv(1)
             logger.debug("socks5 header: %s",header)
-            if len(header) != 4 or header[0] != 0x05:
+            if len(header) != 3 or header[0] != 0x05:
                 raise ValueError("Invalid SOCKS5 header")
 
-            _, cmd, _, atyp = header
+            _, cmd, _ = header
             
-            if ( cmd != 0x01 ) and ( cmd != 0x03 ):  # 只支持CONNECT和UDP命令
+            if ( cmd != 0x01 ) and ( cmd != 0x05 ):  # 只支持CONNECT和UDP（over TCP）命令
                 client_socket.sendall(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
                 raise ValueError("Not supported socks commanf, %s", str(cmd))
 
             # 目标地址解析（复用原有DNS逻辑）
-            server_name, server_port = self._parse_socks5_address(client_socket, atyp)
+            server_name, server_port = parse_socks5_address(client_socket)
             
             logger.info("%s:%d",server_name,server_port)
 
@@ -136,7 +134,7 @@ class ThreadedServer(object):
             try:
                 if cmd==0x01:
                     remote_obj = remote.Remote(server_name, server_port, 6)
-                elif cmd==0x03:
+                elif cmd==0x05:
                     remote_obj = remote.Remote(server_name, server_port, 17)
                     
                 client_socket.sendall(
@@ -204,22 +202,6 @@ class ThreadedServer(object):
             client_socket.close()
             return None
 
-    def _parse_socks5_address(self, sock, atyp):
-        """SOCKS5地址解析"""
-        if atyp == 0x01:  # IPv4
-            server_ip = socket.inet_ntop(socket.AF_INET, sock.recv(4))
-            return server_ip, int.from_bytes(sock.recv(2), "big")
-        elif atyp == 0x03:  # 域名
-            domain_len = ord(sock.recv(1))
-            server_name = sock.recv(domain_len).decode()
-            port = int.from_bytes(sock.recv(2), "big")
-            return server_name, port
-        elif atyp == 0x04:  # IPv6
-            server_ip = socket.inet_ntop(socket.AF_INET6, sock.recv(16))
-            return server_ip, int.from_bytes(sock.recv(2), "big")
-        else:
-            raise ValueError("Invalid address type")
-
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
@@ -238,13 +220,6 @@ class ThreadedServer(object):
                     )  # speed control + waiting for packet to fully recieve
                     data = client_sock.recv(16384)
 
-                    if config["UDPfakeDNS"]:
-                        try:
-                            if backend_sock.protocol == 17 and is_udp_dns_query(data):
-                                client_sock.send(fake_udp_dns_query(data))
-                        except:
-                            pass
-
                     try:
                         extractedsni=extract_sni(data)
                         if config["BySNIfirst"]:
@@ -253,31 +228,14 @@ class ThreadedServer(object):
                                 logger.info("replace backendsock:  %s %s %s",extractedsni,port,protocol)
                                 new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
                                 backend_sock=new_backend_sock
-                    except:
-                        import traceback
-                        traceback.print_exc()
+                    except: 
                         pass
-                    
-                    print(extractedsni,backend_sock.policy)
 
                     try:
                         backend_sock.connect()
                     except:
                         raise Exception("backend connect fail")
                     
-
-                    if isinstance(backend_sock, str):
-                        this_ip = backend_sock
-                        if this_ip not in IP_UL_traffic:
-                            IP_UL_traffic[this_ip] = 0
-                            IP_DL_traffic[this_ip] = 0
-                        client_sock.close()
-                        return False
-
-                    this_ip = backend_sock.sock.getpeername()[0]
-                    if this_ip not in IP_UL_traffic:
-                        IP_UL_traffic[this_ip] = 0
-                        IP_DL_traffic[this_ip] = 0
 
                     if backend_sock.policy.get("safety_check") is True and (data[:3] in {b'GET', b'PUT', b'DEL'} or data[:4] in {b'POST', b'HEAD', b'OPTI'}):
                         logger.warning("HTTP protocol detected, will redirect to https")
@@ -291,14 +249,12 @@ class ThreadedServer(object):
                         client_sock.close()
                         backend_sock.close()
 
-
                     try:
                         backend_sock.sni = extractedsni
                         if str(backend_sock.sni)!=str(backend_sock.domain):
                             backend_sock.policy=merge_dict(match_domain(str(backend_sock.sni)),backend_sock.policy)
                     except:
                         backend_sock.send(data)
-                        IP_UL_traffic[this_ip] += len(data)
                         return
 
                     if data:
@@ -321,8 +277,6 @@ class ThreadedServer(object):
                             client_sock.close()
                             return False
 
-                        IP_UL_traffic[this_ip] += len(data)
-
                     else:
                         raise Exception("cli syn close")
 
@@ -330,7 +284,6 @@ class ThreadedServer(object):
                     data = client_sock.recv(16384)
                     if data:
                         backend_sock.send(data)
-                        IP_UL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("cli pipe close")
 
@@ -365,7 +318,6 @@ class ThreadedServer(object):
                             pass              
                     if data:
                         client_sock.sendall(data)
-                        IP_DL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("backend pipe close at first")
 
@@ -373,7 +325,6 @@ class ThreadedServer(object):
                     data = backend_sock.recv(16384)
                     if data:
                         client_sock.sendall(data)
-                        IP_DL_traffic[this_ip] += len(data)
                     else:
                         raise Exception("backend pipe close")
 
