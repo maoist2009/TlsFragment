@@ -3,11 +3,9 @@ from pathlib import Path
 import socket
 import threading
 import time
-from . import remote, fake_desync, fragment
+from . import remote, fake_desync, fragment, utils
 from .config import config
-from .utils import is_ip_address, detect_tls_version_by_keyshare, extract_sni, is_udp_dns_query, fake_udp_dns_query, parse_socks5_address
 from .remote import match_domain
-from .l38 import merge_dict
 import json
 
 my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
@@ -32,7 +30,7 @@ lock_TTL_cache = threading.Lock()
 pacfile = "function genshin(){}"
 
 ThreadtoWork = False
-proxy_thread=None
+proxy_thread = None
 
 class ThreadedServer(object):
     def __init__(self, host, port):
@@ -79,7 +77,7 @@ class ThreadedServer(object):
                 thread_up.start()
             self.sock.close()
         except Exception as e:
-            logger.warning("Server error: %s", e)
+            logger.warning(f"Server error: {repr(e)}")
 
     def handle_client_request(self, client_socket):
         try:
@@ -96,7 +94,7 @@ class ThreadedServer(object):
                 return self._handle_http_protocol(client_socket)
 
         except Exception as e:
-            logger.error("协议检测异常: %s", e)
+            logger.error(f"协议检测异常: {repr(e)}")
             client_socket.close()
             return None
 
@@ -120,13 +118,13 @@ class ThreadedServer(object):
 
             _, cmd, _ = header
             
-            if ( cmd != 0x01 ) and ( cmd != 0x05 ):  # 只支持CONNECT和UDP（over TCP）命令
+            if cmd not in {0x01, 0x05}:  # 只支持CONNECT和UDP（over TCP）命令
                 client_socket.sendall(b"\x05\x07\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
-                raise ValueError("Not supported socks commanf, %s", str(cmd))
+                raise ValueError(f"Not supported socks command, {cmd}")
 
             # 目标地址解析（复用原有DNS逻辑）
-            server_name, server_port = parse_socks5_address(client_socket)
+            server_name, server_port = utils.parse_socks5_address(client_socket)
             
             logger.info("%s:%d",server_name,server_port)
 
@@ -142,13 +140,13 @@ class ThreadedServer(object):
                 )
                 return remote_obj
             except Exception as e:
-                logger.info(f"连接失败: {str(e)}")
+                logger.info(f"连接失败: {repr(e)}")
                 client_socket.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None
+                return server_name if utils.is_ip_address(server_name) else None
 
         except Exception as e:
-            logger.info(f"SOCKS5处理错误: {str(e)}")
+            logger.info(f"SOCKS5处理错误: {repr(e)}")
             client_socket.close()
             return None
 
@@ -157,7 +155,7 @@ class ThreadedServer(object):
         data = client_socket.recv(16384)
 
         # 原有CONNECT处理
-        if data.startswith(b"CONNECT"):
+        if data.startswith(b"CONNECT "):
             server_name, server_port = self.extract_servername_and_port(data)
             logger.info(f"CONNECT {server_name}:{server_port}")
 
@@ -168,12 +166,12 @@ class ThreadedServer(object):
                 )
                 return remote_obj
             except Exception as e:
-                logger.info(f"连接失败: {str(e)}")
+                logger.info(f"连接失败: {repr(e)}")
                 client_socket.sendall(
                     b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
                 )
                 client_socket.close()
-                return server_name if is_ip_address(server_name) else None
+                return server_name if utils.is_ip_address(server_name) else None
 
         # 原有PAC文件处理
         elif b"/proxy.pac" in data.splitlines()[0]:
@@ -183,7 +181,7 @@ class ThreadedServer(object):
             return None
 
         # 原有HTTP重定向逻辑
-        elif data[:3] in {b"GET", b"PUT", b"DEL"} or data[:4] in {b"POST", b"HEAD", b"OPTI"}:
+        elif data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
             q_line = data.decode().split("\r\n")[0].split()
             q_method, q_url = q_line[0], q_line[1]
             https_url = q_url.replace("http://", "https://", 1)
@@ -221,13 +219,12 @@ class ThreadedServer(object):
                     data = client_sock.recv(16384)
 
                     try:
-                        extractedsni=extract_sni(data)
-                        if config["BySNIfirst"]:
-                            if str(extractedsni,encoding="ASCII")!=backend_sock.domain:
-                                port, protocol=backend_sock.port,backend_sock.protocol
-                                logger.info("replace backendsock:  %s %s %s",extractedsni,port,protocol)
-                                new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
-                                backend_sock=new_backend_sock
+                        extractedsni = utils.extract_sni(data)
+                        if config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain:
+                            port, protocol=backend_sock.port,backend_sock.protocol
+                            logger.info(f"replace backendsock: {extractedsni} {port} {protocol}")
+                            new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
+                            backend_sock=new_backend_sock
                     except: 
                         pass
 
@@ -237,7 +234,7 @@ class ThreadedServer(object):
                         raise Exception("backend connect fail")
                     
 
-                    if backend_sock.policy.get("safety_check") is True and (data[:3] in {b'GET', b'PUT', b'DEL'} or data[:4] in {b'POST', b'HEAD', b'OPTI'}):
+                    if backend_sock.policy.get("safety_check") is True and data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
                         logger.warning("HTTP protocol detected, will redirect to https")
                         # 如果是http协议，重定向到https，要从data中提取url
                         q_line = data.decode().split("\r\n")[0].split()
@@ -252,7 +249,7 @@ class ThreadedServer(object):
                     try:
                         backend_sock.sni = extractedsni
                         if str(backend_sock.sni)!=str(backend_sock.domain):
-                            backend_sock.policy=merge_dict(match_domain(str(backend_sock.sni)),backend_sock.policy)
+                            backend_sock.policy = {**backend_sock.policy, **match_domain(str(backend_sock.sni))}
                     except:
                         backend_sock.send(data)
                         return
@@ -265,14 +262,15 @@ class ThreadedServer(object):
                         thread_down.daemon = True
                         thread_down.start()
                         # backend_sock.sendall(data)
-                        
-                        if backend_sock.policy.get("mode") == "TLSfrag":
+
+                        mode = backend_sock.policy.get('mode')
+                        if mode == "TLSfrag":
                             fragment.send_fraggmed_tls_data(backend_sock, data)
-                        elif backend_sock.policy.get("mode") == "FAKEdesync":
+                        elif mode == "FAKEdesync":
                             fake_desync.send_data_with_fake(backend_sock,data)
-                        elif backend_sock.policy.get("mode") == "DIRECT":
+                        elif mode == "DIRECT":
                             backend_sock.send(data)
-                        elif backend_sock.policy.get("mode") == "GFWlike":
+                        elif mode == "GFWlike":
                             backend_sock.close()
                             client_sock.close()
                             return False
@@ -288,7 +286,7 @@ class ThreadedServer(object):
                         raise Exception("cli pipe close")
 
             except Exception as e:
-                logger.info("upstream : %s from %s", repr(e), backend_sock.domain)
+                logger.info(f"upstream : {repr(e)} from {backend_sock.domain}")
                 time.sleep(2)  # wait two second for another thread to flush
                 client_sock.close()
                 backend_sock.close()
@@ -309,7 +307,7 @@ class ThreadedServer(object):
                     data = backend_sock.recv(16384)
                     if backend_sock.policy.get("safety_check")==True:
                         try:
-                            if detect_tls_version_by_keyshare(data)<0:
+                            if utils.detect_tls_version_by_keyshare(data) < 0:
                                 logger.warning("Not a TLS 1.3 connection and will close")
                                 backend_sock.close()
                                 client_sock.close()
@@ -329,7 +327,7 @@ class ThreadedServer(object):
                         raise Exception("backend pipe close")
 
             except Exception as e:
-                logger.info("downstream : %s %s", repr(e), backend_sock.domain)
+                logger.info(f"downstream : {repr(e)} from {backend_sock.domain}")
                 time.sleep(2)  # wait two second for another thread to flush
                 backend_sock.close()
                 client_sock.close()
@@ -349,7 +347,7 @@ class ThreadedServer(object):
                 host = host[1:]
             else:
                 idx = 0
-                for _ in range(0, 6):
+                for _ in range(6):
                     idx = host_and_port.find(":", idx + 1)
                 host = host_and_port[:idx]
                 port = host_and_port[idx + 1 :]
@@ -474,8 +472,8 @@ function MatchAutomatom(str) {
     return data;
 }
 
+let domains=[];
 """
-    pacfile += "let domains=[];\n"
 
     for line in config["pac_domains"]:
         pacfile += 'domains.push("'
@@ -483,22 +481,15 @@ function MatchAutomatom(str) {
         pacfile += '");\n'
 
     pacfile += "BuildAutomatom(domains);\n"
-
-    pacfile = (
-        pacfile
-        + """function FindProxyForURL(url, host) {
+    pacfile += """function FindProxyForURL(url, host) {
     if(MatchAutomatom("^"+host+"$").length)
          return "PROXY 127.0.0.1:"""
-    )
     pacfile += str(config["port"])
-    pacfile = (
-        pacfile
-        + """";
+    pacfile += """";
     else
         return "DIRECT";
 }
 """
-    )
 
 
 def start_server(block=True):
@@ -511,7 +502,7 @@ def start_server(block=True):
         with dataPath.joinpath("TTL_cache.json").open(mode="r+", encoding="UTF-8") as f:
             TTL_cache = json.load(f)
     except Exception as e:
-        logger.info("ERROR TTL query: %s", repr(e))
+        logger.info(f"ERROR TTL query: {repr(e)}")
 
     global serverHandle
     logger.info(f"Now listening at: 127.0.0.1:{config['port']}")
