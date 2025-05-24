@@ -8,8 +8,8 @@ logger = logger.getChild("fake_desync")
 
 try:
     import platform
-
-    if platform.system() == "Windows":
+    system = platform.system()
+    if system == "Windows":
 
         import ctypes
         from ctypes import wintypes
@@ -104,7 +104,7 @@ try:
         # kernel32._get_osfhandle.argtypes = [wintypes.INT]
         # kernel32._get_osfhandle.restype = wintypes.HANDLE
         pass
-    elif platform.system() in ("Linux", "Darwin", "Android"):
+    elif system in {"Linux", "Darwin", "Android"}:
         import ctypes
 
         # 加载 libc 库
@@ -167,18 +167,18 @@ try:
 
         pass
 except Exception as e:
-    logger.warning(e)
+    logger.warning(repr(e))
 
 
 def send_fake_data(
     data_len, fake_data, fake_ttl, real_data, default_ttl, sock, FAKE_sleep
 ):
     import platform
-
-    logger.info(platform.system())
-    if platform.system() == "Windows":
+    system = platform.system()
+    logger.info(system)
+    if system == "Windows":
         logger.warning(
-            "desync on Windows may cause Error! Make sure other programs are not using the TransmitFile. "
+            "Desync on Windows may cause Error! Make sure other programs are not using the TransmitFile. "
         )
         """
         BOOL TransmitFile(
@@ -214,17 +214,15 @@ def send_fake_data(
                 raise Exception(
                     "Create file failed, Error code:", kernel32.GetLastError()
                 )
-            else:
-                logger.info("Create file success %s", file_handle)
+            logger.info(f"Create file success {file_handle}")
             try:
                 ov = OVERLAPPED()
                 ov.hEvent = kernel32.CreateEventA(None, True, False, None)
                 if ov.hEvent <= 0:
                     raise Exception(
-                        "Create event failed, Error code:", kernel32.GetLastError()
+                        "Failed to create event. Error code:", kernel32.GetLastError()
                     )
-                else:
-                    logger.info("Create event success %s", ov.hEvent)
+                logger.info(f"Create event success {ov.hEvent}")
 
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 kernel32.WriteFile(
@@ -238,7 +236,7 @@ def send_fake_data(
                 set_ttl(sock, fake_ttl)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
 
-                logger.debug("%s %s %s", fake_data, real_data, data_len)
+                logger.debug(f"{fake_data} {real_data} {data_len}")
 
                 # 调用 TransmitFile 函数
                 result = mswsock.TransmitFile(
@@ -272,7 +270,7 @@ def send_fake_data(
                 val = kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(5000))
 
                 if val == 0:
-                    logger.info("TransmitFile call was successful. %s", result)
+                    logger.info(f"TransmitFile call was successful. {result}")
                 else:
                     raise Exception(
                         "TransmitFile call failed (on waiting for event). Error code:",
@@ -288,40 +286,35 @@ def send_fake_data(
                 kernel32.CloseHandle(file_handle)
                 kernel32.CloseHandle(ov.hEvent)
                 import os
-
                 os.remove(file_path)
         except Exception as e:
             raise e
-    elif platform.system() in ("Linux", "Darwin", "Android"):
+    elif system in {"Linux", "Darwin", "Android"}:
         try:
             sock_file_descriptor = sock.fileno()
-            logger.info("sock file discriptor: %s", sock_file_descriptor)
+            logger.info(f"sock file discriptor: {sock_file_descriptor}")
             fds = (ctypes.c_int * 2)()
             if libc.pipe(fds) < 0:
                 raise Exception("pipe creation failed")
-            else:
-                logger.info("pipe creation success %d %d", fds[0], fds[1])
+            logger.info("pipe creation success %d %d", fds[0], fds[1])
             p = libc.mmap(
                 0, ((data_len - 1) // 4 + 1) * 4, 0x1 | 0x2, 0x2 | 0x20, 0, 0
             )  # PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS
             if p == ctypes.c_void_p(-1):
                 raise Exception("mmap failed")
-            else:
-                logger.info("mmap success %s", p)
+            logger.info("mmap success %s", p)
             libc.memcpy(p, fake_data, data_len)
             set_ttl(sock, fake_ttl)
             vec = iovec(p, data_len)
             len = libc.vmsplice(fds[1], ctypes.byref(vec), 1, 2)  # SPLICE_F_GIFT
             if len < 0:
                 raise Exception("vmsplice failed")
-            else:
-                logger.info("vmsplice success %d", len)
+            logger.info("vmsplice success %d", len)
             len = libc.splice(fds[0], 0, sock_file_descriptor, 0, data_len, 0)
             if len < 0:
                 raise Exception("splice failed")
-            else:
-                logger.info("splice success %d", len)
-            logger.info("sleep for: %s", FAKE_sleep)
+            logger.info("splice success %d", len)
+            logger.info(f"sleep for: {FAKE_sleep}")
             time.sleep(FAKE_sleep)
             libc.memcpy(p, real_data, data_len)
             set_ttl(sock, default_ttl)
@@ -359,7 +352,7 @@ def send_data_with_fake(sock: remote.Remote, data):
     ):
         logger.info("Fake data sent.")
     else:
-        raise Exception("Fake data send failed.")
+        raise Exception("Failed to send fake data.")
 
     data = data[data_len:]
     sni=sock.sni
@@ -368,7 +361,7 @@ def send_data_with_fake(sock: remote.Remote, data):
         return
     
     position = data.find(sni)
-    logger.debug("%s %s", sni, position)
+    logger.debug(f"{sni} {position}")
     if position == -1:
         sock.send(data)
         return
@@ -377,7 +370,7 @@ def send_data_with_fake(sock: remote.Remote, data):
     sock.send(data[0:position])
     data=data[position:]
 
-    if not (sock.policy.get("len_tcp_sni")<sni_len):
+    if sock.policy.get("len_tcp_sni") >= sni_len:
         sock.policy["len_tcp_sni"]=sni_len/2
         logger.info("len_tcp_sni too big, set to %d",sock.policy.get("len_tcp_sni"))
 
@@ -392,7 +385,7 @@ def send_data_with_fake(sock: remote.Remote, data):
     ):
         logger.info("Fake sni sent.")
     else:
-        raise Exception("Fake sni send failed.")
+        raise Exception("Failed to send fake SNI.")
 
     data=data[sock.policy.get("len_tcp_sni"):]
     
