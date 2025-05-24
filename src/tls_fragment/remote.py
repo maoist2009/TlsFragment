@@ -148,12 +148,12 @@ class Remote:
 
         if self.protocol == 6:
             socktype = socket.SOCK_STREAM
+            self.sock = socket.socket(iptype, socktype)
         elif self.protocol == 17:
             socktype = socket.SOCK_DGRAM
+            self.sock = socket.socket(iptype, socktype)
         else:
             raise ValueError("Unknown sock type", self.protocol)
-            
-        self.sock = socket.socket(iptype, socktype)
         
         if self.protocol == 6:    
             self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -169,16 +169,21 @@ class Remote:
         if self.protocol == 6:
             self.sock.sendall(data)
         elif self.protocol == 17:
-            self.sock.send_to(data,(self.address, self.port))
+            data=data[3:]
+            address,port,offset=utils.parse_socks5_address_from_data(data)
+            data=data[offset:]
+            logger.info("send to %s:%s",address,port)
+            logger.debug(data)
+            self.sock.sendto(data,(address, port))
 
     def recv(self, size):
         if self.protocol == 6:
             return self.sock.recv(size)
         elif self.protocol == 17:
-            while True:
-                data, address = self.sock.recvfrom(size)
-                if address == (self.address, self.port):
-                    return data
+            data, address = self.sock.recvfrom(size)
+            logger.info("receive from %s:%s",address[0],address[1])
+            logger.debug(b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data)
+            return b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data
 
  
     def close(self):
