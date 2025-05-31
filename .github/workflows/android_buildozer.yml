@@ -2,6 +2,9 @@ name: Android Build
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'src/tls_fragment'
+      - 'main.py'
   workflow_dispatch:
 
 jobs:
