@@ -1,5 +1,5 @@
 {
-    "loglevel": "DEBUG",
+    "loglevel": "INFO",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
@@ -9,9 +9,9 @@
     "send_interval": 0.01,
     "fake_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
     "fake_ttl": "query",
-    "fake_sleep": 0.1,
+    "fake_sleep": 0.2,
     "my_socket_timeout": 120,
-    "FAKE_ttl_auto_timeout": 2,
+    "FAKE_ttl_auto_timeout": 5,
     "doh_server": "https://cloudflare-dns.com/dns-query?dns=",
     "mode": "TLSfrag",
     "DNS_cache": true,
@@ -33,6 +33,13 @@
         "streaming.mastodon.social": {},
         "smsactivate.s3.eu-central-1.amazonaws.com": {
             "IP": "3.5.137.138"
+        },
+        "disk.yandex.com": {
+            "IP": "87.250.250.50",
+            "mode": "FAKEdesync"
+        },
+        "yandex.com": {
+            "mode": "FAKEdesync"
         },
         "inv.nadeko.net": {
             "IP": "186.105.142.141"
@@ -77,8 +84,10 @@
             "IP": "13.107.42.12",
             "mode": "FAKEdesync"
         },
+        "live.com": {
+            "mode": "FAKEdesync"
+        },
         "vercel.app": {
-            "IP": "64.29.17.1",
             "mode": "FAKEdesync"
         },
         "cloudflare.com": {
@@ -116,7 +125,7 @@
             "len_tcp_sni": 5
         },
         "redd.it": {
-            "IP": "146.75.37.140",
+            "IP": "151.101.45.140",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
