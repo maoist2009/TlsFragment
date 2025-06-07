@@ -174,7 +174,14 @@ class Remote:
             if config["UDPfakeDNS"]:
                 try:
                     if utils.is_udp_dns_query(data):
-                        self.client_sock.send(build_socks5_address(address, port)+utils.fake_udp_dns_query(data))
+                        logger.info("UDP dns detected")
+                        try:
+                            ans=b"\x00\x00\x00"+utils.build_socks5_address(address, port)+utils.fake_udp_dns_query(data)
+                            logger.debug(ans)
+                            self.client_sock.send(ans)
+                            return
+                        except Exception as e:
+                            logger.warning("Error making up dns answer: "+repr(e))
                 except:
                     pass
             self.sock.sendto(data,(address, port))
@@ -185,8 +192,9 @@ class Remote:
         elif self.protocol == 17:
             data, address = self.sock.recvfrom(size)
             logger.info(f"receive from {address[0]}:{address[1]}")
-            logger.debug(b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data)
-            return b"\x00\x00\x00"+utils.build_socks5_address(address[0],address[1])+data
+            ans=b"\x00\x00\x00"+utils.build_socks5_address(address, port)+data
+            logger.debug(ans)
+            return ans
 
  
     def close(self):

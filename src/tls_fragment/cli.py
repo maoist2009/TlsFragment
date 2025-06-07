@@ -221,7 +221,7 @@ class ThreadedServer(object):
 
                     try:
                         extractedsni = utils.extract_sni(data)
-                        if backend_sock.domain=="127.0.0.114" or backend_sock.domain=="::114" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
+                        if backend_sock.domain=="66.254.114.41" or backend_sock.domain=="2a03:2880:f127:83:face:b00c:0:25de" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
                             port, protocol=backend_sock.port,backend_sock.protocol
                             logger.info(f"replace backendsock: {extractedsni} {port} {protocol}")
                             new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
@@ -255,7 +255,7 @@ class ThreadedServer(object):
                             backend_sock.policy = {**backend_sock.policy, **match_domain(str(backend_sock.sni))}
                     except:
                         backend_sock.send(data)
-                        return
+                        continue
 
                     if data:
                         thread_down = threading.Thread(
@@ -289,6 +289,8 @@ class ThreadedServer(object):
                         raise Exception("cli pipe close")
 
             except Exception as e:
+                # import traceback
+                # traceback.print_exc()
                 logger.info(f"upstream : {repr(e)} from {backend_sock.domain}")
                 time.sleep(2)  # wait two second for another thread to flush
                 client_sock.close()
