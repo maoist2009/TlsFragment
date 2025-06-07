@@ -11,6 +11,8 @@ from kivy.uix.checkbox import CheckBox
 import os
 import json
 
+config_mirror_list= ["https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main/config.json","https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main/config.json"]
+
 
 class ProxyApp(App):
     def build(self):
@@ -27,52 +29,62 @@ class ProxyApp(App):
         self.box_start.add_widget(self.start_button)
 
         self.proxy_running = False
-        self.vpn_check_box_hint = Label(text='Global VPN')
-        self.box_start.add_widget(self.vpn_check_box_hint)
-        
-        self.vpn_checkbox = CheckBox()
-        self.box_start.add_widget(self.vpn_checkbox)
         self.layout.add_widget(self.box_start)
 
-        self.delete_cache_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
-        self.delete_DNS_cache_button = Button(
-            text='delete DNS cache',
+        self.show_in_edit="config.json"
+        self.file_list_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+        self.config_file_button = Button(
+            text='config',
             size_hint_y=None,
             height=button_height
         )
-        self.delete_DNS_cache_button.bind(on_press=self.delete_DNS_cache)
-        self.delete_cache_box.add_widget(self.delete_DNS_cache_button)
+        self.DNS_cache_file_button = Button(
+            text='DNS cache',
+            size_hint_y=None,
+            height=button_height
+        )
+        self.TTL_cache_file_button = Button(
+            text='TTL cache',
+            size_hint_y=None,
+            height=button_height
+        )
+        self.config_file_button.bind(on_press=self.edit_config)
+        self.DNS_cache_file_button.bind(on_press=self.edit_DNS_cache)
+        self.TTL_cache_file_button.bind(on_press=self.edit_TTL_cache)
+        self.file_list_box.add_widget(self.config_file_button)
+        self.file_list_box.add_widget(self.DNS_cache_file_button)
+        self.file_list_box.add_widget(self.TTL_cache_file_button)
+        self.layout.add_widget(self.file_list_box)
 
-        self.delete_TTL_cache_button = Button(
-            text='delete TTL cache',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.delete_TTL_cache_button.bind(on_press=self.delete_TTL_cache)
-        self.delete_cache_box.add_widget(self.delete_TTL_cache_button)
-        self.layout.add_widget(self.delete_cache_box)
 
         self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
         self.edit_config_button = Button(
-            text='Edit config',
+            text='Edit',
             size_hint_y=None,
             height=button_height
         )
-        self.edit_config_button.bind(on_press=self.edit_config)
+        self.edit_config_button.bind(on_press=self.edit_file)
         self.config_button_box.add_widget(self.edit_config_button)
-
         self.save_config_button = Button(
-            text='Save config',
+            text='Save',
             size_hint_y=None,
             height=button_height
         )
-        self.save_config_button.bind(on_press=self.save_config)
+        self.save_config_button.bind(on_press=self.save_file)
         self.save_config_button.disabled = True
         self.config_button_box.add_widget(self.save_config_button)
         self.layout.add_widget(self.config_button_box)
 
+        self.button_try_to_update_config=Button(
+            text='Try to update config',
+            size_hint_y=None,
+            height=button_height
+        )
+        self.button_try_to_update_config.bind(on_press=self.try_to_update_config)
+        self.layout.add_widget(self.button_try_to_update_config)
+
         self.config_input = TextInput(
-            hint_text='Edit config.json',
+            hint_text='Edit Here',
             multiline=True,
             readonly=True,
             size_hint_y=1
@@ -81,35 +93,86 @@ class ProxyApp(App):
 
         return self.layout
 
+    def try_to_update_config(self, instance):
+        import requests
+
+        succeeded= False
+        # 改为轮询list中url
+        for url in config_mirror_list:
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    config_data = json.loads(response.text)
+                    with open('config.json', 'w') as f:
+                        json.dump(config_data, f, indent=4)
+                    succeeded = True
+                    self.load_file()
+                    self.show_popup('Update success', 'Config file updated successfully. You may need to restart proxy. ')
+                    break
+            except:
+                pass
+        if not succeeded:
+            self.show_popup('Update failed', 'Failed to update config file')
+
+
+    def edit_config(self, instance):
+        self.show_in_edit="config.json"
+        self.load_file()
+    
+    def edit_DNS_cache(self, instance):
+        self.show_in_edit="dns_cache.json"
+        self.load_file()
+
+    def edit_TTL_cache(self, instance):
+        self.show_in_edit="ttl_cache.json"
+        self.load_file()
+
     def on_start(self):
         self.get_permit()
-        self.load_config()
+        self.load_file()
 
     def show_popup(self, title, message):
         """Utility function to show popups."""
-        popup = Popup(title=title, content=Label(text=message), size_hint=(None, None))
+        popup = Popup(title=title, content=Label(text=message), size_hint=(dp(50), dp(20)))
         popup.open()
 
-    def edit_config(self, instance):
+    def edit_file(self, instance):
         if self.config_input.readonly:
             self.config_input.readonly = False
-            self.edit_config_button.text = 'Lock config'
+            self.edit_config_button.text = 'Lock'
             self.save_config_button.disabled = False
         else:
             self.config_input.readonly = True
-            self.edit_config_button.text = 'Edit config'
+            self.edit_config_button.text = 'Edit'
             self.save_config_button.disabled = True
 
-    def load_config(self):
-        config_path = 'config.json'
-        if os.path.exists(config_path):
+    def load_file(self):
+        path=self.show_in_edit
+        if os.path.exists(path):
             try:
-                with open(config_path, 'r') as f:
-                    self.config_input.text = json.dumps(json.load(f), indent=4)
+                with open(path, 'r') as f:
+                    self.config_input.text = f.read()
             except Exception as e:
-                self.show_popup('Load config failed', f"Failed to load config: {e}")
+                self.show_popup('Load file failed', f"Failed to load file: {e}")
         else:
-            self.config_input.text = json.dumps(self.get_default_config(), indent=4)
+            self.show_popup('File not found', f"File {path} not found")
+
+    
+    def save_file(self):
+        path=self.show_in_edit
+        if os.path.exists(path):
+            try:
+                config_data = json.loads(self.config_input.text)
+                with open(path, 'w') as f:
+                    json.dump(config_data, f, indent=4)
+                self.show_popup('Save file success', f"File {path} has been saved successfully")
+            except json.JSONDecodeError:
+                self.show_popup('Invalid JSON format', 'Please input valid JSON format')
+            except Exception as e:
+                self.show_popup('Save file failed', f"Failed to save file: {e}")
+        else:
+            self.show_popup('File not found', f"File {path} not found")
+
 
     def start_proxy_service(self):
         """Start the Android service to run the proxy."""
@@ -162,10 +225,8 @@ class ProxyApp(App):
                 self.stop_proxy_service()
                 self.start_button.text = 'start proxy'
                 self.start_button.disabled = False
-                self.vpn_checkbox.disabled = False
                 self.config_button_box.disabled = False
                 self.config_input.disabled = False
-                self.delete_cache_box.disabled = False
                 self.proxy_running = False
             except Exception as e:
                 self.show_popup('Stop failed', 'Failed to stop proxy')
@@ -178,42 +239,14 @@ class ProxyApp(App):
                 self.start_proxy_service()
                 self.start_button.text = 'stop proxy'
                 self.start_button.disabled = False
-                self.vpn_checkbox.disabled = True
                 self.config_button_box.disabled = True
                 self.config_input.disabled = True
-                self.delete_cache_box.disabled = True
                 self.proxy_running = True
             except Exception as e:
                 self.show_popup('Start failed', 'Failed to start proxy service')
                 self.start_button.text = 'Start proxy'
                 self.start_button.disabled=False
 
-    def save_config(self, instance):
-        try:
-            config_data = json.loads(self.config_input.text)
-            with open('config.json', 'w') as f:
-                json.dump(config_data, f, indent=4)
-            self.show_popup('Save config success', 'Config has been saved successfully')
-        except json.JSONDecodeError:
-            self.show_popup('Invalid JSON format', 'Please input valid JSON format')
-        except Exception as e:
-            self.show_popup('Save config failed', f"Failed to save config: {e}")
-
-    def delete_DNS_cache(self, instance):
-        try:
-            if os.path.exists('DNS_cache.json'):
-                os.remove('DNS_cache.json')
-                self.show_popup('Delete DNS cache success', 'DNS_cache.json has been deleted successfully')
-        except Exception as e:
-            self.show_popup('Delete DNS cache failed', 'Failed to delete DNS_cache.json')
-
-    def delete_TTL_cache(self, instance):
-        try:
-            if os.path.exists('TTL_cache.json'):
-                os.remove('TTL_cache.json')
-                self.show_popup('Delete TTL cache success', 'TTL_cache.json has been deleted successfully')
-        except Exception as e:
-            self.show_popup('Delete TTL cache failed', 'Failed to delete TTL_cache.json')
 
 if __name__ == '__main__':
     ProxyApp().run()
