@@ -120,11 +120,11 @@ class ProxyApp(App):
         self.load_file()
     
     def edit_DNS_cache(self, instance):
-        self.show_in_edit="dns_cache.json"
+        self.show_in_edit="DNS_cache.json"
         self.load_file()
 
     def edit_TTL_cache(self, instance):
-        self.show_in_edit="ttl_cache.json"
+        self.show_in_edit="TTL_cache.json"
         self.load_file()
 
     def on_start(self):
@@ -133,7 +133,7 @@ class ProxyApp(App):
 
     def show_popup(self, title, message):
         """Utility function to show popups."""
-        popup = Popup(title=title, content=Label(text=message), size_hint=(dp(50), dp(20)))
+        popup = Popup(title=title, content=Label(text=message), size=(dp(200), dp(40)))
         popup.open()
 
     def edit_file(self, instance):
@@ -154,11 +154,12 @@ class ProxyApp(App):
                     self.config_input.text = f.read()
             except Exception as e:
                 self.show_popup('Load file failed', f"Failed to load file: {e}")
+                self.config_input.text = ''
         else:
             self.show_popup('File not found', f"File {path} not found")
 
     
-    def save_file(self):
+    def save_file(self,instance):
         path=self.show_in_edit
         if os.path.exists(path):
             try:
