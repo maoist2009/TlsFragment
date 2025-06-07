@@ -168,7 +168,7 @@ class ThreadedServer(object):
             except Exception as e:
                 logger.info(f"连接失败: {repr(e)}")
                 client_socket.sendall(
-                    b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
+                    b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent : MyProxy/1.0\r\n\r\n"
                 )
                 client_socket.close()
                 return server_name if utils.is_ip_address(server_name) else None
@@ -187,7 +187,8 @@ class ThreadedServer(object):
             https_url = q_url.replace("http://", "https://", 1)
             logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
             response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
-            client_socket.sendall(response.encode())
+            logger.debug(response)
+            client_socket.sendall(response.encode(encoding="UTF-8"))
             client_socket.close()
             return None
 
@@ -198,14 +199,14 @@ class ThreadedServer(object):
                 b"HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
             )
             client_socket.close()
-            return None
+            return None  
 
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
         if backend_sock == None:
             client_sock.close()
-            raise Exception("backend not found")
+            return
             
         global ThreadtoWork
         while ThreadtoWork:
@@ -220,13 +221,15 @@ class ThreadedServer(object):
 
                     try:
                         extractedsni = utils.extract_sni(data)
-                        if config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain:
+                        if backend_sock.domain=="127.0.0.114" or backend_sock.domain=="::114" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
                             port, protocol=backend_sock.port,backend_sock.protocol
                             logger.info(f"replace backendsock: {extractedsni} {port} {protocol}")
                             new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
                             backend_sock=new_backend_sock
                     except: 
                         pass
+
+                    backend_sock.client_sock = client_sock
 
                     try:
                         backend_sock.connect()
