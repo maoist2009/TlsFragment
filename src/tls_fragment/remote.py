@@ -171,6 +171,12 @@ class Remote:
             data = data[offset:]
             logger.info(f"send to {address}:{port}")
             logger.debug(data)
+            if config["UDPfakeDNS"]:
+                try:
+                    if utils.is_udp_dns_query(data):
+                        self.client_sock.send(build_socks5_address(address, port)+utils.fake_udp_dns_query(data))
+                except:
+                    pass
             self.sock.sendto(data,(address, port))
 
     def recv(self, size):
