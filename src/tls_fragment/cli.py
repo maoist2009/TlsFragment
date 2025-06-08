@@ -248,6 +248,15 @@ class ThreadedServer(object):
                         client_sock.sendall(response.encode())
                         client_sock.close()
                         backend_sock.close()
+                        
+                    if data:
+                        thread_down = threading.Thread(
+                            target=self.my_downstream,
+                            args=(backend_sock, client_sock),
+                        )
+                        thread_down.daemon = True
+                        thread_down.start()
+                        # backend_sock.sendall(data)
 
                     try:
                         backend_sock.sni = extractedsni
@@ -258,14 +267,6 @@ class ThreadedServer(object):
                         continue
 
                     if data:
-                        thread_down = threading.Thread(
-                            target=self.my_downstream,
-                            args=(backend_sock, client_sock),
-                        )
-                        thread_down.daemon = True
-                        thread_down.start()
-                        # backend_sock.sendall(data)
-
                         mode = backend_sock.policy.get('mode')
                         if mode == "TLSfrag":
                             fragment.send_fraggmed_tls_data(backend_sock, data)
@@ -301,7 +302,6 @@ class ThreadedServer(object):
         backend_sock.close()
 
     def my_downstream(self, backend_sock: remote.Remote, client_sock: socket.socket):
-        this_ip = backend_sock.sock.getpeername()[0]
 
         first_flag = True
         global ThreadtoWork
@@ -332,6 +332,8 @@ class ThreadedServer(object):
                         raise Exception("backend pipe close")
 
             except Exception as e:
+                # import traceback
+                # traceback.print_exc()
                 logger.info(f"downstream : {repr(e)} from {backend_sock.domain}")
                 time.sleep(2)  # wait two second for another thread to flush
                 backend_sock.close()
