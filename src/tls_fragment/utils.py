@@ -238,7 +238,6 @@ import dns.rrset
 import dns.rdatatype
 
 def fake_udp_dns_query(query):
-    print(query)
     dns_query = dns.message.from_wire(query)
 
     # 创建DNS响应
@@ -330,3 +329,9 @@ def build_socks5_address(ip, port):
 
     # 构造 SOCKS5 地址
     return bytes([atyp]) + packed_ip + port.to_bytes(2, 'big')
+
+def build_socks5_udp_ans(address,port,data):
+    addr=build_socks5_address(address,port)
+    hdr_len=len(addr)+3
+    msg_len=len(data)+hdr_len
+    return msg_len.to_bytes(2,'big')+hdr_len.to_bytes(1,'big')+addr+data
