@@ -44,7 +44,7 @@ jobs:
     
       - name: Sign the APK manually
         run: |
-          APK_PATH=$(find ./bin -name "*-release-unsigned.apk" | head -n 1)
+          APK_PATH=$(find ./build/android/bin -name "*-release-unsigned.apk" | head -n 1)
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
             -keystore android.jks \
             -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
@@ -53,7 +53,7 @@ jobs:
 
       - name: Rename the signed APK
         run: |
-          APK_PATH=$(find ./bin -name "*-release-unsigned.apk" | head -n 1)
+          APK_PATH=$(find ./build/android/bin -name "*-release-unsigned.apk" | head -n 1)
           NEW_APK_PATH="${APK_PATH/-unsigned/-signed}"
           mv "$APK_PATH" "$NEW_APK_PATH"
 
@@ -62,4 +62,4 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: signed-release-apk
-          path: ./bin/*-release-signed.apk
+          path: ./build/android/bin/*-release-signed.apk
