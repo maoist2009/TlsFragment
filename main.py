@@ -58,13 +58,6 @@ class ProxyApp(App):
 
 
         self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
-        self.edit_config_button = Button(
-            text='Edit',
-            size_hint_y=None,
-            height=button_height
-        )
-        self.edit_config_button.bind(on_press=self.edit_file)
-        self.config_button_box.add_widget(self.edit_config_button)
         self.save_config_button = Button(
             text='Save',
             size_hint_y=None,
@@ -134,16 +127,6 @@ class ProxyApp(App):
         """Utility function to show popups."""
         popup = Popup(title=title, content=Label(text=message), size=(dp(200), dp(40)))
         popup.open()
-
-    def edit_file(self, instance):
-        if self.config_input.readonly:
-            self.config_input.readonly = False
-            self.edit_config_button.text = 'Lock'
-            self.save_config_button.disabled = False
-        else:
-            self.config_input.readonly = True
-            self.edit_config_button.text = 'Edit'
-            self.save_config_button.disabled = True
 
     def load_file(self):
         path=self.show_in_edit
