@@ -40,9 +40,9 @@ jobs:
           key: ${{ runner.os }}-buildozer-${{ hashFiles('tools/build/buildozer.spec') }}
 
       - name: Buildozer Build
-        run: bash tools/build/build_android_debug.sh
+        run: bash tools/build/build_android_release.sh
     
-            - name: Sign the APK manually
+      - name: Sign the APK manually
         run: |
           APK_PATH=$(find ./bin -name "*-release-unsigned.apk" | head -n 1)
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
