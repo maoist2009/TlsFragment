@@ -164,7 +164,7 @@ class ProxyApp(App):
         SERVICE_NAME = str(context.getPackageName()) + '.ServiceProxyservice'
 
         self.service_target = autoclass(SERVICE_NAME)
-        self.service_target.start(mActivity, 'icon', 'TlsFragment', 'ProxyRunning', '')
+        self.service_target.start(mActivity, 'small_icon.png', 'TlsFragment', 'TlsFragment Proxy Foreground Service Running', '')
         self.show_popup('Start successfully', 'Proxy started successfully')
 
         return self.service_target
