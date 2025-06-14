@@ -43,7 +43,7 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython,pyjnius,https:
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/presplash.jpeg
+presplash.filename = %(source.dir)s/presplash.jpeg
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/small_icon.png
