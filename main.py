@@ -86,7 +86,6 @@ class ProxyApp(App):
         self.config_input = TextInput(
             hint_text='Edit Here',
             multiline=True,
-            readonly=True,
             size_hint_y=1
         )
         self.layout.add_widget(self.config_input)
