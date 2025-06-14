@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-buildozer-${{ hashFiles('tools/build/buildozer.spec') }}
 
       - name: Buildozer Build
-        run: bash tools/build/build_android.sh
+        run: bash tools/build/build_android_debug.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2

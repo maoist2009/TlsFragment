@@ -1,4 +1,0 @@
-
-sh==2.0.4
-setuptools==68.2.2
-git+https://github.com/kivy/buildozer.git@820a4480ec4c9bf8a95ba77ba7b3b85dfc2e0130
