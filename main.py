@@ -99,10 +99,25 @@ class ProxyApp(App):
                         json.dump(config_data, f, indent=4)
                     succeeded = True
                     self.load_file()
-                    self.show_popup('Update success', 'Config file updated successfully. You may need to restart proxy. ')
+                    self.show_popup('Update success', 'Config file updated successfully.  \nYou may need to restart proxy. ')
                     break
             except:
                 pass
+        if self.is_service_running():
+            proxy={"http": f"http://127.0.0.1:{self.proxy_port}"}
+            for url in config_mirror_list:
+                try:
+                    response = requests.get(url,proxies=proxy)
+                    if response.status_code == 200:
+                        config_data = json.loads(response.text)
+                        with open('config.json', 'w') as f:
+                            json.dump(config_data, f, indent=4)
+                        succeeded = True
+                        self.load_file()
+                        self.show_popup('Update success', 'Config file updated successfully.  \nYou may need to restart proxy. ')
+                        break
+                except:
+                    pass
         if not succeeded:
             self.show_popup('Update failed', 'Failed to update config file')
         else:
@@ -203,6 +218,8 @@ class ProxyApp(App):
         Intent = autoclass('android.content.Intent')
         service_intent = Intent(mActivity, Service)
         mActivity.stopService(service_intent)
+        while self.is_service_running():
+            pass
 
     def get_permit(self):
         from android.permissions import Permission, request_permissions
@@ -229,8 +246,8 @@ class ProxyApp(App):
     def run_proxy_service(self, instance, change=True):
         if self.proxy_running:
             try:
-                self.start_button.disabled = True
                 self.start_button.text = 'Stopping'
+                self.start_button.disabled = True
                 if change:
                     self.stop_proxy_service()
                 self.start_button.text = 'start proxy'
@@ -244,8 +261,8 @@ class ProxyApp(App):
                 self.start_button.disabled=False
         else:
             try:
-                self.start_button.disabled = True
                 self.start_button.text = 'starting'
+                self.start_button.disabled = True
                 if change:
                     self.start_proxy_service()
                 self.start_button.text = 'stop proxy'
