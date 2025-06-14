@@ -64,7 +64,6 @@ class ProxyApp(App):
             height=button_height
         )
         self.save_config_button.bind(on_press=self.save_file)
-        self.save_config_button.disabled = True
         self.config_button_box.add_widget(self.save_config_button)
         self.layout.add_widget(self.config_button_box)
 
