@@ -10,6 +10,7 @@ from jnius import autoclass
 from kivy.uix.checkbox import CheckBox
 import os
 import json
+import android
 
 config_mirror_list= ["https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main/config.json","https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main/config.json"]
 
@@ -104,6 +105,27 @@ class ProxyApp(App):
                 pass
         if not succeeded:
             self.show_popup('Update failed', 'Failed to update config file')
+        else:
+            self.get_port_from_config()
+    
+    def get_port_from_config(self):
+        try:
+            path="config.json"
+            with open(path, 'r') as f:
+                json_str = f.read()
+            data = json.loads(json_str)  # 将字符串解析为字典
+            self.proxy_port= data["port"]    # 获取 port 的值
+        except:
+            self.show_popup('Failed to get port from config.json')
+            self.proxy_port=2500
+    
+    def is_service_running(self):
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(1)
+            result = sock.connect_ex(("127.0.0.1", self.proxy_port))
+            sock.close()
+            return result == 0
 
 
     def edit_config(self, instance):
@@ -121,6 +143,8 @@ class ProxyApp(App):
     def on_start(self):
         self.get_permit()
         self.load_file()
+        if self.is_service_running():
+            self.run_proxy_service(None,False)
 
     def show_popup(self, title, message):
         """Utility function to show popups."""
@@ -133,6 +157,8 @@ class ProxyApp(App):
             try:
                 with open(path, 'r') as f:
                     self.config_input.text = f.read()
+                if path=="config.json":
+                    self.get_port_from_config()
             except Exception as e:
                 self.show_popup('Load file failed', f"Failed to load file: {e}")
                 self.config_input.text = ''
@@ -164,8 +190,9 @@ class ProxyApp(App):
 
         self.service_target = autoclass(SERVICE_NAME)
         self.service_target.start(mActivity, 'icon', 'TlsFragment', 'TlsFragment Proxy Foreground Service Running', '')
+        while not self.is_service_running():
+            pass
         self.show_popup('Start successfully', 'Proxy started successfully')
-
         return self.service_target
 
     def stop_proxy_service(self):
@@ -199,12 +226,13 @@ class ProxyApp(App):
         ]
         request_permissions(requested_permissions, callback)
 
-    def run_proxy_service(self, instance):
+    def run_proxy_service(self, instance, change=True):
         if self.proxy_running:
             try:
                 self.start_button.disabled = True
                 self.start_button.text = 'Stopping'
-                self.stop_proxy_service()
+                if change:
+                    self.stop_proxy_service()
                 self.start_button.text = 'start proxy'
                 self.start_button.disabled = False
                 self.config_button_box.disabled = False
@@ -218,7 +246,8 @@ class ProxyApp(App):
             try:
                 self.start_button.disabled = True
                 self.start_button.text = 'starting'
-                self.start_proxy_service()
+                if change:
+                    self.start_proxy_service()
                 self.start_button.text = 'stop proxy'
                 self.start_button.disabled = False
                 self.config_button_box.disabled = True
