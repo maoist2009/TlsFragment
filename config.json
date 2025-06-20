@@ -213,12 +213,12 @@
             "len_tls_sni": 3
         },
         "chrome.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "chromium.org": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
@@ -234,37 +234,37 @@
             "safety_check": true
         },
         "google.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "ai.dev": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "google.dev": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "android.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "golang.org": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "blogger.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "gvt1.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
@@ -284,32 +284,32 @@
             "port": 41620
         },
         "gstatic.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "googleapis.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "youtube.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "youtube-nocookie.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "youtu.be": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "ytimg.com": {
-            "IP": "35.190.247.145",
+            "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
