@@ -176,55 +176,106 @@ def parse_extensions(data):
     return extensions
 
 
-def detect_tls_version_by_keyshare(server_hello):
-    # 解析TLS记录层
-    if len(server_hello) < 5:
-        return 0
-    content_type, _, _, record_length = struct.unpack('>BBBH', server_hello[:5])
-    if content_type != 0x16:  # 0x16表示TLS Handshake
-        return 0
-    handshake_data = server_hello[5:5 + record_length]
-
-    # 解析握手消息头
-    if len(handshake_data) < 4:
-        return 0
-    handshake_type, _, handshake_length = struct.unpack('>BBH', handshake_data[:4])
-    if handshake_type != 0x02:  # 0x02表示Server Hello
-        return 0
-
-    # 跳过前面固定长度的字段（消息类型、长度、版本、随机数）
-    offset = 4 + 2 + 32
-    # 解析会话 ID 长度
-    session_id_length = struct.unpack('>B', handshake_data[offset:offset + 1])[0]
-    offset += 1 + session_id_length
-    # 跳过密码套件和压缩方法
-    offset += 2 + 1
-    # 扩展字段起始位置
-    extensions_start = offset
-
-    # 解析扩展字段的总长度
-    if extensions_start + 2 > len(handshake_data):
-        return 0
-    extensions_length = struct.unpack('>H', handshake_data[extensions_start:extensions_start + 2])[0]
-    # 检查扩展字段数据是否完整
-    if extensions_start + 2 + extensions_length > len(handshake_data):
-        return 0
-    # 提取扩展字段的数据
-    extensions_data = handshake_data[extensions_start + 2:extensions_start + 2 + extensions_length]
-    # 解析扩展字段
-    extensions = parse_extensions(extensions_data)
-
-    # 定义key_share扩展类型
-    key_share_ext_type = 0x0033
-    # 检查是否存在key_share扩展
+def detect_tls_version_by_keyshare(data):
+    '''
+    Validate the existence of "key_share" in ClientHello.
+    '''
     try:
-        has_key_share_ext = key_share_ext_type in extensions
+        if len(data) < 5: # Not long enough
+            return 0
 
-        if has_key_share_ext:
-            return 1
+        # Parse TLS record layer header:
+        # 1-byte type, 2-type version, 2-type length.
+        record_type, record_version, record_length = struct.unpack('!BHH', data[:5])
+
+        # Check if it is a Handshake (type 22) and data length is sufficient.
+        if record_type != 22 or len(data) < 5 + record_length:
+            return 0
+
+        # Extract Handshake protocol data (excluding record layer header).
+        handshake_data = data[5:5+record_length]
+        if len(handshake_data) < 4:  # Handshake header must be at least 4 bytes.
+            return 0
+
+         # Parse Handshake header: 1-byte type, 3-byte length.
+        handshake_type = handshake_data[0]
+        handshake_len = (handshake_data[1] << 16) | (handshake_data[2] << 8) | handshake_data[3]
+
+        # Verify it is a ClientHello (type 1) and length matches.
+        if handshake_type != 1 or len(handshake_data) < 4 + handshake_len:
+            return 0
+
+        # Extract ClientHello body (excluding Handshake header).
+        hello_body = handshake_data[4:4+handshake_len]
+        offset = 0
+
+        # Skip fixed fields: protocol version (2 bytes) + random (32 bytes).
+        if len(hello_body) < 34:
+            return 0
+        offset += 34  # 2 + 32
+        
+        # Parse and skip session ID.
+        if offset >= len(hello_body):
+            return 0
+        session_id_len = hello_body[offset]
+        offset += 1
+        if offset + session_id_len > len(hello_body):
+            return 0
+        offset += session_id_len
+        
+        # Parse and skip cipher suites.
+        if offset + 2 > len(hello_body):
+            return 0
+        cipher_suites_len = (hello_body[offset] << 8) | hello_body[offset+1]
+        offset += 2
+        if offset + cipher_suites_len > len(hello_body):
+            return 0
+        offset += cipher_suites_len
+        
+        # Parse and skip compression methods.
+        if offset >= len(hello_body):
+            return 0
+        compression_len = hello_body[offset]
+        offset += 1
+        if offset + compression_len > len(hello_body):
+            return 0
+        offset += compression_len
+        
+        # Check if there are extensions length.
+        if offset == len(hello_body):
+            return -1  # No extensions.
+        if offset + 2 > len(hello_body):
+            return 0
+        
+        # Parse total extensions length.
+        extensions_len = (hello_body[offset] << 8) | hello_body[offset+1]
+        offset += 2
+        if offset + extensions_len > len(hello_body):
+            return 0
+        
+        # Traverse through extensions.
+        end_ext = offset + extensions_len
+        while offset < end_ext:
+            # Each extension must have at least a 4-byte header.
+            if offset + 4 > end_ext:
+                return 0
+            ext_type = (hello_body[offset] << 8) | hello_body[offset+1]
+            ext_len = (hello_body[offset+2] << 8) | hello_body[offset+3]
+            offset += 4
+            
+            # Check for `key_share` (extension type 51).
+            if ext_type == 51:
+                return 1
+            
+            # Skip over extension data.
+            offset += ext_len
+            if offset > end_ext:
+                return 0
+        
         return -1
-    except:
+    except Exception:
         return 0
+
 
 def is_udp_dns_query(data):
     if len(data) < 12:

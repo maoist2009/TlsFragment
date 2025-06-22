@@ -266,6 +266,16 @@ class ThreadedServer(object):
                         backend_sock.send(data)
                         continue
 
+                    if backend_sock.policy.get("safety_check")==True:
+                        try:
+                            if utils.detect_tls_version_by_keyshare(data) < 0:
+                                logger.warning("Not a TLS 1.3 connection and will close")
+                                backend_sock.close()
+                                client_sock.close()
+                                raise ValueError("Not a TLS 1.3 connection")
+                        except:
+                            pass    
+
                     if data:
                         mode = backend_sock.policy.get('mode')
                         if mode == "TLSfrag":
@@ -309,16 +319,7 @@ class ThreadedServer(object):
             try:
                 if first_flag is True:
                     first_flag = False
-                    data = backend_sock.recv(16384)
-                    if backend_sock.policy.get("safety_check")==True:
-                        try:
-                            if utils.detect_tls_version_by_keyshare(data) < 0:
-                                logger.warning("Not a TLS 1.3 connection and will close")
-                                backend_sock.close()
-                                client_sock.close()
-                                raise ValueError("Not a TLS 1.3 connection")
-                        except:
-                            pass              
+                    data = backend_sock.recv(16384)          
                     if data:
                         client_sock.sendall(data)
                     else:
