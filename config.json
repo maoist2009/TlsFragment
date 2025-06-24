@@ -1,5 +1,6 @@
 {
     "loglevel": "INFO",
+    "logfile": "log.txt",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
