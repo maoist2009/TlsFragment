@@ -43,7 +43,7 @@ def fragment_pattern(data, pattern, len_sni: int, num_pieces: int):
     if position == -1:
         return fragment_content(data, 2 * num_pieces)
 
-    print(position)
+    # print(position)
     pattern_length = len(pattern)
     data_length = len(data)
 
