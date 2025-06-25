@@ -1,6 +1,5 @@
 {
     "loglevel": "INFO",
-    "logfile": "log.txt",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
@@ -315,12 +314,12 @@
             "safety_check": true
         },
         "facebook.com": {
-            "IP": "157.240.229.35",
+            "IP": "57.144.160.1",
             "TLSfrag": 3,
             "TCPfrag": 5
         },
         "www.instagram.com": {
-            "IP": "2a03:2880:f276:e8:face:b00c:0:4420"
+            "IP": "57.144.160.34"
         },
         "meta": {
             "len_tls_sni": 2,
@@ -328,18 +327,20 @@
             "send_interval": 0.01
         },
         "static.cdninstagram.com": {
-            "IP": "2a03:2880:f276:d2:face:b00c:0:43fe"
+            "IP": "57.144.160.192"
         },
         "static.xx.fbcdn.net": {
             "IP": "157.240.229.35",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
-        "fbcdn.net": {
-            "IPtype": "ipv6"
+        "xx.fbcdn.net": {
+            "IP": "57.144.160.128",
+            "len_tls_sni": 3
         },
+        "fbcdn.net": {},
         "fbsbx.com": {
-            "IP": "2a03:2880:f115:83:face:b00c:0:25de",
+            "IP": "57.144.160.1",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
