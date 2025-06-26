@@ -1,6 +1,5 @@
 {
     "loglevel": "INFO",
-    "logfile": "log.txt",
     "port": 2500,
     "DOH_port": 2500,
     "num_tcp_pieces": 8,
@@ -386,8 +385,9 @@
         },
         "video.twimg.com": {
             "CDN": "Fastly: 2024/11/13: 151.101.40.158",
-            "len_tcp_sni": 8,
-            "IPcache": false
+            "len_tcp_sni": 5,
+            "IP": "151.101.88.158",
+            "len_tls_sni": 4
         },
         "twimg.com": {
             "IP": "146.75.48.159",
