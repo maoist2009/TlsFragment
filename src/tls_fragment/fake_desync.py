@@ -253,7 +253,7 @@ def send_fake_data(
                     logger.warning("Too short sleep time on Windows, set to 0.1")
                     FAKE_sleep = 0.1
 
-                logger.info("sleep for: %d", FAKE_sleep)
+                logger.info("sleep for: %f", FAKE_sleep)
                 time.sleep(FAKE_sleep)
                 kernel32.SetFilePointer(file_handle, 0, 0, 0)
                 kernel32.WriteFile(

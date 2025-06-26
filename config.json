@@ -315,13 +315,17 @@
             "TLSfrag": 3,
             "TCPfrag": 5
         },
-        "www.instagram.com": {
+        "instagram.com": {
             "IP": "57.144.160.34"
         },
         "meta": {
             "len_tls_sni": 2,
             "len_tcp_sni": 3,
             "send_interval": 0.01
+        },
+        "meta.com": {
+            "IP": "157.240.15.1",
+            "mode": "FAKEdesync"
         },
         "static.cdninstagram.com": {
             "IP": "57.144.160.192"
