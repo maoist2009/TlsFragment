@@ -18,6 +18,7 @@ class MyDoh:
 
 
     def resolve(self,server_name,dns_type):     
+        print(server_name,dns_type)
         query_params = {
             # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
             'type': dns_type,
