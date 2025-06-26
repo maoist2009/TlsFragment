@@ -17,8 +17,7 @@ class MyDoh:
         
 
 
-    def resolve(self,server_name,dns_type):     
-        print(server_name,dns_type)
+    def resolve(self,server_name,dns_type):   
         query_params = {
             # 'name': server_name,    # no need for this when using dns wire-format , cause 400 err on some server
             'type': dns_type,
@@ -34,7 +33,7 @@ class MyDoh:
 
             query_url = self.url + query_base64
 
-            print(query_url,query_params)
+            # print(query_url,query_params)
 
             ans = self.req.get( query_url , params=query_params , headers={'accept': 'application/dns-message'} , proxies=self.knocker_proxy)
             # print(ans)
