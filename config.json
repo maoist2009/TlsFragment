@@ -43,7 +43,10 @@
         },
         "annas-archive.org": {},
         "mastodon.social": {
-            "IP": "199.232.89.91"
+            "IP": "146.75.49.91"
+        },
+        "fosstodon.social": {
+            "IP": "146.75.51.52"
         },
         "codesandbox.io": {
             "IP": "104.21.3.227"
