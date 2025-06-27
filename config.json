@@ -314,7 +314,7 @@
             "safety_check": true
         },
         "facebook.com": {
-            "IP": "57.144.160.1",
+            "IP": "157.240.22.168",
             "TLSfrag": 3,
             "TCPfrag": 5
         },
@@ -334,12 +334,12 @@
             "IP": "57.144.160.192"
         },
         "static.xx.fbcdn.net": {
-            "IP": "57.144.160.128",
+            "IP": "157.240.22.22",
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
         "xx.fbcdn.net": {
-            "IP": "57.144.160.128",
+            "IP": "157.240.22.169",
             "len_tls_sni": 3
         },
         "fbcdn.net": {},
