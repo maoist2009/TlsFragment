@@ -54,9 +54,6 @@
         "stackblitz.com": {
             "IP": "13.32.27.56"
         },
-        "giscus.app": {
-            "mode": "FAKEdesync"
-        },
         "bbc.com": {
             "IP": "146.75.36.81"
         },
@@ -85,6 +82,10 @@
             "mode": "FAKEdesync"
         },
         "live.com": {
+            "mode": "FAKEdesync"
+        },
+        "giscus.app": {
+            "IP": "18.162.37.140",
             "mode": "FAKEdesync"
         },
         "vercel.app": {
