@@ -436,10 +436,10 @@
             "len_tls_sni": 6
         },
         "tracking.miui.com": {
-            "method": "GFWlike"
+            "mode": "GFWlike"
         },
         "bilibili.com": {
-            "method": "DIRECT"
+            "mode": "DIRECT"
         }
     },
     "pac_domains": [
