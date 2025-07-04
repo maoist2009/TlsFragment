@@ -266,9 +266,9 @@ class ThreadedServer(object):
                         backend_sock.send(data)
                         continue
 
-                    if backend_sock.policy.get("safety_check")==True:
+                    if backend_sock.policy.get("safety_check") is True:
                         try:
-                            if utils.detect_tls_version_by_keyshare(data) < 0:
+                            if utils.detect_tls_version_by_keyshare(data) != 1:
                                 logger.warning("Not a TLS 1.3 connection and will close")
                                 backend_sock.close()
                                 client_sock.close()

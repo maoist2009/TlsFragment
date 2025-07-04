@@ -55,9 +55,6 @@
         "stackblitz.com": {
             "IP": "13.32.27.56"
         },
-        "giscus.app": {
-            "mode": "FAKEdesync"
-        },
         "bbc.com": {
             "IP": "146.75.36.81"
         },
@@ -91,6 +88,10 @@
         },
         "bing.com": {
             "mode": "DIRECT"
+        },
+        "giscus.app": {
+            "IP": "18.162.37.140",
+            "mode": "FAKEdesync"
         },
         "vercel.app": {
             "IP": "18.162.37.140",
@@ -277,16 +278,19 @@
             "IPtype": "ipv6"
         },
         "googleusercontent.com": {
-            "IP": "4.193.121.119",
-            "port": 41620
+            "IP": "35.190.247.150",
+            "port": 1445,
+            "safety_check": true
         },
         ".translate.goog": {
-            "IP": "4.193.121.119",
-            "port": 41620
+            "IP": "35.190.247.150",
+            "port": 1445,
+            "safety_check": true
         },
         "ggpht.com": {
-            "IP": "4.193.121.119",
-            "port": 41620
+            "IP": "35.190.247.150",
+            "port": 1445,
+            "safety_check": true
         },
         "gstatic.com": {
             "IP": "35.190.247.150",
@@ -437,10 +441,10 @@
             "len_tls_sni": 6
         },
         "tracking.miui.com": {
-            "method": "GFWlike"
+            "mode": "GFWlike"
         },
         "bilibili.com": {
-            "method": "DIRECT"
+            "mode": "DIRECT"
         }
     },
     "pac_domains": [
