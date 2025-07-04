@@ -39,7 +39,8 @@
             "mode": "FAKEdesync"
         },
         "yandex.com": {
-            "mode": "FAKEdesync"
+            "mode": "DIRECT",
+            "modesafe": "FAKEdesync"
         },
         "annas-archive.org": {},
         "mastodon.social": {
@@ -85,7 +86,11 @@
             "mode": "FAKEdesync"
         },
         "live.com": {
-            "mode": "FAKEdesync"
+            "mode": "DIRECT",
+            "modesafe": "FAKEdesync"
+        },
+        "bing.com": {
+            "mode": "DIRECT"
         },
         "vercel.app": {
             "IP": "18.162.37.140",
