@@ -416,7 +416,7 @@
             "len_tls_sni": 2
         },
         "platform.twitter.com": {
-            "IP": "146.75.120.157",
+            "IP": "146.75.48.157",
             "len_tls_sni": 4
         },
         "twitter.com": {
@@ -424,7 +424,7 @@
             "len_tls_sni": 4
         },
         "video.pscp.tv": {
-            "IP": "146.75.34.164",
+            "IP": "146.75.50.164",
             "len_tls_sni": 9,
             "IPcache": false
         },
