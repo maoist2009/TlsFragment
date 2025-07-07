@@ -33,9 +33,15 @@ class ProxyApp(App):
         self.layout.add_widget(self.box_start)
 
         self.show_in_edit="config.json"
-        self.file_list_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+        self.file_list_boxA = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
+        self.file_list_boxB = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
         self.config_file_button = Button(
             text='config',
+            size_hint_y=None,
+            height=button_height
+        )
+        self.tlsp_log_file_button = Button(
+            text='tlsp.log',
             size_hint_y=None,
             height=button_height
         )
@@ -50,12 +56,15 @@ class ProxyApp(App):
             height=button_height
         )
         self.config_file_button.bind(on_press=self.edit_config)
+        self.tlsp_log_file_button.bind(on_press=self.edit_log_file)
         self.DNS_cache_file_button.bind(on_press=self.edit_DNS_cache)
         self.TTL_cache_file_button.bind(on_press=self.edit_TTL_cache)
-        self.file_list_box.add_widget(self.config_file_button)
-        self.file_list_box.add_widget(self.DNS_cache_file_button)
-        self.file_list_box.add_widget(self.TTL_cache_file_button)
-        self.layout.add_widget(self.file_list_box)
+        self.file_list_boxA.add_widget(self.config_file_button)
+        self.file_list_boxA.add_widget(self.tlsp_log_file_button)
+        self.file_list_boxB.add_widget(self.DNS_cache_file_button)
+        self.file_list_boxB.add_widget(self.TTL_cache_file_button)
+        self.layout.add_widget(self.file_list_boxA)
+        self.layout.add_widget(self.file_list_boxB)
 
 
         self.config_button_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=button_height)
@@ -155,8 +164,14 @@ class ProxyApp(App):
         self.show_in_edit="TTL_cache.json"
         self.load_file()
 
+    def edit_log_file(self, instance):
+        self.show_in_edit="tlsp.log"
+        self.load_file()
+
     def on_start(self):
         self.get_permit()
+        with open("config_extra.json","w") as f:
+            f.write('{"logfile": "tlsp.log"}')
         self.load_file()
         if self.is_service_running():
             self.run_proxy_service(None,False)
