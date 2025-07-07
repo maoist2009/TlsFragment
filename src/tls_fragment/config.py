@@ -53,7 +53,16 @@ if not Path("config.json").exists():
 with open("config.json", "rb") as f:
     _config = json.load(f)
 
+
 config = {**_config, **config}
+
+try:
+    with open("config_extra.json", "rb") as f:
+        extra_config = json.load(f)
+    config={**config, **extra_config} 
+except:
+    pass
+
 default_policy = {
     "num_tls_pieces": config["num_tls_pieces"],
     "num_tcp_pieces": config["num_tcp_pieces"],
