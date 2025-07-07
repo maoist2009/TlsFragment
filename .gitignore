@@ -6,3 +6,4 @@ proxy.exe.spec
 log.txt
 __pycache__
 .vscode
+config_extra.json
