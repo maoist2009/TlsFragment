@@ -440,6 +440,9 @@
             "IP": "104.21.3.222",
             "len_tls_sni": 6
         },
+        "ooni.org": {
+            "mode": "FAKEdesync"
+        },
         "tracking.miui.com": {
             "mode": "GFWlike"
         },
@@ -586,6 +589,7 @@
         "pages.dev$",
         "greatfire.org$",
         "gstatic.com$",
-        "githubassets.com$"
+        "githubassets.com$",
+        "ooni.org$"
     ]
 }
