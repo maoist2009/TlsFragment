@@ -45,10 +45,10 @@ jobs:
       - name: Sign the APK manually
         run: |
           APK_PATH=$(find ./build/android/bin -name "*-release-unsigned.apk" | head -n 1)
-          ${{ github.workspace }}/build/android/.buildozer/android/platform/android-sdk/build-tools/*/apksigner --verbose \
+          ${{ github.workspace }}/build/android/.buildozer/android/platform/android-sdk/build-tools/*/apksigner sign --verbose \
             --ks android.jks \
-            --ks-pass "${{ secrets.KEYSTORE_PASSWORD }}" \
-            --key-pass "${{ secrets.KEY_PASSWORD }}" \
+            --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
+            --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
             --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
             "$APK_PATH"
 
