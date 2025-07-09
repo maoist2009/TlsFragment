@@ -277,6 +277,11 @@
         "googlevideo.com": {
             "IPtype": "ipv6"
         },
+        "redirector.googlevideo.com": {
+            "IP": "35.190.247.150",
+            "port": 1445,
+            "safety_check": true
+        },
         "googleusercontent.com": {
             "IP": "35.190.247.150",
             "port": 1445,
