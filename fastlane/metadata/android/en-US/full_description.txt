@@ -1,0 +1,22 @@
+Currently, Android only has a proxy, which cannot be used alone. You have the following options.
+
+1. **Recommended**: Use Kiwi Browser, which supports extensions, and install Proxy SwitchOmega for use. (OmegaOptions.bak is available under the browser)
+2. Use FREE Browser on F-Droid
+3. Use SocksTun on F-Droid, fill in 127.0.0.1 for Address, 2500 for Port, check UDP relay over TCP, check the proxy application in APPS, and do not select Global, otherwise the tlsp traffic will be in an endless loop
+4. Set up a proxy on the Android system. Reference: https://github.com/maoist2009/AndroifFrag/issues/1 (adb is also possible)
+
+## User Feedback Group (Matrix only at present)
+
+Matrix Feedback Group (originally public, now with the function of tlsp feedback group)
+
+https://matrix.to/#/!cCTXKjhvtagDMxlyLB:matrix.org
+
+I have been a little lazy in the development of this program recently, mainly for rule maintenance.
+
+## Notes
+
+I hope that the second socialist revolution will win soon and this broken wall will be completely smashed. (It is not to say that there can be no censorship of speech in socialism. On the contrary, censorship of speech is necessary to maintain the dictatorship of the proletariat. However, it should be public and gradually expand the participation of the masses)
+
+Down with Chinese revisionist imperialism
+
+Proletarians of the world, unite!
