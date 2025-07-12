@@ -4,6 +4,7 @@ import ahocorasick
 import json
 import ipaddress
 import random
+import time
 from .utils import ip_to_binary_prefix
 
 basepath = Path(__file__).parent.parent.parent
@@ -74,6 +75,7 @@ default_policy = {
     "fake_sleep": config["fake_sleep"],
     "send_interval": config["send_interval"],
     "DNS_cache": config["DNS_cache"],
+    "DNS_cache_TTL": config["DNS_cache_TTL"],
     "TTL_cache": config["TTL_cache"],
     "safety_check": config["safety_check"],
 }
@@ -114,3 +116,12 @@ def write_DNS_cache():
 def write_TTL_cache():
     with open("TTL_cache.json", "w") as f:
         json.dump(TTL_cache, f)
+
+t = time.time()
+for domain, value in DNS_cache.items():
+    if value['expires'] is not None and value['expires'] < t:
+        print(
+            f'DNS cache for {domain} expired and will be removed.'
+        )
+        DNS_cache.pop(domain)
+write_DNS_cache()

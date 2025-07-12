@@ -18,6 +18,7 @@ from .config import (
 from .dns_extension import MyDoh
 import socket
 import threading
+import time
 from . import utils
 
 logger = logger.getChild("remote")
@@ -83,7 +84,7 @@ class Remote:
         
         if self.policy.get("IP") is None:
             if DNS_cache.get(self.domain) is not None:
-                self.address = DNS_cache[self.domain]
+                self.address = DNS_cache[self.domain]['ip']
                 logger.info("DNS cache for %s is %s", self.domain, self.address)
             else:
                 if self.policy.get("IPtype") == "ipv6":
@@ -99,7 +100,13 @@ class Remote:
                 if self.address:
                     global cnt_upd_DNS_cache, lock_DNS_cache
                     lock_DNS_cache.acquire()
-                    DNS_cache[self.domain] = self.address
+                    if ttl := self.policy.get('DNS_cache_TTL'):
+                        expires = time.time() + ttl
+                    else:
+                        expires = None
+                    DNS_cache[self.domain] = {
+                        'ip': self.address, 'expires': expires
+                    }
                     cnt_upd_DNS_cache += 1
                     if cnt_upd_DNS_cache >= config["DNS_cache_update_interval"]:
                         cnt_upd_DNS_cache = 0

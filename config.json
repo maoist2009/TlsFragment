@@ -16,6 +16,7 @@
     "mode": "TLSfrag",
     "DNS_cache": true,
     "DNS_cache_update_interval": 2,
+    "DNS_cache_TTL": 259200,
     "TTL_cache": true,
     "TTL_cache_update_interval": 2,
     "safety_check": false,
