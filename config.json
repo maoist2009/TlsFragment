@@ -105,14 +105,14 @@
         "bing.com": {
             "mode": "DIRECT"
         },
-        "(giscus.app/vercel.app/kards.com)": {
+        "(giscus.app|vercel.app|kards.com)": {
             "IP": "18.162.37.140",
             "mode": "FAKEdesync"
         },
         "cloudflare.com": {
             "IP": "104.21.3.226"
         },
-        "(cn/purr/et).nytimes.com": {},
+        "(cn|purr|et).nytimes.com": {},
         "pornhub.com": {
             "IP": "66.254.114.40"
         },
@@ -157,18 +157,18 @@
         "objects-origin.githubusercontent.com": {
             "IP": "140.82.113.22"
         },
-        "(wikimedia/wikipedia/wiktionary/wikiversity/wikivoyage/wikisource/wikinews/wikidata/mediawiki/wikifunctions).org": {
+        "(wikimedia|wikipedia|wiktionary|wikiversity|wikivoyage|wikisource|wikinews|wikidata|mediawiki|wikifunctions).org": {
             "IP": "185.15.58.224"
         },
         "upload.wikimedia.org": {
             "IP": "185.15.58.240"
         },
-        "(google.com/google.com.hk/google.dev/googleapis.com/gstatic.com/googleusercontent.com/.google$/goo.gl/translate.goog/android.com/ai.dev/blogger.com/blogspot.com/chrome.com)": {
+        "(google.com|google.com.hk|google.dev|googleapis.com|gstatic.com|googleusercontent.com|.google$|goo.gl|translate.goog|android.com|ai.dev|blogger.com|blogspot.com|chrome.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
-        "(chromium.org/golang.org/youtube.com/youtu.be/youtube-nocookie.com/.ytimg.com/.ggpht.com/gvt1.com/withgoogle.com/googlesource.com/redirector.googlevideo.com)": {
+        "(chromium.org|golang.org|youtube.com|youtu.be|youtube-nocookie.com|.ytimg.com|.ggpht.com|gvt1.com|withgoogle.com|googlesource.com|redirector.googlevideo.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
@@ -219,7 +219,7 @@
             "IP": "162.125.2.18"
         },
         ".dropbox.com": {},
-        "telegram.(org/me)": {
+        "telegram.(org|me)": {
             "IP": "149.154.161.145"
         },
         "t.me": {
@@ -252,7 +252,7 @@
             "IP": "129.80.246.62"
         },
         "video.twimg.com": {
-            "CDN": "Fastly: 2024/11/13: 151.101.40.158",
+            "CDN": "Fastly: 2024|11|13: 151.101.40.158",
             "IP": "146.75.48.158"
         },
         "twimg.com": {
