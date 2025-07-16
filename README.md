@@ -1,6 +1,10 @@
 # TLSFragment使用指南
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maoist2009/TlsFragment)
+<<<<<<< HEAD
+=======
+[![F-Droid Version](https://img.shields.io/f-droid/v/org.maoist2009.tlsfragment)](https://f-droid.org/packages/org.maoist2009.tlsfragment/)
+>>>>>>> 2c72ea82bbf4648bca391be4934465ad3f5c5ce3
 
 ## 交流群
 
