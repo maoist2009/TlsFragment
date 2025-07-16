@@ -45,10 +45,6 @@ class Trie:
             ans = node.val
         return ans
 
-
-ipv4trie = Trie()
-ipv6trie = Trie()
-
 if not Path("config.json").exists():
     shutil.copyfile(basepath / "config.json", "config.json")
 with open("config.json", "rb") as f:
@@ -80,11 +76,11 @@ default_policy = {
     "safety_check": config["safety_check"],
 }
 
-domain_policies = ahocorasick.AhoCorasick(*config["domains"].keys())
+domain_map = ahocorasick.AhoCorasick(*config["domains"].keys())
 ipv4_map = Trie()
 ipv6_map = Trie()
 
-for k, v in config["IPredirect"].items():
+for k, v in config["IP"].items():
     if ':' in k:
         ipv6_map.insert(ip_to_binary_prefix(k), v)
     else:

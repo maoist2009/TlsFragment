@@ -4,7 +4,7 @@ site
 
 from .log import logger
 from .config import (
-    domain_policies,
+    domain_map,
     config,
     default_policy,
     ipv4_map,
@@ -35,9 +35,10 @@ def redirect(ip):
         mapped_ip = ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
         mapped_ip = ipv4_map.search(utils.ip_to_binary_prefix(ip))
-    if mapped_ip is None:
+    if mapped_ip is None or mapped_ip.get("redirect") is None:
         return ip
     logger.info(f"IP redirect {ip} to {mapped_ip}")
+    mapped_ip = mapped_ip["redirect"]
     if mapped_ip[0] == "^":
         return mapped_ip[1:]
     if ip == mapped_ip:
@@ -45,7 +46,7 @@ def redirect(ip):
     return redirect(mapped_ip)
 
 def match_domain(domain):
-    matched_domains = domain_policies.search("^" + domain + "$")
+    matched_domains = domain_map.search("^" + domain + "$")
     if matched_domains:
         import copy
         return copy.deepcopy(
