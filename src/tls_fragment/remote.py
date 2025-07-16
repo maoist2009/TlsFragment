@@ -19,6 +19,7 @@ from .dns_extension import MyDoh
 import socket
 import threading
 import time
+import ipaddress
 from . import utils
 
 logger = logger.getChild("remote")
@@ -29,21 +30,23 @@ lock_TTL_cache = threading.Lock()
 cnt_upd_DNS_cache = 0
 lock_DNS_cache = threading.Lock()
 
-
-def redirect(ip):
+def redirect_ip(ip):
     if ':' in ip:
         mapped_ip = ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
         mapped_ip = ipv4_map.search(utils.ip_to_binary_prefix(ip))
     if mapped_ip is None or mapped_ip.get("redirect") is None:
         return ip
-    logger.info(f"IP redirect {ip} to {mapped_ip}")
     mapped_ip = mapped_ip["redirect"]
+    logger.info(f"IP redirect {ip} to {mapped_ip}")
     if mapped_ip[0] == "^":
-        return mapped_ip[1:]
+        mapped_ip=mapped_ip[1:]
+    
+    mapped_ip = utils.calc_redirect_ip(ip,mapped_ip)
+
     if ip == mapped_ip:
         return mapped_ip
-    return redirect(mapped_ip)
+    return redirect_ip(mapped_ip)
 
 def match_domain(domain):
     matched_domains = domain_map.search("^" + domain + "$")
@@ -116,7 +119,7 @@ class Remote:
                     logger.info(f"DNS cache for {self.domain} to {self.address}")
         else:
             self.address = self.policy["IP"]
-        self.address = redirect(self.address)
+        self.address = redirect_ip(self.address)
         self.port = self.policy["port"]
 
         logger.info("%s %d", self.address, self.port)
