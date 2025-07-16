@@ -32,12 +32,12 @@ lock_DNS_cache = threading.Lock()
 
 def redirect_ip(ip):
     if ':' in ip:
-        mapped_ip = ipv6_map.search(utils.ip_to_binary_prefix(ip))
+        mapped_ip_policy = ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
-        mapped_ip = ipv4_map.search(utils.ip_to_binary_prefix(ip))
-    if mapped_ip is None or mapped_ip.get("redirect") is None:
+        mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(ip))
+    if mapped_ip_policy is None or mapped_ip_policy.get("redirect") is None:
         return ip
-    mapped_ip = mapped_ip["redirect"]
+    mapped_ip = mapped_ip_policy["redirect"]
     logger.info(f"IP redirect {ip} to {mapped_ip}")
     if mapped_ip[0] == "^":
         mapped_ip=mapped_ip[1:]
@@ -119,7 +119,17 @@ class Remote:
                     logger.info(f"DNS cache for {self.domain} to {self.address}")
         else:
             self.address = self.policy["IP"]
+
         self.address = redirect_ip(self.address)
+        if self.address.find(":") == -1:
+            mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(self.address))
+        else:
+            mapped_ip_policy = ipv6_map.search(utils.ip_to_binary_prefix(self.address))
+        if mapped_ip_policy is not None:
+                self.policy={**self.policy,**mapped_ip_policy}
+
+        print(self.policy)
+
         self.port = self.policy["port"]
 
         logger.info("%s %d", self.address, self.port)
@@ -130,7 +140,7 @@ class Remote:
             if TTL_cache.get(self.address) != None:
                 self.policy["fake_ttl"] = TTL_cache[self.address] - 1
                 logger.info(
-                    "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
+                    "FAKE TTL for %s is %d, found in cache", self.address, self.policy.get("fake_ttl")
                 )
             else:
                 logger.info("%s %d", self.address, self.policy.get("port"))
