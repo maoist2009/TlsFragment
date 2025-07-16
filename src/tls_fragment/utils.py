@@ -3,7 +3,7 @@ import socket
 import struct
 
 
-def ip_to_binary_prefix(ip_or_network):
+def ip_to_binary_prefix(ip_or_network:str):
     try:
         network = ipaddress.ip_network(ip_or_network, strict=False)
         network_address = network.network_address
@@ -25,7 +25,51 @@ def ip_to_binary_prefix(ip_or_network):
                 binary_prefix = binary_ip[:128]
             return binary_prefix
         except ValueError:
-            raise ValueError(f"输入的 {ip_or_network} 不是有效的 IP 地址或网络")
+            raise ValueError(f"input {ip_or_network} is not a valid IP or network address")
+
+def calc_redirect_ip(ip_str:str, mapper_str:str):
+    # 自动补全默认前缀
+    if '/' not in mapper_str:
+        if ':' in mapper_str:
+            mapper_str += '/128'  # IPv6 默认 /128
+        else:
+            mapper_str += '/32'   # IPv4 默认 /32
+
+    # 解析目标网络
+    mapper_network = ipaddress.ip_network(mapper_str, strict=False)
+
+    # 解析源 IP 地址
+    ip_obj = ipaddress.ip_address(ip_str)
+
+    # 根据 mapper 的地址族确定地址长度
+    if mapper_network.version == 4:
+        total_bits = 32
+        address_class = ipaddress.IPv4Address
+    else:
+        total_bits = 128
+        address_class = ipaddress.IPv6Address
+
+    prefixlen = mapper_network.prefixlen
+    fill_bits = total_bits - prefixlen
+
+    # 构建掩码
+    mask_fill = (1 << fill_bits) - 1
+    mask_keep = ((1 << total_bits) - 1) ^ mask_fill
+
+    # 获取源 IP 的整数表示
+    ip_int = int(ip_obj)
+
+    # 获取目标网络地址的整数表示
+    mapped_network_int = int(mapper_network.network_address)
+
+    # 计算填充部分
+    fill_part = ip_int & mask_fill
+
+    # 合成新的 IP 地址整数
+    new_int = (mapped_network_int & mask_keep) | fill_part
+
+    # 构造新的 IP 地址对象
+    return str(address_class(new_int))
 
 
 def set_ttl(sock, ttl):
