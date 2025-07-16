@@ -5,7 +5,7 @@
     "num_tcp_pieces": 8,
     "num_tls_pieces": 8,
     "len_tcp_sni": 4,
-    "len_tls_sni": 4,
+    "len_tls_sni": 3,
     "send_interval": 0.01,
     "fake_packet": "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n",
     "fake_ttl": "query",
@@ -22,7 +22,7 @@
     "safety_check": false,
     "UDPfakeDNS": true,
     "BySNIfirst": false,
-    "IP": {
+    "IPs": {
         "104.16.0.0/13": {
             "redirect": "104.21.57.162"
         },
@@ -105,30 +105,14 @@
         "bing.com": {
             "mode": "DIRECT"
         },
-        "giscus.app": {
-            "IP": "18.162.37.140",
-            "mode": "FAKEdesync"
-        },
-        "vercel.app": {
-            "IP": "18.162.37.140",
-            "mode": "FAKEdesync"
-        },
-        "kards.com": {
+        "(giscus.app/vercel.app/kards.com)": {
             "IP": "18.162.37.140",
             "mode": "FAKEdesync"
         },
         "cloudflare.com": {
             "IP": "104.21.3.226"
         },
-        "cn.nytimes.com": {},
-        "nytimes.com": {
-            "IP": "199.232.137.164"
-        },
-        "purr.nytimes.com": {},
-        "et.nytimes.com": {},
-        "nyt.com": {
-            "IP": "199.232.137.164"
-        },
+        "(cn/purr/et).nytimes.com": {},
         "pornhub.com": {
             "IP": "66.254.114.40"
         },
@@ -146,45 +130,23 @@
         "pages.dev": {
             "IP": "172.66.44.87"
         },
-        "reddit": {
-            "IP": "146.75.49.140",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
-        },
-        "redd.it": {
-            "IP": "146.75.49.140",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
-        },
         "github.com": {
-            "IP": "4.237.22.38",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "4.237.22.38"
         },
         "gist.github.com": {
-            "IP": "4.237.22.38",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "4.237.22.38"
         },
         "api.github.com": {
-            "IP": "4.237.22.34",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "4.237.22.34"
         },
         "codeload.github.com": {
-            "IP": "4.237.22.35",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "4.237.22.35"
         },
         "uploads.github.com": {
-            "IP": "4.237.22.36",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "4.237.22.36"
         },
         "alive.github.com": {
-            "IP": "140.82.112.26",
-            "len_tls_sni": 3,
-            "len_tcp_sni": 5
+            "IP": "140.82.112.26"
         },
         "github.io": {
             "IP": "146.75.48.133"
@@ -195,153 +157,25 @@
         "objects-origin.githubusercontent.com": {
             "IP": "140.82.113.22"
         },
-        "wikipedia.org": {
+        "(wikimedia/wikipedia/wiktionary/wikiversity/wikivoyage/wikisource/wikinews/wikidata/mediawiki/wikifunctions).org": {
             "IP": "185.15.58.224"
         },
         "upload.wikimedia.org": {
             "IP": "185.15.58.240"
         },
-        "wiktionary.org": {
-            "IP": "185.15.59.224"
-        },
-        "wikiversity.org": {
-            "IP": "185.15.58.224"
-        },
-        "wikivoyage.org": {
-            "IP": "185.15.58.224"
-        },
-        "wikisource.org": {
-            "IP": "185.15.58.224"
-        },
-        "wikinews.org": {
-            "IP": "185.15.58.224"
-        },
-        "wikidata.org": {
-            "IP": "185.15.58.224"
-        },
-        "species.wikimedia.org": {
-            "IP": "185.15.58.224"
-        },
-        "meta.wikimedia.org": {
-            "IP": "185.15.58.224"
-        },
-        "mediawiki.org": {
-            "IP": "185.15.58.224"
-        },
-        "wikifunctions.org": {
-            "IP": "185.15.58.224"
-        },
-        "pixiv": {
-            "len_tls_sni": 3
-        },
-        "chrome.com": {
+        "(google.com/google.com.hk/google.dev/googleapis.com/gstatic.com/googleusercontent.com/.google$/goo.gl/translate.goog/android.com/ai.dev/blogger.com/blogspot.com/chrome.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
-        "chromium.org": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        ".google$": {
+        "(chromium.org/golang.org/youtube.com/youtu.be/youtube-nocookie.com/.ytimg.com/.ggpht.com/gvt1.com/withgoogle.com/googlesource.com/redirector.googlevideo.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
         "deepmind.google": {},
-        "goo.gl": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "google.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "ai.dev": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "google.dev": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "android.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "golang.org": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "blogger.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "gvt1.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
         "googlevideo.com": {
             "IPtype": "ipv6"
-        },
-        "redirector.googlevideo.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "googleusercontent.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        ".translate.goog": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "ggpht.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "gstatic.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "googleapis.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "youtube.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "youtube-nocookie.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "youtu.be": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
-        },
-        "ytimg.com": {
-            "IP": "35.190.247.150",
-            "port": 1445,
-            "safety_check": true
         },
         "facebook.com": {
             "IP": "157.240.22.169",
@@ -385,10 +219,7 @@
             "IP": "162.125.2.18"
         },
         ".dropbox.com": {},
-        "telegram.org": {
-            "IP": "149.154.161.145"
-        },
-        "telegram.me": {
+        "telegram.(org/me)": {
             "IP": "149.154.161.145"
         },
         "t.me": {
@@ -422,17 +253,14 @@
         },
         "video.twimg.com": {
             "CDN": "Fastly: 2024/11/13: 151.101.40.158",
-            "len_tcp_sni": 5,
-            "IP": "151.101.88.158",
-            "len_tls_sni": 4
+            "IP": "146.75.48.158"
         },
         "twimg.com": {
-            "IP": "146.75.48.159",
-            "len_tls_sni": 4
+            "IP": "146.75.48.159"
         },
         "x.com": {
             "IP": "104.18.38.25",
-            "len_tcp_sni": 5,
+            "len_tcp_sni": 3,
             "send_interval": 0.02,
             "len_tls_sni": 2
         },
@@ -460,9 +288,6 @@
         "cloudflare-dns.com": {
             "IP": "104.21.3.222",
             "len_tls_sni": 6
-        },
-        "ooni.org": {
-            "mode": "FAKEdesync"
         },
         "tracking.miui.com": {
             "mode": "GFWlike"

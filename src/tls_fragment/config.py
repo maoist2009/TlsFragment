@@ -5,7 +5,7 @@ import json
 import ipaddress
 import random
 import time
-from .utils import ip_to_binary_prefix
+from .utils import ip_to_binary_prefix,expand_pattern
 
 basepath = Path(__file__).parent.parent.parent
 
@@ -76,11 +76,20 @@ default_policy = {
     "safety_check": config["safety_check"],
 }
 
+
+expanded_policies = {}
+for key in config['domains'].keys():
+    for item in key.replace(' ', '').split(','):
+        for pattern in expand_pattern(item):
+            expanded_policies[pattern] = config['domains'][key]
+
+config['domains'] = expanded_policies
+
 domain_map = ahocorasick.AhoCorasick(*config["domains"].keys())
 ipv4_map = Trie()
 ipv6_map = Trie()
 
-for k, v in config["IP"].items():
+for k, v in config["IPs"].items():
     if ':' in k:
         ipv6_map.insert(ip_to_binary_prefix(k), v)
     else:
