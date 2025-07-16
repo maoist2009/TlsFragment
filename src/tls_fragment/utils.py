@@ -5,7 +5,7 @@ import struct
 def expand_pattern(s):
     left_index, right_index = s.find('('), s.find(')')
     if left_index == -1 and right_index == -1:
-        return s.split('/')
+        return s.split('|')
     if -1 in (left_index, right_index):
         raise ValueError("Both '(' and ')' must be present", s)
     if left_index > right_index:
@@ -17,7 +17,7 @@ def expand_pattern(s):
     prefix = s[:left_index]
     suffix = s[right_index + 1:]
     inner = s[left_index + 1:right_index]
-    return [prefix + part + suffix for part in inner.split('/')]
+    return [prefix + part + suffix for part in inner.split('|')]
 
 
 def ip_to_binary_prefix(ip_or_network:str):

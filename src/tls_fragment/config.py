@@ -89,6 +89,14 @@ domain_map = ahocorasick.AhoCorasick(*config["domains"].keys())
 ipv4_map = Trie()
 ipv6_map = Trie()
 
+expanded_policies = {}
+for key in config['IPs'].keys():
+    for item in key.replace(' ', '').split(','):
+        for pattern in expand_pattern(item):
+            expanded_policies[pattern] = config['IPs'][key]
+
+config['IPs'] = expanded_policies
+
 for k, v in config["IPs"].items():
     if ':' in k:
         ipv6_map.insert(ip_to_binary_prefix(k), v)
