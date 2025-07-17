@@ -50,7 +50,7 @@
             "redirect": "146.75.48.0/22"
         },
         "146.75.0.0/16": {
-            "redirect": "146.75.20.0/22"
+            "redirect": "146.75.48.0/22"
         },
         "199.232.0.0/16": {
             "redirect": "146.75.48.0/22"
@@ -235,6 +235,9 @@
             "num_tcp_pieces": 3,
             "num_tls_pieces": 5,
             "len_tcp_sni": 2
+        },
+        "telegra.ph": {
+            "IP": "95.161.64.99"
         },
         "medium": {},
         "cdn-telegram.org": {
