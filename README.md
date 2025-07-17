@@ -8,7 +8,14 @@
 
 可用discussions
 
-[matrix反馈群](https://matrix.to/#/!cCTXKjhvtagDMxlyLB:matrix.org?via=matrix.org&via=cutefunny.art)（本来就是公开的，现在多一个tlsp反馈群的功能）
+[matrix反馈空间](https://matrix.to/#/#tlsp_public:matrix.org)
+也可直接加入公开群
+
++ 配置优化（如可用ip查找，mode变更等）： <https://matrix.to/#/!WvZLqiyvvsVSCrsuWt:matrix.org?via=matrix.org>
++ tlsp程序本身问题：<https://matrix.to/#/!GvJhmmjpGqeNCPyMyE:matrix.org?via=matrix.org>
++ 关于代理配置问题： <https://matrix.to/#/!bRNRPJmWSBrWyuQbCd:matrix.org?via=matrix.org>
+
+有一个私密群
 
 ## 安装
 
