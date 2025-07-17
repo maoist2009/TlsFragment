@@ -34,8 +34,7 @@ source.exclude_dirs = test, tools, docs, browser
 version.regex = version = ['"](.*)['"]
 version.filename = %(source.dir)s/pyproject.toml
 
-# (int) overrides automatic versionCode computation (used in build.gradle)
-# this is not the same as app version and should only be edited if you know what you're doing
+# === DON'T FORGET TO UPDATE THIS ===
 android.numeric_version = 102130200
 # always "1021" ----------^^^^|||||
 # 3.2.0 ----> 3 02 00 --------^^^^^
