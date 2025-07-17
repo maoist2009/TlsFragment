@@ -359,11 +359,11 @@ def fake_udp_dns_query(query):
     for question in dns_query.question:
         if question.rdtype == dns.rdatatype.A:
             # A记录返回127.0.0.1
-            a_record = dns.rrset.from_text(question.name, 3600,"IN", "A", "66.254.114.41")
+            a_record = dns.rrset.from_text(question.name, 3600,"IN", "A", "127.0.0.114")
             response.answer.append(a_record)
         elif question.rdtype == dns.rdatatype.AAAA:
             # AAAA记录返回::1
-            aaaa_record = dns.rrset.from_text(question.name, 3600,"IN" , "AAAA", "2a03:2880:f127:83:face:b00c:0:25de")
+            aaaa_record = dns.rrset.from_text(question.name, 3600,"IN" , "AAAA", "::114")
             
             response.answer.append(aaaa_record)
         else:

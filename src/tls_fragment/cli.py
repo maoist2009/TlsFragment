@@ -221,7 +221,7 @@ class ThreadedServer(object):
 
                     try:
                         extractedsni = utils.extract_sni(data)
-                        if backend_sock.domain=="66.254.114.41" or backend_sock.domain=="2a03:2880:f127:83:face:b00c:0:25de" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
+                        if backend_sock.domain=="127.0.0.114" or backend_sock.domain=="::114" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
                             port, protocol=backend_sock.port,backend_sock.protocol
                             logger.info(f"replace backendsock: {extractedsni} {port} {protocol}")
                             new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
