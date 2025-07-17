@@ -60,22 +60,8 @@ try:
 except:
     pass
 
-default_policy = {
-    "num_tls_pieces": config["num_tls_pieces"],
-    "num_tcp_pieces": config["num_tcp_pieces"],
-    "len_tcp_sni": config["len_tcp_sni"],
-    "len_tls_sni": config["len_tls_sni"],
-    "mode": config["mode"],
-    "fake_packet": config["fake_packet"].encode(encoding="UTF-8"),
-    "fake_ttl": config["fake_ttl"],
-    "fake_sleep": config["fake_sleep"],
-    "send_interval": config["send_interval"],
-    "DNS_cache": config["DNS_cache"],
-    "DNS_cache_TTL": config["DNS_cache_TTL"],
-    "TTL_cache": config["TTL_cache"],
-    "safety_check": config["safety_check"],
-}
-
+default_policy = config["default_policy"]
+default_policy["fake_packet"]= default_policy["fake_packet"].encode(encoding="UTF-8")
 
 expanded_policies = {}
 for key in config['domains'].keys():
@@ -103,9 +89,9 @@ for k, v in config["IPs"].items():
     else:
         ipv4_map.insert(ip_to_binary_prefix(k), v)
 
-if config["fake_ttl"] == "auto":
+if default_policy["fake_ttl"] == "auto":
     # temp code for auto fake_ttl
-    config["fake_ttl"] = random.randint(10, 60)
+    default_policy["fake_ttl"] = random.randint(10, 60)
 
 TTL_cache = {}  # TTL for each IP
 DNS_cache = {}  # DNS cache for each domain
