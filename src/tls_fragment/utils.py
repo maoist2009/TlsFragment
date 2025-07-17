@@ -88,6 +88,28 @@ def calc_redirect_ip(ip_str:str, mapper_str:str):
     # 构造新的 IP 地址对象
     return str(address_class(new_int))
 
+def fake_ttl_mapping(config, dist):
+    if not config.startswith('q'):
+        return int(config)
+    items = config[1:].split(';')
+    intervals = []
+    for item in items:
+        if '-' in item:
+            a, b = map(int, item.split('-'))
+            intervals.append((a, '-', b))  # a-b
+        elif '=' in item:
+            a, val = map(int, item.split('='))
+            intervals.append((a, '=', val))  # a=b
+
+    intervals.sort(reverse=True, key=lambda x: x[0])
+
+    for a, typ, val in intervals:
+        if dist >= a:
+            if typ == '-':
+                return dist - val
+            elif typ == '=':
+                return val
+    raise ValueError
 
 def set_ttl(sock, ttl):
     if sock.family == socket.AF_INET6:

@@ -38,14 +38,17 @@ def redirect_ip(ip):
     if mapped_ip_policy is None or mapped_ip_policy.get("redirect") is None:
         return ip
     mapped_ip = mapped_ip_policy["redirect"]
-    logger.info(f"IP redirect {ip} to {mapped_ip}")
     
     stopchain=False
     if mapped_ip[0] == "^":
         mapped_ip=mapped_ip[1:]
         stopchain=True
     mapped_ip = utils.calc_redirect_ip(ip,mapped_ip)
-    if ip == mapped_ip or stopchain:
+    
+    if ip==mapped_ip:
+        return mapped_ip
+    logger.info(f"IP redirect {ip} to {mapped_ip}")
+    if stopchain:
         return mapped_ip
     return redirect_ip(mapped_ip)
 
@@ -134,15 +137,14 @@ class Remote:
 
         logger.info("connect %s %d", self.address, self.port)
         
-        if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEdesync":
+        if self.policy["fake_ttl"][0] == "q" and self.policy["mode"] == "FAKEdesync":
             logger.info(f'FAKE TTL for {self.address} is {self.policy.get("fake_ttl")}')
             if TTL_cache.get(self.address) != None:
-                self.policy["fake_ttl"] = TTL_cache[self.address] - 1
+                val = TTL_cache[self.address]
                 logger.info(
-                    "FAKE TTL for %s is %d, found in cache", self.address, self.policy.get("fake_ttl")
+                    "dist for %s is %d, found in cache", self.address, val
                 )
             else:
-                logger.info("%s %d", self.address, self.policy.get("port"))
                 val = utils.get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")
@@ -154,10 +156,12 @@ class Remote:
                     cnt_upd_TTL_cache = 0
                     write_TTL_cache()
                 lock_TTL_cache.release()
-                self.policy["fake_ttl"] = val - 1
                 logger.info(
-                    "FAKE TTL for %s is %d", self.address, self.policy.get("fake_ttl")
+                    "dist for %s is %d", self.address, val
                 )
+            self.policy["fake_ttl"]=utils.fake_ttl_mapping(self.policy["fake_ttl"],val) 
+            logger.info(
+                    "FAKE TTL for %s is %d", self.address, self.policy["fake_ttl"])
 
         logger.info(f"{domain} --> {self.policy}")
 
