@@ -7,9 +7,17 @@ Currently, Android only has a proxy, which cannot be used alone. You have the fo
 
 ## User Feedback Group (Matrix only at present)
 
-Matrix Feedback Group (originally public, now with the function of tlsp feedback group)
+github discussions and issues are availabe too. 
 
-https://matrix.to/#/!cCTXKjhvtagDMxlyLB:matrix.org
+[matrix space](https://matrix.to/#/#tlsp_public:matrix.org)
+
+or you may join public groups directly. 
+
++ better config(such as available ip or mode)： <https://matrix.to/#/!WvZLqiyvvsVSCrsuWt:matrix.org?via=matrix.org>
++ the tlsp programme itself：<https://matrix.to/#/!GvJhmmjpGqeNCPyMyE:matrix.org?via=matrix.org>
++ proxy or vpn setting <https://matrix.to/#/!bRNRPJmWSBrWyuQbCd:matrix.org?via=matrix.org>
+
+There is a private room. 
 
 I have been a little lazy in the development of this program recently, mainly for rule maintenance.
 
