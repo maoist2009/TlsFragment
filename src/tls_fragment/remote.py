@@ -39,11 +39,11 @@ def redirect_ip(ip):
         return ip
     mapped_ip = mapped_ip_policy["redirect"]
     logger.info(f"IP redirect {ip} to {mapped_ip}")
+    
     if mapped_ip[0] == "^":
         mapped_ip=mapped_ip[1:]
-    
+        return utils.calc_redirect_ip(ip,mapped_ip)
     mapped_ip = utils.calc_redirect_ip(ip,mapped_ip)
-
     if ip == mapped_ip:
         return mapped_ip
     return redirect_ip(mapped_ip)
@@ -117,10 +117,11 @@ class Remote:
                         write_DNS_cache()
                     lock_DNS_cache.release()
                     logger.info(f"DNS cache for {self.domain} to {self.address}")
+            self.address = redirect_ip(self.address)
+            # will redirect ip only if it it connected by domain
         else:
             self.address = self.policy["IP"]
 
-        self.address = redirect_ip(self.address)
         if self.address.find(":") == -1:
             mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(self.address))
         else:
@@ -128,13 +129,10 @@ class Remote:
         if mapped_ip_policy is not None:
                 self.policy={**self.policy,**mapped_ip_policy}
 
-        print(self.policy)
-
         self.port = self.policy["port"]
 
-        logger.info("%s %d", self.address, self.port)
-        # res["IP"]="127.0.0.1"
-
+        logger.info("connect %s %d", self.address, self.port)
+        
         if self.policy["fake_ttl"] == "query" and self.policy["mode"] == "FAKEdesync":
             logger.info(f'FAKE TTL for {self.address} is {self.policy.get("fake_ttl")}')
             if TTL_cache.get(self.address) != None:
