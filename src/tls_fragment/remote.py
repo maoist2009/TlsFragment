@@ -40,11 +40,12 @@ def redirect_ip(ip):
     mapped_ip = mapped_ip_policy["redirect"]
     logger.info(f"IP redirect {ip} to {mapped_ip}")
     
+    stopchain=False
     if mapped_ip[0] == "^":
         mapped_ip=mapped_ip[1:]
-        return utils.calc_redirect_ip(ip,mapped_ip)
+        stopchain=True
     mapped_ip = utils.calc_redirect_ip(ip,mapped_ip)
-    if ip == mapped_ip:
+    if ip == mapped_ip or stopchain:
         return mapped_ip
     return redirect_ip(mapped_ip)
 
