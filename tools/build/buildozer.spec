@@ -34,6 +34,13 @@ source.exclude_dirs = test, tools, docs, browser
 version.regex = version = ['"](.*)['"]
 version.filename = %(source.dir)s/pyproject.toml
 
+# (int) overrides automatic versionCode computation (used in build.gradle)
+# this is not the same as app version and should only be edited if you know what you're doing
+android.numeric_version = 102130200
+# always "1021" ----------^^^^|||||
+# 3.2.0 ----> 3 02 00 --------^^^^^
+# ===================================
+
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
 requirements = python3,kivy,ahocorasick-python,requests,dnspython,pyjnius,https://github.com/kvdroid/Kvdroid/archive/refs/heads/master.zip
@@ -283,10 +290,6 @@ android.ndk = 25b
 # (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
 android.archs = arm64-v8a, armeabi-v7a
-
-# (int) overrides automatic versionCode computation (used in build.gradle)
-# this is not the same as app version and should only be edited if you know what you're doing
-# android.numeric_version = 1
 
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
