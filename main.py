@@ -220,6 +220,22 @@ class ProxyApp(App):
         mActivity.stopService(service_intent)
         while self.is_service_running():
             pass
+        
+    def request_battery_optimization(self):
+        # 获取安卓类
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        Intent = autoclass('android.content.Intent')
+        Settings = autoclass('android.provider.Settings')
+        Uri = autoclass('android.net.Uri')
+        
+        # 构建意图
+        intent = Intent()
+        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        package_uri = Uri.fromParts("package", PythonActivity.mActivity.getPackageName(), None)
+        intent.setData(package_uri)
+        
+        # 启动意图
+        PythonActivity.mActivity.startActivity(intent)
 
     def get_permit(self):
         from android.permissions import Permission, request_permissions
@@ -234,6 +250,7 @@ class ProxyApp(App):
                 print('Got all permissions')
             else:
                 self.show_popup('Lack of permissions', 'Please grant all permissions to use this app')
+            self.request_battery_optimization()
 
         requested_permissions = [
             Permission.INTERNET,
