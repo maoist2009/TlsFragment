@@ -31,9 +31,10 @@ cnt_upd_DNS_cache = 0
 lock_DNS_cache = threading.Lock()
 def match_ip(ip):
     if ':' in ip:
-        mapped_ip_policy = ipv6_map.search(utils.ip_to_binary_prefix(ip))
+        return ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
-        mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(ip))
+        return ipv4_map.search(utils.ip_to_binary_prefix(ip))
+        
 def redirect_ip(ip):
     mapped_ip_policy=match_ip(ip)
     if mapped_ip_policy is None or mapped_ip_policy.get("redirect") is None:
