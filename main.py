@@ -80,7 +80,11 @@ class ProxyApp(App):
         self.config_input = TextInput(
             hint_text='Edit Here',
             multiline=True,
-            size_hint_y=1
+            size_hint_y=1,
+    auto_indent=True,  # 自动缩进
+    replace_crlf=True,  # 替换换行符为 \n
+    cursor_blink=True,  # 光标闪烁
+    cursor_width=dp(2),  # 设置光标宽度
         )
         self.layout.add_widget(self.config_input)
 
@@ -159,7 +163,10 @@ class ProxyApp(App):
     def on_start(self):
         self.get_permit()
         self.load_file()
-        self.request_battery_optimization()
+        try:
+            self.request_battery_optimization()
+        except:
+            pass
         if self.is_service_running():
             self.run_proxy_service(None,False)
 
@@ -197,8 +204,9 @@ class ProxyApp(App):
             self.show_popup('File not found', f"File {path} not found")
 
     def show_popup(self, title, message, callback=None):
+        
         # 创建垂直布局，设置外边距和间距
-        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        layout = BoxLayout(orientation='vertical')
     
         # 创建 Label，支持自动换行
         label = Label(
