@@ -35,9 +35,9 @@ version.regex = version = ["](.*)["]
 version.filename = %(source.dir)s/pyproject.toml
 
 # === DON'T FORGET TO UPDATE THIS ===
-android.numeric_version = 102130200
+android.numeric_version = 102130201
 # always "1021" ----------^^^^|||||
-# 3.2.0 ----> 3 02 00 --------^^^^^
+# 3.2.1 ----> 3 02 01 --------^^^^^
 # ===================================
 
 # (list) Application requirements
