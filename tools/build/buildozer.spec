@@ -31,7 +31,7 @@ source.exclude_dirs = test, tools, docs, browser
 # version = 0.2
 
 # (str) Application versioning (method 2)
-version.regex = version = ['"](.*)['"]
+version.regex = version = ["](.*)["]
 version.filename = %(source.dir)s/pyproject.toml
 
 # === DON'T FORGET TO UPDATE THIS ===
