@@ -29,12 +29,13 @@ cnt_upd_TTL_cache = 0
 lock_TTL_cache = threading.Lock()
 cnt_upd_DNS_cache = 0
 lock_DNS_cache = threading.Lock()
-
-def redirect_ip(ip):
+def match_ip(ip):
     if ':' in ip:
         mapped_ip_policy = ipv6_map.search(utils.ip_to_binary_prefix(ip))
     else:
         mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(ip))
+def redirect_ip(ip):
+    mapped_ip_policy=match_ip(ip)
     if mapped_ip_policy is None or mapped_ip_policy.get("redirect") is None:
         return ip
     mapped_ip = mapped_ip_policy["redirect"]
@@ -78,17 +79,9 @@ class Remote:
         self.policy = {**default_policy, **self.policy}
         self.policy.setdefault("port", port)
         self.protocol = protocol
-        import ipaddress
-
-        try:
-            ipaddress.IPv4Address(self.domain)
+        
+        if utils.is_ip_address(self.domain):
             self.policy["IP"] = self.domain
-        except:
-            try:
-                ipaddress.IPv6Address(self.domain)
-                self.policy["IP"] = self.domain
-            except:
-                pass
         
         if self.policy.get("IP") is None:
             if DNS_cache.get(self.domain) is not None:
@@ -105,7 +98,7 @@ class Remote:
                         self.address = resolver.resolve(self.domain, "A")
                     except:
                         self.address = resolver.resolve(self.domain, "AAAA")
-                if self.address:
+                if self.address and self.policy["DNS_cache"]:
                     global cnt_upd_DNS_cache, lock_DNS_cache
                     lock_DNS_cache.acquire()
                     if ttl := self.policy.get('DNS_cache_TTL'):
@@ -125,11 +118,10 @@ class Remote:
             # will redirect ip only if it it connected by domain
         else:
             self.address = self.policy["IP"]
+            if config["redirect_when_ip"]:
+                self.address = redirect_ip(self.address)
 
-        if self.address.find(":") == -1:
-            mapped_ip_policy = ipv4_map.search(utils.ip_to_binary_prefix(self.address))
-        else:
-            mapped_ip_policy = ipv6_map.search(utils.ip_to_binary_prefix(self.address))
+        mapped_ip_policy=match_ip(self.address)
         if mapped_ip_policy is not None:
                 self.policy={**self.policy,**mapped_ip_policy}
 
@@ -148,14 +140,15 @@ class Remote:
                 val = utils.get_ttl(self.address, self.policy.get("port"))
                 if val == -1:
                     raise Exception("ERROR get ttl")
-                global cnt_upd_TTL_cache, lock_TTL_cache
-                lock_TTL_cache.acquire()
-                TTL_cache[self.address] = val
-                cnt_upd_TTL_cache += 1
-                if cnt_upd_TTL_cache >= config["TTL_cache_update_interval"]:
-                    cnt_upd_TTL_cache = 0
-                    write_TTL_cache()
-                lock_TTL_cache.release()
+                if self.policy["TTL_cache"]:
+                    global cnt_upd_TTL_cache, lock_TTL_cache
+                    lock_TTL_cache.acquire()
+                    TTL_cache[self.address] = val
+                    cnt_upd_TTL_cache += 1
+                    if cnt_upd_TTL_cache >= config["TTL_cache_update_interval"]:
+                        cnt_upd_TTL_cache = 0
+                        write_TTL_cache()
+                    lock_TTL_cache.release()
                 logger.info(
                     "dist for %s is %d", self.address, val
                 )
