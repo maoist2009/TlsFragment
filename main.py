@@ -4,9 +4,10 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 from kivy.metrics import dp
 from kivy.utils import platform
-from jnius import autoclass
+from jnius import autoclass, cast
 from kivy.uix.checkbox import CheckBox
 import os
 import json
@@ -158,13 +159,10 @@ class ProxyApp(App):
     def on_start(self):
         self.get_permit()
         self.load_file()
+        self.request_battery_optimization()
         if self.is_service_running():
             self.run_proxy_service(None,False)
 
-    def show_popup(self, title, message):
-        """Utility function to show popups."""
-        popup = Popup(title=title, content=Label(text=message), size=(dp(200), dp(40)))
-        popup.open()
 
     def load_file(self):
         path=self.show_in_edit
@@ -185,6 +183,8 @@ class ProxyApp(App):
         path=self.show_in_edit
         if os.path.exists(path):
             try:
+                if self.config_input.text=="":
+                    self.config_input.text="{}"
                 config_data = json.loads(self.config_input.text)
                 with open(path, 'w') as f:
                     json.dump(config_data, f, indent=4)
@@ -196,7 +196,60 @@ class ProxyApp(App):
         else:
             self.show_popup('File not found', f"File {path} not found")
 
-
+    def show_popup(self, title, message, callback=None):
+        # 创建垂直布局，设置外边距和间距
+        layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+    
+        # 创建 Label，支持自动换行
+        label = Label(
+            text=message,
+            halign='left',
+            valign='top',
+            font_size=dp(14),
+            text_size=(dp(330), None),  # 根据弹窗宽度调整
+            size_hint_y=None
+        )
+        label.bind(texture_size=label.setter('size'))  # 自动调整高度
+    
+        # 创建 ScrollView，填充整个可用空间
+        scroll_view = ScrollView(
+            size_hint=(1, 1),  # 填充剩余空间
+            bar_width=dp(8),   # 滚动条宽度（可选）
+            bar_color=[0.2, 0.6, 1, 0.8],  # 滚动条颜色（可选）
+            scroll_type=['bars', 'content']  # 滚动类型（可选）
+        )
+        scroll_view.add_widget(label)
+    
+        # 创建 OK 按钮
+        ok_button = Button(
+            text='OK',
+            size_hint_y=None,
+            height=dp(48),
+            font_size=dp(16)
+        )
+    
+        # 添加组件到布局
+        layout.add_widget(scroll_view)
+        layout.add_widget(ok_button)
+    
+        # 创建弹窗
+        popup = Popup(
+            title=title,
+            content=layout,
+            size=(dp(350), dp(350)),
+            size_hint=(None, None)
+        )
+    
+        # 绑定按钮仅用于关闭弹窗
+        ok_button.bind(on_release=popup.dismiss)
+    
+        # 绑定弹窗关闭事件，执行回调
+        if callback:
+            popup.bind(on_dismiss=lambda instance: callback())
+    
+        # 显示弹窗
+        popup.open()    
+        
     def start_proxy_service(self):
         """Start the Android service to run the proxy."""
         from android import mActivity
@@ -221,7 +274,20 @@ class ProxyApp(App):
         while self.is_service_running():
             pass
         
-    def request_battery_optimization(self):
+    def is_battery_optimization_ignored(self):
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        Context = autoclass('android.content.Context')
+        PowerManager = autoclass('android.os.PowerManager')
+    
+        context = PythonActivity.mActivity.getApplicationContext()
+        power_manager = cast(PowerManager, context.getSystemService(Context.POWER_SERVICE))
+    
+        if power_manager:
+            package_name = context.getPackageName()
+            return power_manager.isIgnoringBatteryOptimizations(package_name)
+        return False
+
+    def show_battery_optimization_popup(self):
         # 获取安卓类
         PythonActivity = autoclass('org.kivy.android.PythonActivity')
         Intent = autoclass('android.content.Intent')
@@ -237,6 +303,12 @@ class ProxyApp(App):
         # 启动意图
         PythonActivity.mActivity.startActivity(intent)
 
+    def request_battery_optimization(self):
+        if not self.is_battery_optimization_ignored():
+            self.show_popup("Keep Alive",'The programme runs in the background. \nTo keep it alive, please select: \n Ignore Battery optimization. \nSome Chinese UI may not work, then you need to open it manually. \nAdditionally, Please allow creating notification to allow the application start a foreground service. \nSome Chinese UI requires you open it manually too. ',self.show_battery_optimization_popup)
+        else:
+            print("battery optimization turnned of")
+
     def get_permit(self):
         from android.permissions import Permission, request_permissions
 
@@ -250,7 +322,6 @@ class ProxyApp(App):
                 print('Got all permissions')
             else:
                 self.show_popup('Lack of permissions', 'Please grant all permissions to use this app')
-            self.request_battery_optimization()
 
         requested_permissions = [
             Permission.INTERNET,
