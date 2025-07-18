@@ -88,6 +88,13 @@ def calc_redirect_ip(ip_str:str, mapper_str:str):
     # 构造新的 IP 地址对象
     return str(address_class(new_int))
 
+def is_ip_address(s: str) -> bool:
+    try:
+        ipaddress.ip_address(s)
+        return True
+    except ValueError:
+        return False
+
 def fake_ttl_mapping(config, dist):
     if not config.startswith('q'):
         return int(config)

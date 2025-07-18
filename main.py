@@ -238,8 +238,7 @@ class ProxyApp(App):
         requested_permissions = [
             Permission.INTERNET,
             Permission.FOREGROUND_SERVICE,
-            Permission.READ_EXTERNAL_STORAGE,
-            Permission.SYSTEM_ALERT_WINDOW,
+            Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
         ]
         request_permissions(requested_permissions, callback)
 
