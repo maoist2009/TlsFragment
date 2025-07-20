@@ -27,6 +27,19 @@ logger = logger.getChild("remote")
 resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh_server"])
 cnt_upd_TTL_cache = 0
 lock_TTL_cache = threading.Lock()
+
+t = time.time()
+temp_DNS_cache = DNS_cache.copy()
+for domain, value in temp_DNS_cache.items():
+    if value['expires'] is not None and value['expires'] < t:
+        logger.info(
+            f'DNS cache for {domain} expired and will be removed.'
+        )
+        DNS_cache.pop(domain)
+temp_DNS_cache.clear()
+        
+write_DNS_cache()
+
 cnt_upd_DNS_cache = 0
 lock_DNS_cache = threading.Lock()
 def match_ip(ip):
