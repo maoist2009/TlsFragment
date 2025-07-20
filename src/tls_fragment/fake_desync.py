@@ -2,7 +2,12 @@ import socket
 from .utils import set_ttl
 from .log import logger
 from . import remote
+from .config import config
 import time
+import threading
+
+# 实现lock，使得最多同时运行k个
+transmitfile_semaphore = threading.Semaphore(config["TransmitFile_Limit"])
 
 logger = logger.getChild("fake_desync")
 
@@ -239,35 +244,36 @@ def send_fake_data(
                 logger.debug(f"{fake_data} {real_data} {data_len}")
 
                 # 调用 TransmitFile 函数
-                result = mswsock.TransmitFile(
-                    sock_file_descriptor,
-                    file_handle,
-                    wintypes.DWORD(data_len),
-                    wintypes.DWORD(data_len),
-                    ov,
-                    None,
-                    32 | 4,  # TF_USE_KERNEL_APC | TF_WRITE_BEHIND
-                )
+                with transmitfile_semaphore:
+                    result = mswsock.TransmitFile(
+                        sock_file_descriptor,
+                        file_handle,
+                        wintypes.DWORD(data_len),
+                        wintypes.DWORD(data_len),
+                        ov,
+                        None,
+                        32 | 4,  # TF_USE_KERNEL_APC | TF_WRITE_BEHIND
+                    )
 
-                if FAKE_sleep < 0.1:
-                    logger.warning("Too short sleep time on Windows, set to 0.1")
-                    FAKE_sleep = 0.1
+                    if FAKE_sleep < 0.1:
+                        logger.warning("Too short sleep time on Windows, set to 0.1")
+                        FAKE_sleep = 0.1
 
-                logger.info("sleep for: %f", FAKE_sleep)
-                time.sleep(FAKE_sleep)
-                kernel32.SetFilePointer(file_handle, 0, 0, 0)
-                kernel32.WriteFile(
-                    file_handle,
-                    real_data,
-                    data_len,
-                    ctypes.byref(wintypes.DWORD(0)),
-                    None,
-                )
-                kernel32.SetEndOfFile(file_handle)
-                kernel32.SetFilePointer(file_handle, 0, 0, 0)
-                set_ttl(sock, default_ttl)
+                    logger.info("sleep for: %f", FAKE_sleep)
+                    time.sleep(FAKE_sleep)
+                    kernel32.SetFilePointer(file_handle, 0, 0, 0)
+                    kernel32.WriteFile(
+                        file_handle,
+                        real_data,
+                        data_len,
+                        ctypes.byref(wintypes.DWORD(0)),
+                        None,
+                    )
+                    kernel32.SetEndOfFile(file_handle)
+                    kernel32.SetFilePointer(file_handle, 0, 0, 0)
+                    set_ttl(sock, default_ttl)
 
-                val = kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(5000))
+                    val = kernel32.WaitForSingleObject(ov.hEvent, wintypes.DWORD(5000))
 
                 if val == 0:
                     logger.info(f"TransmitFile call was successful. {result}")
@@ -277,6 +283,7 @@ def send_fake_data(
                         kernel32.GetLastError(),
                         ws2_32.WSAGetLastError(),
                     )
+                    
                 return True
             except:
                 raise Exception(
