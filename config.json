@@ -115,6 +115,9 @@
         "bing.com": {
             "mode": "DIRECT"
         },
+        "microsoft.com": {
+            "mode": "DIRECT"
+        },
         "(kards.com|giscus.app)": {
             "IP": "18.162.37.140"
         },
