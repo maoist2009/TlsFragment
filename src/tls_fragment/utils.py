@@ -150,7 +150,7 @@ def get_ttl(ip, port):
     from .log import logger
     logger = logger.getChild("utils")
     l = 1
-    r = 128
+    r = 32
     ans = -1
     while l <= r:
         mid = (l + r) // 2
