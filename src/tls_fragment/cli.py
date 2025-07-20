@@ -8,25 +8,8 @@ from .config import config
 from .remote import match_domain
 import json
 
-my_socket_timeout = 120  # default for google is ~21 sec , recommend 60 sec unless you have low ram and need close soon
-
 datapath = Path()
 
-domain_settings = {
-    "null": {
-        "IP": "127.0.0.1",
-        "TCP_frag": 114514,
-        "TCP_sleep": 0.001,
-        "TLS_frag": 114514,
-        "num_TCP_fragment": 37,
-        "num_TLS_fragment": 37,
-    }
-}
-
-
-TTL_cache = {}  # TTL for each IP
-
-lock_TTL_cache = threading.Lock()
 pacfile = "function genshin(){}"
 
 ThreadtoWork = False
@@ -67,7 +50,7 @@ class ThreadedServer(object):
             global ThreadtoWork
             while ThreadtoWork:
                 client_sock, _ = self.sock.accept()
-                client_sock.settimeout(my_socket_timeout)
+                client_sock.settimeout(config["my_socket_timeout"])
 
                 time.sleep(0.01)  # avoid server crash on flooding request
                 thread_up = threading.Thread(
@@ -111,7 +94,7 @@ class ThreadedServer(object):
             header = client_socket.recv(3)
             while header[0]!=0x05:
                 logger.debug("right 1, %s",str(header))
-                header=header[1:]+client_sock.recv(1)
+                header=header[1:]+client_socket.recv(1)
             logger.debug("socks5 header: %s",header)
             if len(header) != 3 or header[0] != 0x05:
                 raise ValueError("Invalid SOCKS5 header")

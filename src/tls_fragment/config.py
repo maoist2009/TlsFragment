@@ -115,12 +115,3 @@ def write_DNS_cache():
 def write_TTL_cache():
     with open("TTL_cache.json", "w") as f:
         json.dump(TTL_cache, f)
-
-t = time.time()
-for domain, value in DNS_cache.items():
-    if value['expires'] is not None and value['expires'] < t:
-        print(
-            f'DNS cache for {domain} expired and will be removed.'
-        )
-        DNS_cache.pop(domain)
-write_DNS_cache()

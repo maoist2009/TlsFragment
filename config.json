@@ -9,6 +9,7 @@
     "TTL_cache_update_interval": 2,
     "UDPfakeDNS": true,
     "BySNIfirst": false,
+    "TransmitFile_Limit": 2,
     "redirect_when_ip": false,
     "default_policy": {
         "mode": "TLSfrag",
