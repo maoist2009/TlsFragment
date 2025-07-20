@@ -14,8 +14,8 @@ import json
 import android
 
 config_mirror_list = [
-    "https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main",
-    "https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main",
+    "https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main/",
+    "https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main/",
 ]
 
 
@@ -37,8 +37,9 @@ class ProxyApp(App):
         self.layout.add_widget(self.box_start)
 
         self.show_in_edit = "config.json"
+        button_heightm2=button_height*2
         self.file_list_box = BoxLayout(
-            orientation="vertical", size_hint_y=None, height=button_height
+            orientation="vertical", size_hint_y=None, height=button_heightm2
         )
         self.file_list_box_sub1 = BoxLayout(
             orientation="horizontal", size_hint_y=None, height=button_height
@@ -115,7 +116,7 @@ class ProxyApp(App):
                     self.load_file()
                     self.show_popup(
                         "Update success",
-                        "Config file updated successfully.  \nYou may need to restart proxy. "
+                        f"{self.show_in_edit} updated successfully.  \nYou may need to restart proxy. "
                     )
                     break
             except:
@@ -133,13 +134,13 @@ class ProxyApp(App):
                         self.load_file()
                         self.show_popup(
                             "Update success",
-                            "Config file updated successfully.  \nYou may need to restart proxy. "
+                            f"{self.show_in_edit} updated successfully.  \nYou may need to restart proxy. "
                         )
                         break
                 except:
                     pass
         if not succeeded:
-            self.show_popup("Update failed", "Failed to update config file")
+            self.show_popup("Update failed", f"Failed to update {self.show_in_edit}")
         else:
             self.get_port_from_config()
 
@@ -191,6 +192,10 @@ class ProxyApp(App):
 
     def load_file(self):
         path = self.show_in_edit
+        if self.show_in_edit == "config_pac.json":
+            self.show_popup("warning","Too big, can't show. ")
+            self.config_input.text = "Too big, can't show."
+            return
         if os.path.exists(path):
             try:
                 with open(path, "r") as f:
@@ -205,6 +210,9 @@ class ProxyApp(App):
 
     def save_file(self, instance):
         path = self.show_in_edit
+        if self.config_input.text == "Too big, can't show.":
+            self.show_popup("Warning", "You can't save it. ")
+            return
         if os.path.exists(path):
             try:
                 if self.config_input.text == "":
