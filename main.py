@@ -14,8 +14,8 @@ import json
 import android
 
 config_mirror_list = [
-    "https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main/config.json",
-    "https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main/config.json",
+    "https://raw.bgithub.xyz/maoist2009/TlsFragment/refs/heads/main",
+    "https://raw.githubusercontent.com/maoist2009/TlsFragment/refs/heads/main",
 ]
 
 
@@ -38,10 +38,19 @@ class ProxyApp(App):
 
         self.show_in_edit = "config.json"
         self.file_list_box = BoxLayout(
+            orientation="vertical", size_hint_y=None, height=button_height
+        )
+        self.file_list_box_sub1 = BoxLayout(
             orientation="horizontal", size_hint_y=None, height=button_height
         )
+        self.file_list_box_sub2 = BoxLayout(
+            orientation="horizontal", size_hint_y=None, height=button_height
+        )    
         self.config_file_button = Button(
             text="config", size_hint_y=None, height=button_height
+        )
+        self.config_pac_file_button = Button(
+            text="PAC config", size_hint_y=None, height=button_height
         )
         self.DNS_cache_file_button = Button(
             text="DNS cache", size_hint_y=None, height=button_height
@@ -50,11 +59,15 @@ class ProxyApp(App):
             text="TTL cache", size_hint_y=None, height=button_height
         )
         self.config_file_button.bind(on_press=self.edit_config)
+        self.config_pac_file_button.bind(on_press=self.edit_config_pac)
         self.DNS_cache_file_button.bind(on_press=self.edit_DNS_cache)
         self.TTL_cache_file_button.bind(on_press=self.edit_TTL_cache)
-        self.file_list_box.add_widget(self.config_file_button)
-        self.file_list_box.add_widget(self.DNS_cache_file_button)
-        self.file_list_box.add_widget(self.TTL_cache_file_button)
+        self.file_list_box_sub1.add_widget(self.config_file_button)
+        self.file_list_box_sub1.add_widget(self.config_pac_file_button)
+        self.file_list_box_sub2.add_widget(self.DNS_cache_file_button)
+        self.file_list_box_sub2.add_widget(self.TTL_cache_file_button)
+        self.file_list_box.add_widget(self.file_list_box_sub1)
+        self.file_list_box.add_widget(self.file_list_box_sub2)
         self.layout.add_widget(self.file_list_box)
 
         self.config_button_box = BoxLayout(
@@ -68,7 +81,7 @@ class ProxyApp(App):
         self.layout.add_widget(self.config_button_box)
 
         self.button_try_to_update_config = Button(
-            text="Try to update config", size_hint_y=None, height=button_height
+            text="Try to update file", size_hint_y=None, height=button_height
         )
         self.button_try_to_update_config.bind(on_press=self.try_to_update_config)
         self.layout.add_widget(self.button_try_to_update_config)
@@ -93,7 +106,7 @@ class ProxyApp(App):
         # 改为轮询list中url
         for url in config_mirror_list:
             try:
-                response = requests.get(url)
+                response = requests.get(url+self.show_in_edit)
                 if response.status_code == 200:
                     config_data = json.loads(response.text)
                     with open("config.json", "w") as f:
@@ -111,7 +124,7 @@ class ProxyApp(App):
             proxy = {"http": f"http://127.0.0.1:{self.proxy_port}"}
             for url in config_mirror_list:
                 try:
-                    response = requests.get(url, proxies=proxy)
+                    response = requests.get(url+self.show_in_edit, proxies=proxy)
                     if response.status_code == 200:
                         config_data = json.loads(response.text)
                         with open("config.json", "w") as f:
@@ -152,6 +165,10 @@ class ProxyApp(App):
 
     def edit_config(self, instance):
         self.show_in_edit = "config.json"
+        self.load_file()
+    
+    def edit_config_pac(self, instance):
+        self.show_in_edit = "config_pac.json"
         self.load_file()
 
     def edit_DNS_cache(self, instance):
