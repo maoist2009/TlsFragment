@@ -19,7 +19,6 @@ from .dns_extension import MyDoh
 import socket
 import threading
 import time
-import ipaddress
 from . import utils
 
 logger = logger.getChild("remote")
