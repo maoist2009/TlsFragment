@@ -112,10 +112,7 @@
             "mode": "DIRECT",
             "modesafe": "FAKEdesync"
         },
-        "bing.com": {
-            "mode": "DIRECT"
-        },
-        "microsoft.com": {
+        "(bing|microsoft|skype|office|microsoftonline).com": {
             "mode": "DIRECT"
         },
         "(kards.com|giscus.app)": {
