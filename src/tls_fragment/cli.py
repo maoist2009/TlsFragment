@@ -165,12 +165,7 @@ class ThreadedServer(object):
 
         # 原有HTTP重定向逻辑
         elif data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
-            q_line = data.decode().split("\r\n")[0].split()
-            q_method, q_url = q_line[0], q_line[1]
-            https_url = q_url.replace("http://", "https://", 1)
-            logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
-            response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
-            logger.debug(response)
+            response = utils.generate_302(data,"github.com")
             client_socket.sendall(response.encode(encoding="UTF-8"))
             client_socket.close()
             return None
@@ -223,11 +218,7 @@ class ThreadedServer(object):
                     if backend_sock.policy.get("safety_check") is True and data.startswith((b'GET ', b'PUT ', b'DELETE ', b'POST ', b'HEAD ', b'OPTIONS ')):
                         logger.warning("HTTP protocol detected, will redirect to https")
                         # 如果是http协议，重定向到https，要从data中提取url
-                        q_line = data.decode().split("\r\n")[0].split()
-                        q_method, q_url = q_line[0], q_line[1]
-                        https_url = q_url.replace("http://", "https://", 1)
-                        logger.info(f"重定向 {q_method} 到 HTTPS: {https_url}")
-                        response = f"HTTP/1.1 302 Found\r\nLocation: {https_url}\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
+                        response = utils.generate_302(data,extractedsni)
                         client_sock.sendall(response.encode())
                         client_sock.close()
                         backend_sock.close()
@@ -251,13 +242,18 @@ class ThreadedServer(object):
 
                     if backend_sock.policy.get("safety_check") is True:
                         try:
-                            if utils.detect_tls_version_by_keyshare(data) != 1:
-                                logger.warning("Not a TLS 1.3 connection and will close")
-                                backend_sock.close()
-                                client_sock.close()
-                                raise ValueError("Not a TLS 1.3 connection")
+                            can_pass=utils.detect_tls_version_by_keyshare(data)
                         except:
-                            pass    
+                            pass
+                        if can_pass != 1:
+                            logger.warning("Not a TLS 1.3 connection and will close")
+                            try:
+                                client_sock.send(utils.generate_tls_alert(data))
+                            except:
+                                pass
+                            backend_sock.close()
+                            client_sock.close()
+                            raise ValueError("Not a TLS 1.3 connection")
 
                     if data:
                         mode = backend_sock.policy.get('mode')
