@@ -24,7 +24,7 @@
         "DNS_cache": true,
         "DNS_cache_TTL": 259200,
         "TTL_cache": true,
-        "safety_check": false
+        "safety_check": true
     },
     "IPs": {
         "104.16.0.0/13": {
@@ -181,12 +181,15 @@
         "upload.wikimedia.org": {
             "IP": "185.15.58.240"
         },
+        "go.dev":{
+            "IP": "216.239.32.52"
+        },
         "(google.com|google.com.hk|google.dev|googleapis.com|gstatic.com|googleusercontent.com|.google$|goo.gl|translate.goog|android.com|ai.dev|blogger.com|blogspot.com|chrome.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
         },
-        "(chromium.org|golang.org|youtube.com|youtu.be|youtube-nocookie.com|.ytimg.com|.ggpht.com|gvt1.com|withgoogle.com|googlesource.com|redirector.googlevideo.com)": {
+        "(golang.org|youtube.com|youtu.be|youtube-nocookie.com|.ytimg.com|.ggpht.com|gvt1.com|withgoogle.com|googlesource.com|redirector.googlevideo.com)": {
             "IP": "35.190.247.150",
             "port": 1445,
             "safety_check": true
