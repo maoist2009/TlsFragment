@@ -59,13 +59,15 @@
 		"pximg.net": {
 			"IP": "104.21.3.221"
 		},
-		"streaming.mastodon.social": {},
 		"smsactivate.s3.eu-central-1.amazonaws.com": {
 			"IP": "3.5.137.138"
 		},
 		"disk.yandex.com": {
 			"IP": "87.250.250.50",
 			"mode": "FAKEdesync"
+		},
+		".disk.yandex.com": {
+		    "mode": "FAKEdesync"
 		},
 		"yandex.com": {
 			"mode": "DIRECT",
