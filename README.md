@@ -59,7 +59,8 @@ python -m installer dist/*.whl
 
 ```bash
 git clone git@github.com:maoist2009/TlsFragment.git
-pip install -r requirements.txt
+pip install poetry
+poetry init
 python run.py
 ```
 
