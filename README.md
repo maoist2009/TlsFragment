@@ -60,7 +60,7 @@ python -m installer dist/*.whl
 ```bash
 git clone git@github.com:maoist2009/TlsFragment.git
 pip install -r requirements.txt
-python server.py
+python run.py
 ```
 
 也可以编译后开机自启动：
