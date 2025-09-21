@@ -176,7 +176,7 @@
 			"port": 1445,
 			"safety_check": true
 		},
-		"(golang.org|youtube.com|youtu.be|youtube-nocookie.com|.ytimg.com|.ggpht.com|gvt1.com|withgoogle.com|googlesource.com|redirector.googlevideo.com)": {
+		"(golang.org|youtube.com|youtu.be|youtube-nocookie.com|.ytimg.com|.ggpht.com|gvt1.com|withgoogle.com|googlesource.com|redirector.googlevideo.com|recaptcha.net|page.link)": {
 			"IP": "35.190.247.150",
 			"port": 1445,
 			"safety_check": true
