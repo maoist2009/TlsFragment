@@ -159,7 +159,7 @@
 		"githubusercontent.com": {
 			"IP": "146.75.48.133"
 		},
-		"objects-origin.githubusercontent.com": {
+		"(objects-origin|actions).githubusercontent.com": {
 			"IP": "140.82.113.22"
 		},
 		"(wikimedia|wikipedia|wiktionary|wikiversity|wikivoyage|wikisource|wikinews|wikidata|mediawiki|wikifunctions).org": {

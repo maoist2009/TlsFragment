@@ -35,7 +35,7 @@ version.regex = version = ["](.*)["]
 version.filename = %(source.dir)s/pyproject.toml
 
 # === DON'T FORGET TO UPDATE THIS ===
-android.numeric_version = 102130300
+android.numeric_version = 102130301
 # always "1021" ----------^^^^|||||
 # 3.2.1 ----> 3 02 01 --------^^^^^
 # ===================================
@@ -52,7 +52,7 @@ requirements = python3,kivy,ahocorasick-python,requests,dnspython,pyjnius,https:
 presplash.filename = %(source.dir)s/presplash.jpeg
 
 # (str) Icon of the application
-icon.filename = %(source.dir)s/small_icon.png
+icon.filename = %(source.dir)s/app_icon.png
 
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
@@ -100,7 +100,7 @@ android.presplash_color = #39C5BB
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = INTERNET, FOREGROUND_SERVICE, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+android.permissions = INTERNET, FOREGROUND_SERVICE, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, POST_NOTIFICATIONS
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -197,7 +197,7 @@ android.ndk = 25b
 # The option may be used in three ways, the value may contain one or zero ':'
 # Some examples:
 # 1) A file to add to resources, legal resource names contain ['a-z','0-9','_']
-# android.add_resources = my_icons/all-inclusive.png:drawable/all_inclusive.png
+android.add_resources = %(source.dir)s/notification_icon.png:drawable/notification_icon.png
 # 2) A directory, here  'legal_icons' must contain resources of one kind
 # android.add_resources = legal_icons:drawable
 # 3) A directory, here 'legal_resources' must contain one or more directories, 
