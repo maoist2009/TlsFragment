@@ -7,10 +7,9 @@ from . import remote, fake_desync, fragment, utils
 from .config import config
 from .remote import match_domain
 from .pac import generate_pac, load_pac
+from .utils import extract_servername_and_port
 
 datapath = Path()
-
-pacfile = "function genshin(){}"
 
 ThreadtoWork = False
 proxy_thread = None
@@ -38,7 +37,7 @@ class ThreadedServer(object):
                     time.sleep(1)  # 主线程的其他操作
             except KeyboardInterrupt:
                 # 捕获 Ctrl+C
-                logger.warning("\nServer shutting down.")
+                logger.warning("Server shutting down.")
             finally:
                 ThreadtoWork = False
                 self.sock.close()
@@ -60,7 +59,7 @@ class ThreadedServer(object):
                 thread_up.start()
             self.sock.close()
         except Exception as e:
-            logger.warning(f"Server error: {repr(e)}")
+            logger.warning("Server error: %s", repr(e))
 
     def handle_client_request(self, client_socket):
         try:
@@ -77,7 +76,7 @@ class ThreadedServer(object):
                 return self._handle_http_protocol(client_socket)
 
         except Exception as e:
-            logger.error(f"协议检测异常: {repr(e)}")
+            logger.error("协议检测异常: %s", repr(e))
             client_socket.close()
             return None
 
@@ -123,13 +122,13 @@ class ThreadedServer(object):
                 )
                 return remote_obj
             except Exception as e:
-                logger.info(f"连接失败: {repr(e)}")
+                logger.info("连接失败: %s", repr(e))
                 client_socket.sendall(b"\x05\x04\x00\x01\x00\x00\x00\x00\x00\x00")
                 client_socket.close()
                 return server_name if utils.is_ip_address(server_name) else None
 
         except Exception as e:
-            logger.info(f"SOCKS5处理错误: {repr(e)}")
+            logger.info("SOCKS5处理错误: %s", repr(e))
             client_socket.close()
             return None
 
@@ -139,8 +138,8 @@ class ThreadedServer(object):
 
         # 原有CONNECT处理
         if data.startswith(b"CONNECT "):
-            server_name, server_port = self.extract_servername_and_port(data)
-            logger.info(f"CONNECT {server_name}:{server_port}")
+            server_name, server_port = extract_servername_and_port(str(data).split()[1])
+            logger.info("CONNECT %s:%d", server_name, server_port)
 
             try:
                 remote_obj = remote.Remote(server_name, server_port)
@@ -149,7 +148,7 @@ class ThreadedServer(object):
                 )
                 return remote_obj
             except Exception as e:
-                logger.info(f"连接失败: {repr(e)}")
+                logger.info("连接失败: ", repr(e))
                 client_socket.sendall(
                     b"HTTP/1.1 502 Bad Gateway\r\nProxy-agent : MyProxy/1.0\r\n\r\n"
                 )
@@ -172,7 +171,7 @@ class ThreadedServer(object):
 
         # 原有错误处理
         else:
-            logger.info(f"未知请求: {data[:10]}")
+            logger.info("未知请求: %s", data[:10])
             client_socket.sendall(
                 b"HTTP/1.1 400 Bad Request\r\nProxy-agent: MyProxy/1.0\r\n\r\n"
             )
@@ -182,7 +181,7 @@ class ThreadedServer(object):
     def my_upstream(self, client_sock):
         first_flag = True
         backend_sock = self.handle_client_request(client_sock)
-        if backend_sock == None:
+        if backend_sock is None:
             client_sock.close()
             return
             
@@ -201,17 +200,17 @@ class ThreadedServer(object):
                         extractedsni = utils.extract_sni(data)
                         if backend_sock.domain=="127.0.0.114" or backend_sock.domain=="::114" or (config["BySNIfirst"] and str(extractedsni,encoding="ASCII") != backend_sock.domain):
                             port, protocol=backend_sock.port,backend_sock.protocol
-                            logger.info(f"replace backendsock: {extractedsni} {port} {protocol}")
+                            logger.info("replace backendsock: %s %s %s", extractedsni, port, protocol)
                             new_backend_sock=remote.Remote(str(extractedsni,encoding="ASCII"),port,protocol)
                             backend_sock=new_backend_sock
-                    except: 
+                    except Exception: 
                         pass
 
                     backend_sock.client_sock = client_sock
 
                     try:
                         backend_sock.connect()
-                    except:
+                    except Exception:
                         raise Exception("backend connect fail")
                     
 
@@ -236,20 +235,20 @@ class ThreadedServer(object):
                         backend_sock.sni = extractedsni
                         if str(backend_sock.sni)!=str(backend_sock.domain):
                             backend_sock.policy = {**backend_sock.policy, **match_domain(str(backend_sock.sni))}
-                    except:
+                    except Exception:
                         backend_sock.send(data)
                         continue
 
                     if backend_sock.policy.get("safety_check") is True:
                         try:
                             can_pass=utils.detect_tls_version_by_keyshare(data)
-                        except:
+                        except Exception:
                             pass
                         if can_pass != 1:
                             logger.warning("Not a TLS 1.3 connection and will close")
                             try:
                                 client_sock.send(utils.generate_tls_alert(data))
-                            except:
+                            except Exception:
                                 pass
                             backend_sock.close()
                             client_sock.close()
@@ -281,7 +280,7 @@ class ThreadedServer(object):
             except Exception as e:
                 # import traceback
                 # traceback.print_exc()
-                logger.info(f"upstream : {repr(e)} from {backend_sock.domain}")
+                logger.info("upstream : %s from %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
                 client_sock.close()
                 backend_sock.close()
@@ -314,7 +313,7 @@ class ThreadedServer(object):
             except Exception as e:
                 # import traceback
                 # traceback.print_exc()
-                logger.info(f"downstream : {repr(e)} from {backend_sock.domain}")
+                logger.info("downstream : %s from %s", repr(e), backend_sock.domain)
                 time.sleep(2)  # wait two second for another thread to flush
                 backend_sock.close()
                 client_sock.close()
@@ -323,34 +322,13 @@ class ThreadedServer(object):
         client_sock.close()
         backend_sock.close()
 
-    def extract_servername_and_port(self, data):
-        host_and_port = str(data).split()[1]
-        try:
-            host, port = host_and_port.split(":")
-        except:
-            # ipv6
-            if host_and_port.find("[") != -1:
-                host, port = host_and_port.split("]:")
-                host = host[1:]
-            else:
-                idx = 0
-                for _ in range(6):
-                    idx = host_and_port.find(":", idx + 1)
-                host = host_and_port[:idx]
-                port = host_and_port[idx + 1 :]
-        return (host, int(port))
-
-
-# http114=b""
-
-
 serverHandle = None
 
 def start_server(block=True):
     generate_pac()
 
     global serverHandle
-    logger.info(f"Now listening at: 127.0.0.1:{config['port']}")
+    logger.info("Now listening at: 0.0.0.0:%d", config['port'])
     serverHandle = ThreadedServer("", config["port"]).listen(block)
 
 
@@ -361,8 +339,7 @@ def stop_server(wait_for_stop=True):
     sock.connect(("127.0.0.1", config["port"]))
     sock.close()
     if wait_for_stop:
-        while proxy_thread.is_alive():
-            pass
+        proxy_thread.join()
         logger.info("Server stopped")
 
 

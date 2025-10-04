@@ -531,3 +531,19 @@ def build_socks5_udp_ans(address,port,data):
     hdr_len=len(addr)+3
     msg_len=len(data)+hdr_len
     return msg_len.to_bytes(2,'big')+hdr_len.to_bytes(1,'big')+addr+data
+
+def extract_servername_and_port(host_and_port: str):
+    try:
+        host, port = host_and_port.split(":")
+    except Exception:
+        # ipv6
+        if host_and_port.find("[") != -1:
+            host, port = host_and_port.split("]:")
+            host = host[1:]
+        else:
+            idx = 0
+            for _ in range(6):
+                idx = host_and_port.find(":", idx + 1)
+            host = host_and_port[:idx]
+            port = host_and_port[idx + 1 :]
+    return (host, int(port))

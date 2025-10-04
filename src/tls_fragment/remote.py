@@ -20,10 +20,23 @@ import socket
 import threading
 import time
 from . import utils
+import dns.resolver
+import dns.nameserver
+from .utils import extract_servername_and_port
 
 logger = logger.getChild("remote")
 
-resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh_server"])
+if config.get('do53_server'):
+    resolver = dns.resolver.Resolver(configure=False)
+    host, port = extract_servername_and_port(config['do53_server'])
+    resolver.nameservers.append(dns.nameserver.Do53Nameserver(host, port))
+    def resolve(domain, rdtype):
+        result = resolver.resolve(domain, rdtype)
+        return result[0].to_text()
+else:
+    resolver = MyDoh(proxy=f'http://127.0.0.1:{config["DOH_port"]}', url=config["doh_server"])
+    resolve = resolver.resolve
+
 cnt_upd_TTL_cache = 0
 lock_TTL_cache = threading.Lock()
 
@@ -42,10 +55,7 @@ write_DNS_cache()
 cnt_upd_DNS_cache = 0
 lock_DNS_cache = threading.Lock()
 def match_ip(ip):
-    if ':' in ip:
-        return ipv6_map.search(utils.ip_to_binary_prefix(ip))
-    else:
-        return ipv4_map.search(utils.ip_to_binary_prefix(ip))
+    return (ipv6_map if ':' in ip else ipv4_map).search(utils.ip_to_binary_prefix(ip))
         
 def redirect_ip(ip):
     mapped_ip_policy=match_ip(ip)
@@ -103,14 +113,14 @@ class Remote:
             else:
                 if self.policy.get("IPtype") == "ipv6":
                     try:
-                        self.address = resolver.resolve(self.domain, "AAAA")
+                        self.address = resolve(self.domain, "AAAA")
                     except:
-                        self.address = resolver.resolve(self.domain, "A")
+                        self.address = resolve(self.domain, "A")
                 else:
                     try:
-                        self.address = resolver.resolve(self.domain, "A")
+                        self.address = resolve(self.domain, "A")
                     except:
-                        self.address = resolver.resolve(self.domain, "AAAA")
+                        self.address = resolve(self.domain, "AAAA")
                 if self.address and self.policy["DNS_cache"]:
                     global cnt_upd_DNS_cache, lock_DNS_cache
                     lock_DNS_cache.acquire()
