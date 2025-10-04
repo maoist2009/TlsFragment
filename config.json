@@ -4,7 +4,7 @@
 	"DOH_port": 2500,
 	"my_socket_timeout": 120,
 	"FAKE_ttl_auto_timeout": 5,
-	"do53_server": "127.0.0.1:8053",
+	"do53_server": "",
 	"doh_server": "https://cloudflare-dns.com/dns-query?dns=",
 	"DNS_cache_update_interval": 2,
 	"TTL_cache_update_interval": 2,
