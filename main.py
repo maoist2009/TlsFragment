@@ -281,16 +281,7 @@ class ProxyApp(App):
         from jnius import autoclass
 
         SDK_INT = autoclass('android.os.Build$VERSION').SDK_INT
-        channel_id = "tlsfragment_fg"
-
-        if SDK_INT >= 26:
-            Context = autoclass('android.content.Context')
-            NotificationManager = autoclass('android.app.NotificationManager')
-            NotificationChannel = autoclass('android.app.NotificationChannel')
-            nm = mActivity.getSystemService(Context.NOTIFICATION_SERVICE)
-            channel = NotificationChannel(channel_id, "Proxy Service", NotificationManager.IMPORTANCE_LOW)
-            nm.createNotificationChannel(channel)
-
+        
         context = mActivity.getApplicationContext()
         SERVICE_NAME = str(context.getPackageName()) + ".ServiceProxyservice"
         service = autoclass(SERVICE_NAME)
@@ -299,7 +290,7 @@ class ProxyApp(App):
             "notification_icon",   # ← 与 android.add_resources 中的文件名一致（不含 .png）
             "TlsFragment",
             "Proxy is running",
-            channel_id             # ← Android 8.0+ 必需
+            ""
         )
 
     def stop_proxy_service(self):
