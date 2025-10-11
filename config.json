@@ -53,6 +53,10 @@
         },
         "18.162.37.140": {
             "mode": "FAKEdesync"
+        },
+        "216.239.(32|34|36|38).21": {
+            "redirect": "216.239.32.52",
+            "comment": "go.dev,photomath.com,1e100"
         }
     },
     "domains": {
@@ -167,9 +171,6 @@
         },
         "upload.wikimedia.org": {
             "IP": "185.15.58.240"
-        },
-        "go.dev": {
-            "IP": "216.239.32.52"
         },
         "(google.com|google.com.hk|google.dev|googleapis.com|gstatic.com|googleusercontent.com|.google$|goo.gl|translate.goog|android.com|ai.dev|blogger.com|blogspot.com|chrome.com)": {
             "IP": "35.190.247.150",
