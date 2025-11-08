@@ -28,7 +28,7 @@
     },
     "IPs": {
         "(104.16.0.0/13|104.24.0.0/14|172.64.0.0/13|162.158.0.0/15|2606:4700::/32|2400:cb00::/32|2400:cb00::/32)": {
-            "redirect": "^172.64.144.0/30",
+            "redirect": "^172.64.144.4/30",
             "CDN": "CloudFlare"
         },
         "2400:cb00::/32": {
@@ -60,6 +60,9 @@
         }
     },
     "domains": {
+        "lapi.photomath.net": {
+          "IP": "216.239.32.21"
+        },
         "pximg.net": {
             "IP": "104.21.3.221"
         },
@@ -112,7 +115,7 @@
             "mode": "DIRECT",
             "modesafe": "FAKEdesync"
         },
-        "(bing|microsoft|skype|office|microsoftonline).com": {
+        "(bing|microsoft|skype|office|microsoftonline|visualstudio|exp-tas).com": {
             "mode": "DIRECT"
         },
         "(kards.com|giscus.app)": {
