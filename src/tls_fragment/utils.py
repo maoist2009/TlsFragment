@@ -165,14 +165,6 @@ def get_ttl(ip, port):
     return ans
 
 
-def is_ip_address(s):
-    try:
-        ipaddress.ip_address(s)
-        return True
-    except ValueError:
-        return False
-
-
 def extract_sni(data):
     """
     extract sni

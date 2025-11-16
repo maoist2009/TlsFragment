@@ -3,6 +3,7 @@ import dns.message
 import dns.rdatatype
 import dns.query
 import base64
+import time
 from urllib.parse import urlparse
 
 from .log import logger
@@ -53,16 +54,33 @@ class MyDoh:
             else:  # udp
                 answer_msg = dns.query.udp(query_message, self.udp_host, port=self.udp_port, timeout=5)
 
+            result,current_time = {},time.time() 
+    
             for rrset in answer_msg.answer:
-                if (dns_type == "A" and rrset.rdtype == dns.rdatatype.A) or \
-                   (dns_type == "AAAA" and rrset.rdtype == dns.rdatatype.AAAA):
-                    ip = rrset[0].address
-                    logger.info(f"Resolved {server_name} to {ip}")
-                    return ip
+                domain = rrset.name.to_text()
+                if domain[-1]=='.':
+                    domain=domain[:-1]
+                ttl = rrset.ttl
+                expires = current_time + ttl
+                
+                if rrset.rdtype == dns.rdatatype.CNAME:
+                    target = rrset[0].target.to_text()
+                    if target[-1]=='.':
+                        target=target[:-1]
+                elif rrset.rdtype == dns.rdatatype.A:
+                    target = [record.address for record in rrset]
+                elif rrset.rdtype == dns.rdatatype.AAAA:
+                    target = [record.address for record in rrset]
 
-            logger.warning(f"No {dns_type} record for {server_name}")
-            return None
+                result[domain] = {
+                    "route": target,
+                    "expires": expires
+                }
 
+            # print(answer_msg,result)
+            logger.info(f"DNS query result: {result}")
+            
+            return result
         except Exception as e:
             logger.error(f"DNS query error: {repr(e)}")
             raise Exception("DNS query failed")

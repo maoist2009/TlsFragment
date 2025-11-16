@@ -50,6 +50,13 @@ def expand_pattern(s):
     inner = s[left_index + 1:right_index]
     return [prefix + part + suffix for part in inner.split('|')]
 
+def expand_policies(policies:dict) -> dict:
+    expanded_policies = {}
+    for key in policies.keys():
+        for item in key.replace(' ', '').split(','):
+            for pattern in expand_pattern(item):
+                expanded_policies[pattern] = policies[key]
+    return expanded_policies
 
 def ip_to_binary_prefix(ip_or_network:str):
     try:
@@ -102,7 +109,7 @@ class Trie:
 
     def search(self, prefix):
         node = self.root
-        ans = None
+        ans = {}
         for bit in prefix:
             index = int(bit)
             if node.val is not None:
@@ -125,32 +132,21 @@ config = merge_dict(_config,config)
 try:
     with open("config_extra.json", "rb") as f:
         extra_config = json.load(f)
-    config=merge_dict(extra_config,config)
 except:
     pass
 
 default_policy = config["default_policy"]
 default_policy["fake_packet"]= default_policy["fake_packet"].encode(encoding="UTF-8")
 
-expanded_policies = {}
-for key in config['domains'].keys():
-    for item in key.replace(' ', '').split(','):
-        for pattern in expand_pattern(item):
-            expanded_policies[pattern] = config['domains'][key]
-
-config['domains'] = expanded_policies
+config['domains'] = expand_policies(config['domains'])
+config['IPs'] = expand_policies(config['IPs'])
+extra_config["domains"] = expand_policies(extra_config.get('domains',{}))
+extra_config["IPs"] = expand_policies(extra_config.get('IPs',{}))
+config = merge_dict(extra_config,config)
 
 domain_map = ahocorasick.AhoCorasick(*config["domains"].keys())
 ipv4_map = Trie()
 ipv6_map = Trie()
-
-expanded_policies = {}
-for key in config['IPs'].keys():
-    for item in key.replace(' ', '').split(','):
-        for pattern in expand_pattern(item):
-            expanded_policies[pattern] = config['IPs'][key]
-
-config['IPs'] = expanded_policies
 
 for k, v in config["IPs"].items():
     if ':' in k:
