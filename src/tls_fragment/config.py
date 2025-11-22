@@ -133,7 +133,7 @@ try:
     with open("config_extra.json", "rb") as f:
         extra_config = json.load(f)
 except:
-    pass
+    extra_config={}
 
 default_policy = config["default_policy"]
 default_policy["fake_packet"]= default_policy["fake_packet"].encode(encoding="UTF-8")

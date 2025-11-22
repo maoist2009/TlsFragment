@@ -20,6 +20,7 @@ from .dns_extension import MyDoh
 import socket
 import threading
 import time
+import copy
 from . import utils
 
 logger = logger.getChild("remote")
@@ -46,16 +47,14 @@ lock_DNS_cache = threading.Lock()
 
 def match_ip(ip:str):
     if ":" in ip:
-        return ipv6_map.search(utils.ip_to_binary_prefix(ip))
+        return copy.deepcopy(ipv6_map.search(utils.ip_to_binary_prefix(ip)))
     else:
-        return ipv4_map.search(utils.ip_to_binary_prefix(ip))
+        return copy.deepcopy(ipv4_map.search(utils.ip_to_binary_prefix(ip)))
 
 
 def match_domain(domain:str):
     matched_domains = domain_map.search("^" + domain + "$")
     if matched_domains:
-        import copy
-
         return copy.deepcopy(
             config["domains"].get(sorted(matched_domains, key=len, reverse=True)[0])
         )
@@ -80,7 +79,7 @@ def route(address:str,policy:dict,tmp_DNS_cache:dict={}) -> {str,dict}:
     如果是域名要进行dns查询，就进行查询到cname，继承^，使其最终不重定向，递归
     如果不是，此时^意味着仍需要计算
     """
-    print(address,policy)
+    # print(address,policy)
     redirectm = policy.get("route")
     if redirectm[0] == "^":
         stopchain = True
@@ -178,11 +177,11 @@ class Remote:
     def __init__(self, domain: str, port=443, protocol=6):
         self.domain = domain
         self.protocol = protocol
-
-        self.policy = default_policy
+        
+        self.policy = copy.deepcopy(default_policy)
         self.policy.setdefault("port", port)
         self.address, self.policy = route(self.domain, self.policy)
-        print(self.policy)
+        # print(self.policy)
 
         self.port = self.policy["port"]
 

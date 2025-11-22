@@ -347,12 +347,14 @@ class ThreadedServer(object):
 serverHandle = None
 
 def start_server(block=True):
-    generate_pac()
-
+    try:
+      generate_pac()
+    except:
+      pass
+    
     global serverHandle
     logger.info(f"Now listening at: 127.0.0.1:{config['port']}")
     serverHandle = ThreadedServer("", config["port"]).listen(block)
-
 
 def stop_server(wait_for_stop=True):
     global ThreadtoWork, proxy_thread
