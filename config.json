@@ -170,7 +170,7 @@
         "(objects-origin|actions).githubusercontent.com": {
             "route": "140.82.113.22"
         },
-        "(wikimedia|wikrouteedia|wiktionary|wikiversity|wikivoyage|wikisource|wikinews|wikidata|mediawiki|wikifunctions).org": {
+        "(wikimedia|wikipedia|wiktionary|wikiversity|wikivoyage|wikisource|wikinews|wikidata|mediawiki|wikifunctions).org": {
             "route": "185.15.58.224"
         },
         "upload.wikimedia.org": {
