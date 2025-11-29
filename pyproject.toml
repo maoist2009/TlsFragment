@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tls_fragment"
-version = "3.4.0"
+version = "3.4.1"
 description = "tls fragment"
 readme = "README.md"
 authors = ["Maoist2009 <maoist2009@example.com>"]
