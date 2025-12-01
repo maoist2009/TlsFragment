@@ -1,5 +1,5 @@
 # 使用 Python 3.11 Slim 版本
-FROM python:3.11-slim
+FROM python:3.11
 
 # 关键步骤：安装编译工具 AND 加密/开发库依赖
 # build-essential: 基础编译器 (gcc等)
