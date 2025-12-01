@@ -1,6 +1,12 @@
 # 使用一个轻量级的 Python 镜像作为基础
 FROM python:3.11-slim
 
+# 安装必要的编译工具
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # 设置容器内的工作目录
 WORKDIR /app
 
