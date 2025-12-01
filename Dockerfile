@@ -1,26 +1,50 @@
-# 1. 使用完整版 Python 镜像 (预装 gcc, git, openssl 等所有工具)
-# 这会增加镜像体积，但能解决绝大多数编译错误
-FROM python:3.11
+# -----------------------------------------------------------
+# 第一阶段：构建环境 (Builder)
+# 用于编译和安装依赖，体积较大，最终会被丢弃
+# -----------------------------------------------------------
+FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-# 2. 只复制配置文件，【不要】复制 poetry.lock
-# 这样 Poetry 会忽略旧的锁定文件，重新为 Linux 环境解析依赖
+# 安装编译所需的系统工具 (gcc, ssl, ffi等)
+# 这一步是为了解决之前的报错
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 只复制配置文件，忽略旧的 lock 文件
 COPY pyproject.toml ./
 
-# 3. 安装 Poetry
+# 安装 Poetry
 RUN pip install poetry
 
-# 4. 禁用虚拟环境
-RUN poetry config virtualenvs.create false
+# 配置 Poetry 将虚拟环境创建在项目目录内 (.venv)
+# 这样方便我们在下一个阶段直接复制整个文件夹
+RUN poetry config virtualenvs.in-project true
 
-# 5. 安装依赖 (不再使用 lock 文件)
-# 注意：这里去掉了 --only main，以防万一缺少某些隐式依赖
-# 增加了 -v (verbose) 参数，如果万一再报错，我们能看到具体错误原因
-RUN poetry install --no-interaction --no-root -v
+# 安装依赖
+RUN poetry install --no-interaction --no-root
 
-# 6. 复制项目代码
+# -----------------------------------------------------------
+# 第二阶段：运行环境 (Final)
+# 最终产出的镜像，基于 slim 版本，仅包含运行所需文件
+# -----------------------------------------------------------
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 关键步骤：从第一阶段复制生成的虚拟环境 (.venv)
+COPY --from=builder /app/.venv /app/.venv
+
+# 复制源代码
 COPY . .
+
+# 设置环境变量：将虚拟环境的 bin 目录加入 PATH
+# 这样直接输入 python 就是使用虚拟环境里的 python
+ENV PATH="/app/.venv/bin:$PATH"
 
 # 暴露端口
 EXPOSE 2500
