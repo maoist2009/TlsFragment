@@ -1,32 +1,39 @@
-# 使用一个轻量级的 Python 镜像作为基础
+# 使用 Python 3.11 Slim 版本
 FROM python:3.11-slim
 
-# 安装必要的编译工具
+# 关键步骤：安装编译工具 AND 加密/开发库依赖
+# build-essential: 基础编译器 (gcc等)
+# libssl-dev: OpenSSL 开发库 (cryptography 必须)
+# libffi-dev: 外部函数接口库 (cffi 必须)
+# python3-dev: Python 头文件 (编译 Python 扩展必须)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
+    libssl-dev \
+    libffi-dev \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 设置容器内的工作目录
 WORKDIR /app
 
-# 复制 Poetry 配置文件和依赖锁文件
+# 复制依赖文件
 COPY pyproject.toml poetry.lock ./
 
-# 安装 Poetry 包管理器
+# 安装 Poetry
 RUN pip install poetry
 
-# 确保 Poetry 缓存不影响构建速度，并解决所有依赖
-# --only main 只安装主要依赖，不安装开发依赖
+# 关键配置：禁用 Poetry 的虚拟环境创建
+# 让依赖直接安装在容器的系统 Python 环境中，避免路径问题
+RUN poetry config virtualenvs.create false
+
+# 安装项目依赖
 RUN poetry install --only main --no-interaction
 
-# 复制所有项目代码和配置文件
+# 复制其余项目代码
 COPY . .
 
-# 暴露端口 (TlsFragment 默认代理端口为 2500)
+# 暴露端口
 EXPOSE 2500
 
-# 定义容器启动时的默认命令
-# run.py 是该项目的主要启动文件
-# 注意：配置（如 TLSfrag 模式）将在 docker-compose.yml 中传入
+# 启动命令
 CMD ["python", "run.py"]
