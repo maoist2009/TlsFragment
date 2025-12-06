@@ -1,0 +1,54 @@
+name: Docker Image CI/CD (GHCR)
+
+on:
+  push:
+    branches: [ "main" ] # 当您向 main 分支推送代码时触发
+  workflow_dispatch: # 允许在 GitHub 网页上手动点击运行
+
+env:
+  REGISTRY: ghcr.io
+  # 镜像名称将自动识别为 NianSan/DPYProxy
+  IMAGE_NAME: ${{ github.repository }} 
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # 授予写入 packages 的权限，这是推送到 GHCR 必需的
+    permissions:
+      contents: read
+      packages: write 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      # 设置 Docker Buildx 环境
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 登录到 GHCR，使用 GitHub 提供的默认 Token
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} 
+          
+      # 自动生成镜像标签 (tag)，如 latest 和 commit SHA
+      - name: Extract metadata (tags) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=true
+            type=sha,prefix=,suffix=,format=short
+            
+      # 构建并推送镜像
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # 从当前目录查找 Dockerfile
+          push: true # 推送镜像到 GHCR
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
