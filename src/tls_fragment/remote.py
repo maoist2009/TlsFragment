@@ -233,6 +233,14 @@ class Remote:
             self.sock.connect((self.address, self.port))
         elif self.protocol == 17:
             pass
+          
+    def send_with_oob(self, data, oob):
+        if self.protocol == 17:
+            self.sock.sendall(data)
+        elif self.protocol == 6:
+            print("OOB ",data,oob)
+            self.sock.send(data+oob,socket.MSG_OOB)
+            # self.sock.sendall(data)
 
     def send(self, data):
         if self.protocol == 6:
@@ -246,13 +254,13 @@ class Remote:
             if config["UDPfakeDNS"]:
                 try:
                     if utils.is_udp_dns_query(data):
-                        logger.info("UDP dns detected")
                         try:
                             ans = utils.build_socks5_udp_ans(
                                 address, port, utils.fake_udp_dns_query(data)
                             )
                             logger.debug(ans)
                             self.client_sock.sendall(ans)
+                            logger.info("UDP dns dealt")
                             return
                         except Exception as e:
                             logger.warning("Error making up dns answer: " + repr(e))

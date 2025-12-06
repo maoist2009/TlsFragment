@@ -115,9 +115,15 @@ def send_fraggmed_tls_data(sock: remote.Remote, data):
         sock.policy["len_tcp_sni"],
         sock.policy["num_tcp_pieces"],
     )
+    
+    obboffset=sock.policy.get("oob_offset")
 
-    for packet in fragmented_tcp_data:
-        sock.send(packet)
+    for i in range(0,len(fragmented_tcp_data)):
+        packet=fragmented_tcp_data[i]
+        if sock.policy.get("oob_str") and i==l+obboffset:
+                sock.send_with_oob(packet,bytes(sock.policy["oob_str"][0],encoding="utf-8"))
+        else:
+            sock.send(packet)
         logger.debug(
             "TCP send: %d bytes. And 'll sleep for %d seconds.",
             len(packet),
