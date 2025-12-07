@@ -1,5 +1,5 @@
 import socket
-from .utils import set_ttl
+from .utils import set_ttl,find_second_last_dot
 from .log import logger
 from . import remote
 from .config import config
@@ -380,6 +380,12 @@ def send_data_with_fake(sock: remote.Remote, data):
     if sock.policy.get("len_tcp_sni") >= sni_len:
         sock.policy["len_tcp_sni"]=sni_len/2
         logger.info("len_tcp_sni too big, set to %d",sock.policy.get("len_tcp_sni"))
+    
+    sld=find_second_last_dot(sni)
+    
+    if sock.policy.get("len_tcp_sni")<=sld:
+        sock.policy["len_tcp_sni"]=sld+2
+        logger.info("len_tcp_sni too small, set to %d",sock.policy.get("len_tcp_sni"))
 
     if send_fake_data(
         sock.policy.get("len_tcp_sni"),

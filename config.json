@@ -60,6 +60,10 @@
         "216.239.(32|34|36|38).21": {
             "route": "216.239.32.52",
             "comment": "go.dev,photomath.com,1e100"
+        },
+        "162.125.0.0/16": {
+            "mode": "FAKEdesync",
+            "comment": "dropbox"
         }
     },
     "domains": {
@@ -227,13 +231,6 @@
             "len_tls_sni": 3,
             "len_tcp_sni": 5
         },
-        "dropbox.com": {
-            "route": "162.125.2.18"
-        },
-        "www.dropbox.com": {
-            "route": "162.125.2.18"
-        },
-        ".dropbox.com": {},
         "telegram.(org|me)": {
             "route": "149.154.161.145"
         },
@@ -276,7 +273,7 @@
         "twimg.com": {
             "route": "146.75.48.159"
         },
-        "x.com": {
+        "(.|^)x.com": {
             "route": "104.18.38.25",
             "len_tcp_sni": 3,
             "send_interval": 0.02,

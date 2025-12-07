@@ -523,3 +523,21 @@ def build_socks5_udp_ans(address,port,data):
     hdr_len=len(addr)+3
     msg_len=len(data)+hdr_len
     return msg_len.to_bytes(2,'big')+hdr_len.to_bytes(1,'big')+addr+data
+
+def find_second_last_dot(data: bytes) -> int:
+    """
+    查找 bytes 对象中倒数第二个 b'.' 的位置
+    
+    参数:
+    data -- 要搜索的 bytes 对象
+    
+    返回:
+    倒数第二个 b'.' 的索引位置，如果不足两个点则返回 -1
+    """
+    # 先找到最后一个点的位置
+    last_dot = data.rfind(b'.')
+    if last_dot == -1:
+        return -1  # 没有任何点
+    
+    # 在最后一个点之前的部分查找倒数第二个点
+    return data.rfind(b'.', 0, last_dot)
