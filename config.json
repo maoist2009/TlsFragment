@@ -63,6 +63,7 @@
         },
         "162.125.0.0/16": {
             "mode": "FAKEdesync",
+            "route": "162.125.1.0/24",
             "comment": "dropbox"
         }
     },
