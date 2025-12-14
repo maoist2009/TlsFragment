@@ -129,10 +129,11 @@ with open("config.json", "rb") as f:
 
 config = merge_dict(_config,config)
 
-try:
+
+if Path("config_extra.json").exists():
     with open("config_extra.json", "rb") as f:
         extra_config = json.load(f)
-except:
+else:
     extra_config={}
 
 default_policy = config["default_policy"]

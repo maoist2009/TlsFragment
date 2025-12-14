@@ -6,5 +6,8 @@
         }
     },
     "domains": {
+        "ei.phncdn.com.sds.rncdn7.com": {
+            "route": "208.99.84.19"
+        }
     }
 }
