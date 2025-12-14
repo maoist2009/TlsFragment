@@ -186,6 +186,9 @@
         "upload.wikimedia.org": {
             "route": "185.15.58.240"
         },
+        "cdn.com.sds.rncdn7.com": {
+            "route": "208.99.84.19"
+        },
         "(google.com|google.com.hk|google.dev|googleapis.com|gstatic.com|googleusercontent.com|.google$|goo.gl|translate.goog|android.com|ai.dev|blogger.com|blogspot.com|chrome.com)": {
             "route": "35.190.247.150",
             "port": 1445,
@@ -204,6 +207,10 @@
             "route": "157.240.22.169",
             "TLSfrag": 3,
             "TCPfrag": 5
+        },
+        "kaios-d.facebook.com": {
+            "route": "157.240.229.5",
+            "mode": "FAKEdesync"
         },
         "instagram.com": {
             "route": "57.144.160.34"
