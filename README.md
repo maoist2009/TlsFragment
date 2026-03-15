@@ -1,5 +1,7 @@
 # [English](/README-en.md) [Russian](/README-ru.md) [Chinese](/README.md)
 
+停止维护，后继项目存在且可用公开，可自行寻找。
+
 # TLSFragment使用指南
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/maoist2009/TlsFragment)
